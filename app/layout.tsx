@@ -1,11 +1,8 @@
 import "../styles/globals.css"
 import { ConditionalHeader } from "@/components/layout/ConditionalHeader"
-// TEMP: Disabled _sw_cleanup to test if it causes AbortError
-// import "./_sw_cleanup" // DEV ONLY: Force unregister all Service Workers
 import Providers from "@/components/layout/Providers"
 import { SkipLink } from "@/components/layout/SkipLink"
 import { NavigationProvider } from "@/components/navigation/NavigationProvider"
-import { UserProvider } from "@/context/UserContext"
 import type { Metadata, Viewport } from "next"
 import { Toaster } from "sonner"
 
@@ -147,20 +144,18 @@ export default function RootLayout({
         />
         <SkipLink />
 
-        {/* Global Providers (Theme, Language, Auth) */}
+        {/* Global Providers (Theme, Language) */}
         <Providers>
-          <UserProvider>
-            {/* Navigation Provider (UI-only state) */}
-            <NavigationProvider>
-              {/* Header - conditionally rendered based on route */}
-              <ConditionalHeader />
+          {/* Navigation Provider (UI-only state) */}
+          <NavigationProvider>
+            {/* Header - conditionally rendered based on route */}
+            <ConditionalHeader />
 
-              {/* Page content */}
-              <main id="main-content" className="w-full pt-[var(--header-total-height)]">
-                {children}
-              </main>
-            </NavigationProvider>
-          </UserProvider>
+            {/* Page content */}
+            <main id="main-content" className="w-full pt-[var(--header-total-height)]">
+              {children}
+            </main>
+          </NavigationProvider>
         </Providers>
 
         <Toaster
