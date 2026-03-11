@@ -5,7 +5,10 @@
 
 "use client"
 
-import { HeartIcon, MagnifyingGlassIcon } from "@/components/icons"
+import {
+  HeartIcon,
+  MagnifyingGlassIcon,
+} from "@/components/icons"
 import { useNavigation } from "@/components/navigation/NavigationProvider"
 import type { PanelProps } from "@/components/types"
 import { useLanguage } from "@/context/LanguageContext"
@@ -24,23 +27,14 @@ interface NavItem {
 export default function SideMenu({ isOpen, onClose }: PanelProps) {
   const { t } = useLanguage()
   const router = useRouter()
-  const { closeMenu } = useNavigation()
 
-  const handleNavigate = useCallback(
-    (href: string) => {
-      router.push(href)
-      closeMenu()
-    },
-    [router, closeMenu]
-  )
+  const handleNavigate = useCallback((href: string) => {
+    router.push(href)
+    onClose()
+  }, [router, onClose])
 
   const navigationItems: NavItem[] = [
-    {
-      id: "restaurants",
-      labelKey: "nav.restaurants",
-      icon: MagnifyingGlassIcon,
-      href: "/restaurants",
-    },
+    { id: "restaurants", labelKey: "nav.restaurants", icon: MagnifyingGlassIcon, href: "/restaurants" },
     { id: "favorites", labelKey: "nav.favorites", icon: HeartIcon, href: "/favorites" },
   ]
 
@@ -72,12 +66,7 @@ export default function SideMenu({ isOpen, onClose }: PanelProps) {
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <title>Close</title>
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
