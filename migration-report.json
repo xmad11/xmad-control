@@ -1,0 +1,218 @@
+{
+  "timestamp": "2026-01-03T13:58:14.286Z",
+  "totalImages": 19,
+  "successful": 19,
+  "failed": 0,
+  "filesModified": ["/Users/ahmadabdullah/Projects/shadi-V2/app/cards/page.tsx"],
+  "images": [
+    {
+      "url": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&h=800&fit=crop",
+      "id": "1565299624946-b28f40a0ae38",
+      "localPaths": {
+        "thumbnail": "/images/restaurants/1565299624946-b28f40a0ae38-thumbnail.webp",
+        "card": "/images/restaurants/1565299624946-b28f40a0ae38-card.webp",
+        "marquee": "/images/restaurants/1565299624946-b28f40a0ae38-marquee.webp",
+        "hero": "/images/restaurants/1565299624946-b28f40a0ae38-hero.webp"
+      },
+      "status": "replaced"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop",
+      "id": "1555396273-367ea4eb4db5",
+      "localPaths": {
+        "thumbnail": "/images/restaurants/1555396273-367ea4eb4db5-thumbnail.webp",
+        "card": "/images/restaurants/1555396273-367ea4eb4db5-card.webp",
+        "marquee": "/images/restaurants/1555396273-367ea4eb4db5-marquee.webp",
+        "hero": "/images/restaurants/1555396273-367ea4eb4db5-hero.webp"
+      },
+      "status": "replaced"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=600&h=400&fit=crop",
+      "id": "1552566626-52f8b828add9",
+      "localPaths": {
+        "thumbnail": "/images/restaurants/1552566626-52f8b828add9-thumbnail.webp",
+        "card": "/images/restaurants/1552566626-52f8b828add9-card.webp",
+        "marquee": "/images/restaurants/1552566626-52f8b828add9-marquee.webp",
+        "hero": "/images/restaurants/1552566626-52f8b828add9-hero.webp"
+      },
+      "status": "replaced"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1577106263724-2c8e03bfe9cf?w=200&h=200&fit=crop",
+      "id": "1577106263724-2c8e03bfe9cf",
+      "localPaths": {
+        "thumbnail": "/images/restaurants/1577106263724-2c8e03bfe9cf-thumbnail.webp",
+        "card": "/images/restaurants/1577106263724-2c8e03bfe9cf-card.webp",
+        "marquee": "/images/restaurants/1577106263724-2c8e03bfe9cf-marquee.webp",
+        "hero": "/images/restaurants/1577106263724-2c8e03bfe9cf-hero.webp"
+      },
+      "status": "replaced"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&h=450&fit=crop",
+      "id": "1517248135467-4c7edcad34c4",
+      "localPaths": {
+        "thumbnail": "/images/restaurants/1517248135467-4c7edcad34c4-thumbnail.webp",
+        "card": "/images/restaurants/1517248135467-4c7edcad34c4-card.webp",
+        "marquee": "/images/restaurants/1517248135467-4c7edcad34c4-marquee.webp",
+        "hero": "/images/restaurants/1517248135467-4c7edcad34c4-hero.webp"
+      },
+      "status": "replaced"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=150&h=150&fit=crop",
+      "id": "1414235077428-338989a2e8c0",
+      "localPaths": {
+        "thumbnail": "/images/restaurants/1414235077428-338989a2e8c0-thumbnail.webp",
+        "card": "/images/restaurants/1414235077428-338989a2e8c0-card.webp",
+        "marquee": "/images/restaurants/1414235077428-338989a2e8c0-marquee.webp",
+        "hero": "/images/restaurants/1414235077428-338989a2e8c0-hero.webp"
+      },
+      "status": "replaced"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=270&h=270&fit=crop",
+      "id": "1511671782779-c97d3d27a1d4",
+      "localPaths": {
+        "thumbnail": "/images/restaurants/1511671782779-c97d3d27a1d4-thumbnail.webp",
+        "card": "/images/restaurants/1511671782779-c97d3d27a1d4-card.webp",
+        "marquee": "/images/restaurants/1511671782779-c97d3d27a1d4-marquee.webp",
+        "hero": "/images/restaurants/1511671782779-c97d3d27a1d4-hero.webp"
+      },
+      "status": "replaced"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop",
+      "id": "1493225457124-a3eb161ffa5f",
+      "localPaths": {
+        "thumbnail": "/images/restaurants/1493225457124-a3eb161ffa5f-thumbnail.webp",
+        "card": "/images/restaurants/1493225457124-a3eb161ffa5f-card.webp",
+        "marquee": "/images/restaurants/1493225457124-a3eb161ffa5f-marquee.webp",
+        "hero": "/images/restaurants/1493225457124-a3eb161ffa5f-hero.webp"
+      },
+      "status": "replaced"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=200&h=140&fit=crop",
+      "id": "1560806887-1e4cd0b6cbd6",
+      "localPaths": {
+        "thumbnail": "/images/restaurants/1560806887-1e4cd0b6cbd6-thumbnail.webp",
+        "card": "/images/restaurants/1560806887-1e4cd0b6cbd6-card.webp",
+        "marquee": "/images/restaurants/1560806887-1e4cd0b6cbd6-marquee.webp",
+        "hero": "/images/restaurants/1560806887-1e4cd0b6cbd6-hero.webp"
+      },
+      "status": "replaced"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1590779033100-9f60a05a013d?w=200&h=140&fit=crop",
+      "id": "1590779033100-9f60a05a013d",
+      "localPaths": {
+        "thumbnail": "/images/restaurants/1590779033100-9f60a05a013d-thumbnail.webp",
+        "card": "/images/restaurants/1590779033100-9f60a05a013d-card.webp",
+        "marquee": "/images/restaurants/1590779033100-9f60a05a013d-marquee.webp",
+        "hero": "/images/restaurants/1590779033100-9f60a05a013d-hero.webp"
+      },
+      "status": "replaced"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=200&h=140&fit=crop",
+      "id": "1488477181946-6428a0291777",
+      "localPaths": {
+        "thumbnail": "/images/restaurants/1488477181946-6428a0291777-thumbnail.webp",
+        "card": "/images/restaurants/1488477181946-6428a0291777-card.webp",
+        "marquee": "/images/restaurants/1488477181946-6428a0291777-marquee.webp",
+        "hero": "/images/restaurants/1488477181946-6428a0291777-hero.webp"
+      },
+      "status": "replaced"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1590502593747-42a996133562?w=200&h=140&fit=crop",
+      "id": "1590502593747-42a996133562",
+      "localPaths": {
+        "thumbnail": "/images/restaurants/1590502593747-42a996133562-thumbnail.webp",
+        "card": "/images/restaurants/1590502593747-42a996133562-card.webp",
+        "marquee": "/images/restaurants/1590502593747-42a996133562-marquee.webp",
+        "hero": "/images/restaurants/1590502593747-42a996133562-hero.webp"
+      },
+      "status": "replaced"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400&h=300&fit=crop",
+      "id": "1478720568477-152d9b164e26",
+      "localPaths": {
+        "thumbnail": "/images/restaurants/1478720568477-152d9b164e26-thumbnail.webp",
+        "card": "/images/restaurants/1478720568477-152d9b164e26-card.webp",
+        "marquee": "/images/restaurants/1478720568477-152d9b164e26-marquee.webp",
+        "hero": "/images/restaurants/1478720568477-152d9b164e26-hero.webp"
+      },
+      "status": "replaced"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop",
+      "id": "1441974231531-c6227db76b6e",
+      "localPaths": {
+        "thumbnail": "/images/restaurants/1441974231531-c6227db76b6e-thumbnail.webp",
+        "card": "/images/restaurants/1441974231531-c6227db76b6e-card.webp",
+        "marquee": "/images/restaurants/1441974231531-c6227db76b6e-marquee.webp",
+        "hero": "/images/restaurants/1441974231531-c6227db76b6e-hero.webp"
+      },
+      "status": "replaced"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop",
+      "id": "1558618666-fcd25c85cd64",
+      "localPaths": {
+        "thumbnail": "/images/restaurants/1558618666-fcd25c85cd64-thumbnail.webp",
+        "card": "/images/restaurants/1558618666-fcd25c85cd64-card.webp",
+        "marquee": "/images/restaurants/1558618666-fcd25c85cd64-marquee.webp",
+        "hero": "/images/restaurants/1558618666-fcd25c85cd64-hero.webp"
+      },
+      "status": "replaced"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&h=300&fit=crop",
+      "id": "1550745165-9bc0b252726f",
+      "localPaths": {
+        "thumbnail": "/images/restaurants/1550745165-9bc0b252726f-thumbnail.webp",
+        "card": "/images/restaurants/1550745165-9bc0b252726f-card.webp",
+        "marquee": "/images/restaurants/1550745165-9bc0b252726f-marquee.webp",
+        "hero": "/images/restaurants/1550745165-9bc0b252726f-hero.webp"
+      },
+      "status": "replaced"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500&h=300&fit=crop",
+      "id": "1517248135467-4c7edcad34c4",
+      "localPaths": {
+        "thumbnail": "/images/restaurants/1517248135467-4c7edcad34c4-thumbnail.webp",
+        "card": "/images/restaurants/1517248135467-4c7edcad34c4-card.webp",
+        "marquee": "/images/restaurants/1517248135467-4c7edcad34c4-marquee.webp",
+        "hero": "/images/restaurants/1517248135467-4c7edcad34c4-hero.webp"
+      },
+      "status": "replaced"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=400&fit=crop",
+      "id": "1504674900247-0877df9cc836",
+      "localPaths": {
+        "thumbnail": "/images/restaurants/1504674900247-0877df9cc836-thumbnail.webp",
+        "card": "/images/restaurants/1504674900247-0877df9cc836-card.webp",
+        "marquee": "/images/restaurants/1504674900247-0877df9cc836-marquee.webp",
+        "hero": "/images/restaurants/1504674900247-0877df9cc836-hero.webp"
+      },
+      "status": "replaced"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=300&fit=crop",
+      "id": "1414235077428-338989a2e8c0",
+      "localPaths": {
+        "thumbnail": "/images/restaurants/1414235077428-338989a2e8c0-thumbnail.webp",
+        "card": "/images/restaurants/1414235077428-338989a2e8c0-card.webp",
+        "marquee": "/images/restaurants/1414235077428-338989a2e8c0-marquee.webp",
+        "hero": "/images/restaurants/1414235077428-338989a2e8c0-hero.webp"
+      },
+      "status": "replaced"
+    }
+  ]
+}

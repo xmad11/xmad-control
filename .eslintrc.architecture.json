@@ -1,0 +1,59 @@
+{
+  "root": true,
+  "overrides": [
+    {
+      "files": ["components/view-mode/icons/**/*.{ts,tsx}"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "name": "Architectural violation: Icons must NOT import breakpoint hooks or view mode logic",
+            "paths": [
+              {
+                "name": "@/hooks/useBreakpoint",
+                "message": "Icons represent user intent, not responsive behavior. Icons must be pure and static."
+              },
+              {
+                "name": "@/components/view-mode/viewModeColumns",
+                "message": "Icons must not access responsive mapping. Use ViewModeButton with resolveViewMode instead."
+              },
+              {
+                "name": "@/components/view-mode/resolveViewMode",
+                "message": "Icons must not resolve view modes. Icons represent semantic intent only."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["components/card/**/*.{ts,tsx}"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "name": "Architectural violation: Cards must NOT import view mode or breakpoint logic",
+            "paths": [
+              {
+                "name": "@/hooks/useBreakpoint",
+                "message": "Cards must be layout-agnostic. Responsive logic lives in CardGrid + viewModeColumns only."
+              },
+              {
+                "name": "@/components/view-mode/viewModeColumns",
+                "message": "Cards must not access view mode mapping. Cards receive layout via props only."
+              },
+              {
+                "name": "@/components/view-mode/resolveViewMode",
+                "message": "Cards must not resolve view modes. Cards receive resolved columns via props."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["components/cards/CardGrid.tsx"],
+      "allowedDependencies": ["@/types/restaurant", "react"]
+    }
+  ]
+}

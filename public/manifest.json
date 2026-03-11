@@ -1,0 +1,39 @@
+{
+  "name": "Shadi Shawqi | UAE Restaurant Reviews",
+  "short_name": "Shadi Shawqi",
+  "description": "Discover the UAE's best restaurants, cafes, and dining experiences through the eyes of Shadi Shawqi (@the.ss). Every restaurant personally visited, photographed, and honestly reviewed.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#9c4a4a",
+  "icons": [
+    {
+      "src": "/apple-touch-icon-180x180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon-167x167.png",
+      "sizes": "167x167",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon-120x120.png",
+      "sizes": "120x120",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["food", "dining", "lifestyle", "restaurant"],
+  "screenshots": []
+}

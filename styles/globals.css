@@ -1,0 +1,373 @@
+/* GLOBAL STYLES */
+@import "./tokens.css";
+@import "./tokens/mask.css";
+@import "./utilities.css";
+
+/* Component-scoped CSS imports */
+@import "./components/skeleton.css";
+@import "./components/marquee.css";
+@import "./components/button-3d.css";
+@import "./components/filter-button.css";
+@import "./components/neon-animations.css";
+@import "./components/navigation.css";
+
+/* Tailwind v4 - Exclude docs from scanning */
+@source not "../coordinator/**";
+@source not "../docs/**";
+@source not "../documentation/**";
+@source not "../**/*.md";
+@source not "../**/*.mdx";
+
+/* BASE STYLES */
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  color: var(--fg);
+  background: var(--bg);
+  /* Removed global transition to prevent page-wide reflows on theme changes */
+  overflow-x: hidden;
+}
+
+/* Prevent theme flash - hide body until theme is applied (next-themes pattern) */
+body {
+  visibility: hidden;
+  opacity: 0;
+}
+
+/* Show body once theme is set via inline script */
+html[data-theme] body {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 50ms ease-in;
+}
+
+/* VIEW TRANSITIONS */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--duration-normal);
+}
+
+/* GLASS PRIMITIVES */
+/* Base glass - for cards, panels, modals */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: var(--border-width-thin) solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  /* Enable hardware acceleration for Chrome */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Header glass - same as base glass for consistency */
+.glass-header {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: var(--border-width-thin) solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  /* Enable hardware acceleration for Chrome */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Interactive card - with hover effects */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: var(--border-width-thin) solid var(--glass-border);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-card);
+  /* Enable hardware acceleration for Chrome */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  transition: transform var(--duration-normal) var(--ease-out-quart), box-shadow
+    var(--duration-normal) var(--ease-out-quart);
+}
+
+.glass-card:hover {
+  transform: translate3d(0, var(--hover-lift-y), 0) scale(1.01);
+  box-shadow: var(--shadow-lg);
+}
+
+.glass-card:active {
+  transform: translate3d(0, 0, 0) scale(0.98);
+}
+
+/* FADE MASKS */
+.fade-x {
+  mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 8%,
+    black 92%,
+    transparent 100%
+  );
+}
+
+.fade-y {
+  mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 8%,
+    black 92%,
+    transparent 100%
+  );
+}
+
+/* Simple scroll animation for adaptive marquee */
+@keyframes scroll-up-simple {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+/* Cursor blink */
+@keyframes cursor-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Floating lights animation for hero background */
+@keyframes float-lights {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(50px, -30px) rotate(180deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(360deg);
+  }
+}
+
+/* Typing animation text wrapping - prevents line-jump glitches */
+.typing-text {
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Spinner rotation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Animated gradient background */
+@keyframes gradient-x {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Carousel dynamic height */
+.carousel-container {
+  height: var(--carousel-height, auto);
+}
+
+/* Carousel dynamic transform */
+.carousel-track {
+  transform: translateX(var(--carousel-transform, 0%));
+}
+
+/* Staggered animation delays */
+.stagger-delay-0 {
+  animation-delay: 0ms;
+}
+
+.stagger-delay-1 {
+  animation-delay: 150ms;
+}
+
+.stagger-delay-2 {
+  animation-delay: 300ms;
+}
+
+.stagger-delay-3 {
+  animation-delay: 450ms;
+}
+
+.stagger-delay-4 {
+  animation-delay: 600ms;
+}
+
+/* HERO STYLES */
+.hero-subtitle {
+  max-width: 100%;
+}
+
+.hero-headline {
+  font-size: var(--hero-headline-size);
+}
+
+@media (orientation: landscape) and (max-height: 700px) {
+  .hero-headline {
+    font-size: var(--hero-headline-size-landscape);
+  }
+}
+
+/* Hero title muted text - opacity only in dark/warm modes */
+.hero-title-muted {
+  opacity: 1;
+}
+
+[data-theme="dark"] .hero-title-muted,
+[data-theme="warm"] .hero-title-muted {
+  opacity: var(--opacity-medium);
+}
+
+/* UTILITY CLASSES */
+.bg-primary {
+  background-color: var(--color-brand-primary);
+}
+
+.text-primary {
+  color: var(--color-brand-primary);
+}
+
+.bg-secondary {
+  background-color: var(--color-brand-secondary);
+}
+
+.text-secondary {
+  color: var(--color-brand-secondary);
+}
+
+.text-secondary-gray {
+  color: var(--fg-40);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--color-brand-primary), oklch(0.6 0.25 280.0));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ACCESSIBILITY - Focus styles
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+*:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-brand-primary);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-sm);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Search input - remove focus ring, keep rounded shape */
+input[type="search"]:focus,
+input[type="search"]:focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  border-radius: 9999px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (pointer: coarse) {
+  .touch-target {
+    min-width: var(--touch-target-min);
+    min-height: var(--touch-target-min);
+  }
+}
+
+.no-scrollbar,
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   UTILITY COMPONENTS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.spinner {
+  border: var(--ring-width) solid var(--color-primary);
+  border-top-color: transparent;
+  border-radius: var(--radius-full);
+  animation: spin var(--duration-normal) linear infinite;
+}
+
+.contain-optimization {
+  contain: layout style paint;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Blue link - for auth pages */
+.link-blue {
+  color: var(--color-brand-secondary);
+}
+
+/* Business CTA */
+.accent-gradient {
+  clip-path: polygon(30% 0%, 100% 0%, 100% 100%, 0% 100%);
+  background: linear-gradient(
+    to bottom,
+    var(--color-primary),
+    color-mix(in srgb, var(--color-primary) 85%, var(--color-black))
+  );
+}
+
+/* Text selection */
+::selection {
+  background-color: oklch(from var(--color-brand-primary) l c h / 0.3);
+  color: inherit;
+}

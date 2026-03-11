@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "timestamp": "2026-01-30T12:53:03.353Z",
+    "project": "starter-template-v1",
+    "mode": "inspect",
+    "mobileFirstScore": 1,
+    "duration": 18
+  },
+  "summary": {
+    "componentsScanned": 1,
+    "violations": 0,
+    "warnings": 1,
+    "exceptions": 0,
+    "duplications": 0,
+    "tokenCoverage": 1
+  },
+  "violations": [],
+  "warnings": [
+    {
+      "type": "TOUCH_TARGET",
+      "component": "components/search/SearchContainer.tsx",
+      "line": 576,
+      "message": "Touch target 10px is below 44px minimum"
+    }
+  ],
+  "recommendations": []
+}

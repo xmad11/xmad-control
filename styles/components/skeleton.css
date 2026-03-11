@@ -1,0 +1,64 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   SKELETON LOADING STATES - Component-scoped CSS
+   Moved from globals.css (lines 235-291)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@import "../tokens.css";
+
+/* Shimmer animation for skeleton cards - GPU optimized */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+/* Shimmer effect class */
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+  /* Off-screen optimization */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 200px;
+  /* GPU acceleration */
+  will-change: transform;
+}
+
+.skeleton-shimmer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  /* Theme-aware shimmer */
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--fg) 15%, transparent) 50%,
+    transparent 100%
+  );
+  /* GPU-accelerated animation */
+  animation: shimmer 2s infinite linear;
+  pointer-events: none;
+  /* Force GPU layer */
+  transform: translateZ(0);
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+  background-size: 200% 100%;
+}
+
+/* Shimmer gradient for skeleton loading states */
+.bg-shimmer-gradient {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--fg) 15%, transparent) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+}

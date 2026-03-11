@@ -1,0 +1,204 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   3D MARQUEE SYSTEM - LEGACY/SHOWCASE ONLY
+   ═══════════════════════════════════════════════════════════════════════════════
+
+   ⚠️  ARCHIVED: Not used in production
+   📦  PURPOSE: Showcase/Portfolio demonstration
+   🔒  ISOLATED: No imports, no conflicts with main app
+
+   Usage: Copy this file and its tokens to your project
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   3D MARQUEE TOKENS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Marquee 3D - Enhanced visual depth with GPU acceleration */
+  --marquee-3d-card-width: 144px;
+  --marquee-3d-gap: 16px;
+  --marquee-3d-card-fluid: clamp(120px, 14vw, 160px);
+
+  /* 3D Illusion - Simple rotateZ + unequal spacing (zero performance cost) */
+  --marquee-rotate-z: 15deg; /* Clock ~1:30 diagonal direction */
+  --marquee-gap-tight: 0.75rem; /* Creates depth perception */
+  --marquee-gap-normal: 1.25rem;
+  --marquee-gap-loose: 1.75rem;
+
+  /* Animation durations - variable speed control */
+  --marquee-duration-fast: 15s;
+  --marquee-duration-mid: 20s;
+  --marquee-duration-slow: 25s;
+  --marquee-3d-duration: var(--marquee-duration-mid);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   3D MARQUEE KEYFRAMES
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@keyframes scroll-left {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    /* Scroll by exactly -50% because track contains 2 identical sets */
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes scroll-right {
+  from {
+    transform: translate3d(-50%, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes scroll-down {
+  to {
+    transform: translate3d(0, calc(var(--track-width, 50%) * -1), 0);
+  }
+}
+
+@keyframes scroll-up {
+  from {
+    transform: translate3d(0, calc(var(--track-width, 50%) * -1), 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   3D MARQUEE STYLES
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* Edge fade masks */
+.marquee-row::before,
+.marquee-row::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.marquee-row::before {
+  left: 0;
+  background: linear-gradient(to right, var(--bg), transparent);
+}
+
+.marquee-row::after {
+  right: 0;
+  background: linear-gradient(to left, var(--bg), transparent);
+}
+
+.marquee-track {
+  display: flex;
+  gap: 0.5rem;
+  animation: scroll-left 30s linear infinite;
+  animation-play-state: var(--marquee-play, running);
+}
+
+.marquee-track-reverse {
+  display: flex;
+  gap: 0.5rem;
+  animation: scroll-right 30s linear infinite;
+  animation-play-state: var(--marquee-play, running);
+}
+
+@media (min-width: 1024px) {
+  .marquee-track,
+  .marquee-track-reverse {
+    gap: var(--spacing-md);
+  }
+}
+
+.marquee-track-vertical {
+  flex-direction: column;
+}
+
+.marquee-card {
+  width: var(--marquee-card-size);
+  height: var(--marquee-card-size);
+  flex-shrink: 0;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  backface-visibility: hidden;
+}
+
+.marquee-card:hover {
+  transform: scale(1.05);
+}
+
+.marquee-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow: hidden;
+}
+
+/* 3D Container */
+.marquee-3d-container {
+  position: relative;
+  height: 320px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.marquee-3d-wrapper {
+  display: flex;
+  gap: var(--marquee-gap-tight);
+  transform: rotateZ(var(--marquee-rotate-z));
+}
+
+.marquee-col-small {
+  gap: var(--marquee-gap-tight);
+  transform: scale(0.75);
+  filter: brightness(0.85);
+}
+
+.marquee-col-medium {
+  gap: var(--marquee-gap-normal);
+  transform: scale(0.875);
+  filter: brightness(0.92);
+}
+
+.marquee-col-large {
+  gap: var(--marquee-gap-loose);
+  transform: scale(1);
+  filter: brightness(1);
+}
+
+@media (max-width: 1023px) {
+  .marquee-col-small,
+  .marquee-col-medium,
+  .marquee-col-large {
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .marquee-3d-wrapper {
+    rotate: none !important;
+  }
+
+  .marquee-card:hover {
+    transform: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ACCESSIBILITY
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none !important;
+  }
+}

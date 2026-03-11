@@ -1,0 +1,31 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   UTILITIES.VISUAL.CSS - LOCKED (MASKS ONLY)
+   Fade masks ONLY
+   ❌ No tokens
+   ❌ No overrides
+   ❌ No animation logic
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* Horizontal fade */
+.fade-horizontal {
+  --fade: 30%;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black var(--fade),
+    black calc(100% - var(--fade)),
+    transparent 100%
+  );
+}
+
+/* 3D / all edges */
+.fade-3d {
+  -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      black 22%,
+      black 78%,
+      transparent 100%
+    ), linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%);
+  -webkit-mask-composite: intersect;
+}

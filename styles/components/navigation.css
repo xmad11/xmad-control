@@ -1,0 +1,39 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   NAVIGATION MENU ITEM STYLES - From al-kabab-recovery project
+   Border hover effect for side menu navigation items
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.nav-menu-item {
+  background-color: transparent;
+  border-radius: var(--radius-lg);
+  position: relative;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out-quart);
+  font-weight: var(--font-weight-medium);
+  border: 2px solid transparent;
+  text-decoration: none;
+  outline: none;
+}
+
+/* Hover State - Show border */
+.nav-menu-item:hover {
+  border-color: var(--color-primary);
+}
+
+/* Active/Clicked State - Keep the border */
+.nav-menu-item:active,
+.nav-menu-item:focus-visible {
+  border-color: var(--color-primary) !important;
+  color: var(--color-primary) !important;
+  background-color: transparent !important;
+}
+
+/* Focus State */
+.nav-menu-item:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent);
+}
+
+/* Active Press State */
+.nav-menu-item:active {
+  transform: scale(0.98);
+}

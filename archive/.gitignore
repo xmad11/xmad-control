@@ -1,0 +1,5 @@
+# Ignore everything in archive
+*
+
+# But track this .gitignore
+!.gitignore

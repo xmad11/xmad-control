@@ -1,0 +1,16 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   MASK TOKENS - Progressive fade percentages for marquees
+   Responsive values that scale from mobile to desktop
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Horizontal fade - edges where marquee content fades out */
+  --fade-x-mobile: 4%; /* Mobile: small soft fade */
+  --fade-x-tablet: 8%; /* Tablet: visible progressive fade */
+  --fade-x-desktop: 14%; /* Desktop: strong cinematic edge */
+
+  /* Vertical fade - for 3D marquee top/bottom edges */
+  --fade-y-mobile: 6%; /* Mobile: small soft fade */
+  --fade-y-tablet: 10%; /* Tablet: medium fade */
+  --fade-y-desktop: 16%; /* Desktop: strong fade for 3D */
+}

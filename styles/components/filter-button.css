@@ -1,0 +1,386 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   FILTER BUTTON 3D STYLES - Component-scoped CSS (REFACTORED - SSOT)
+   Moved from globals.css (lines 374-535) and tokens.css (lines 683-740)
+
+   ARCHITECTURE: ONE generic 3D button + color variant tokens (no duplication)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@import "../tokens.css";
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   FILTER TOKENS - Component-specific design tokens
+   Source: tokens.css lines 683-740
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Filter Z-Index - Layer management */
+  --z-filter-backdrop: 50;
+  --z-filter-sheet: 51;
+  --z-filter-bar: 52;
+
+  /* Filter Badge Colors - Theme-aware, consistent across all modes */
+  --filter-badge-meal: #ef4444; /* Red */
+  --filter-badge-cuisine: #22c55e; /* Green */
+  --filter-badge-atmosphere: #3b82f6; /* Blue */
+  --filter-badge-location: #8b5cf6; /* Purple */
+  --filter-badge-shadi: #a855f7; /* Purple */
+
+  /* ═══════════════════════════════════════════════════════════════════════════════
+     COLOR VARIANT TOKENS - Each variant defines these 5 tokens
+     ═══════════════════════════════════════════════════════════════════════════════ */
+
+  /* Meal Variant - Red */
+  --filter-meal-bg-start: #ef4444;
+  --filter-meal-bg-end: #dc2626;
+  --filter-meal-content-start: #fca5a5;
+  --filter-meal-content-end: #f87171;
+  --filter-meal-inset: rgba(252, 165, 165, 0.4);
+
+  /* Cuisine Variant - Green */
+  --filter-cuisine-bg-start: #22c55e;
+  --filter-cuisine-bg-end: #16a34a;
+  --filter-cuisine-content-start: #86efac;
+  --filter-cuisine-content-end: #4ade80;
+  --filter-cuisine-inset: rgba(134, 239, 172, 0.4);
+
+  /* Atmosphere Variant - Blue */
+  --filter-atmosphere-bg-start: #3b82f6;
+  --filter-atmosphere-bg-end: #2563eb;
+  --filter-atmosphere-content-start: #93c5fd;
+  --filter-atmosphere-content-end: #60a5fa;
+  --filter-atmosphere-inset: rgba(147, 197, 253, 0.4);
+
+  /* Filter Button Sizes */
+  --filter-button-size: 3rem; /* 48px */
+  --filter-button-expanded: 9rem; /* 144px */
+  --filter-badge-size: 1.25rem; /* 20px */
+  --filter-label-width-collapsed: 0;
+  --filter-label-width-expanded: 7rem; /* 112px */
+
+  /* Filter Button 3D Effects */
+  --filter-button-3d-shadow-offset: -3px 3px 0 0;
+  --filter-button-3d-shadow-blur: -6px 6px 3px 0;
+  --filter-button-3d-shadow-color: 0 0 0 / 15%;
+  --filter-button-3d-shadow-blur-color: 0 0 0 / 10%;
+  --filter-button-3d-inset-shadow: inset -2px 4px 4px -2px;
+  --filter-button-3d-inset-dark: inset 1px -2px 4px 0px rgb(0 0 0 / 35%);
+  --filter-button-3d-active-inset: inset -1px 4px 4px -2px;
+
+  /* Filter Sheet - Bottom sheet */
+  --filter-sheet-height: 14rem;
+  --filter-sheet-swipe-threshold: 6.25rem; /* 100px - swipe down to close */
+
+  /* Filter Thresholds */
+  --filter-drag-threshold: 6.25rem; /* 100px */
+  --filter-scroll-threshold: 3.125rem; /* 50px */
+  --filter-animation-duration: 700ms;
+  --filter-easing: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   GENERIC 3D BUTTON - Single Source of Truth (SSOT)
+   Uses --filter-variant-* tokens for color customization
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+button.filter-button-base {
+  width: var(--filter-button-size);
+  height: var(--filter-button-size);
+  min-width: var(--filter-button-size);
+  transition: width var(--filter-animation-duration) var(--filter-easing), box-shadow
+    var(--filter-animation-duration) var(--filter-easing), transform
+    var(--filter-animation-duration) var(--filter-easing);
+}
+
+button.filter-button-expanded {
+  width: var(--filter-button-expanded) !important;
+}
+
+.filter-pill-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: white;
+  flex-shrink: 0;
+  filter: drop-shadow(-1px 1px 2px rgb(0 0 0 / 30%));
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:hover .filter-pill-icon {
+  transform: scale(1.1);
+}
+
+.filter-pill-label {
+  font-family: var(--font-family-filter-btn);
+  font-size: 1rem;
+  font-weight: var(--font-weight-filter-btn);
+  color: white;
+  letter-spacing: var(--letter-spacing-filter-btn);
+  white-space: nowrap;
+  width: 0;
+  min-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: width 300ms cubic-bezier(0.23, 1, 0.32, 1), opacity 200ms ease-out;
+  padding-left: 0;
+}
+
+button.filter-button-expanded .filter-pill-label {
+  width: 7rem !important;
+  opacity: 1;
+  padding-left: 0.25rem;
+}
+
+/* 3D Background Layer */
+.filter-3d-bg {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  box-shadow: var(--filter-button-3d-shadow-offset) var(--filter-button-3d-shadow-color),
+    var(--filter-button-3d-shadow-blur) var(--filter-button-3d-shadow-blur-color);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, box-shadow;
+  transform: translateZ(0);
+
+  /* Uses variant token for color */
+  background: linear-gradient(145deg, var(--filter-variant-bg-start), var(--filter-variant-bg-end));
+}
+
+/* 3D Content Layer */
+.filter-3d-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  padding: 0.5rem;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+  transform: translateZ(0);
+
+  /* Uses variant tokens for gradient and inset */
+  background: linear-gradient(
+    to bottom,
+    var(--filter-variant-content-start),
+    var(--filter-variant-content-end)
+  );
+  box-shadow: inset -2px 4px 4px -2px var(--filter-variant-inset), inset 1px -2px 4px 0px
+    rgb(0 0 0 / 35%);
+}
+
+button:hover .filter-3d-content {
+  transform: translateY(-2px);
+}
+
+button:active .filter-3d-content {
+  transform: translateY(0);
+  box-shadow: var(--filter-button-3d-active-inset) rgba(0, 0, 0, 0.4), inset 0px -1px 4px 0px
+    rgba(255, 255, 255, 0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   COLOR VARIANTS - Only define token mappings (no duplicated styles)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* Meal Variant - Orange */
+.filter-3d-meal {
+  --filter-variant-bg-start: var(--filter-meal-bg-start);
+  --filter-variant-bg-end: var(--filter-meal-bg-end);
+  --filter-variant-content-start: var(--filter-meal-content-start);
+  --filter-variant-content-end: var(--filter-meal-content-end);
+  --filter-variant-inset: var(--filter-meal-inset);
+}
+
+/* Cuisine Variant - Red */
+.filter-3d-cuisine {
+  --filter-variant-bg-start: var(--filter-cuisine-bg-start);
+  --filter-variant-bg-end: var(--filter-cuisine-bg-end);
+  --filter-variant-content-start: var(--filter-cuisine-content-start);
+  --filter-variant-content-end: var(--filter-cuisine-content-end);
+  --filter-variant-inset: var(--filter-cuisine-inset);
+}
+
+/* Atmosphere Variant - Blue */
+.filter-3d-atmosphere {
+  --filter-variant-bg-start: var(--filter-atmosphere-bg-start);
+  --filter-variant-bg-end: var(--filter-atmosphere-bg-end);
+  --filter-variant-content-start: var(--filter-atmosphere-content-start);
+  --filter-variant-content-end: var(--filter-atmosphere-content-end);
+  --filter-variant-inset: var(--filter-atmosphere-inset);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   FILTER BADGE - Notification count
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.filter-badge {
+  width: var(--filter-badge-size);
+  height: var(--filter-badge-size);
+  font-size: 0.65rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* ═══════════════════════════════════════════════════════════════════════════════
+   FILTER BUTTON 3D STYLES - Using tokens from tokens.css
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+button.filter-button-base {
+  width: var(--filter-button-size);
+  height: var(--filter-button-size);
+  min-width: var(--filter-button-size);
+  transition: width var(--filter-animation-duration) var(--filter-easing), box-shadow
+    var(--filter-animation-duration) var(--filter-easing), transform
+    var(--filter-animation-duration) var(--filter-easing);
+}
+
+button.filter-button-expanded {
+  width: var(--filter-button-expanded) !important;
+}
+
+.filter-pill-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: white;
+  flex-shrink: 0;
+  filter: drop-shadow(-1px 1px 2px rgb(0 0 0 / 30%));
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:hover .filter-pill-icon {
+  transform: scale(1.1);
+}
+
+.filter-pill-label {
+  font-family: var(--font-family-filter-btn);
+  font-size: 1rem;
+  font-weight: var(--font-weight-filter-btn);
+  color: white;
+  letter-spacing: var(--letter-spacing-filter-btn);
+  white-space: nowrap;
+  width: 0;
+  min-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: width 300ms cubic-bezier(0.23, 1, 0.32, 1), opacity 200ms ease-out;
+  padding-left: 0;
+}
+
+button.filter-button-expanded .filter-pill-label {
+  width: 7rem !important;
+  opacity: 1;
+  padding-left: 0.25rem;
+}
+
+.filter-3d-bg {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  box-shadow: var(--filter-button-3d-shadow-offset) var(--filter-button-3d-shadow-color),
+    var(--filter-button-3d-shadow-blur) var(--filter-button-3d-shadow-blur-color);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, box-shadow;
+  transform: translateZ(0);
+}
+
+.filter-3d-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  padding: 0.5rem;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+button:hover .filter-3d-content {
+  transform: translateY(-2px);
+}
+
+button:active .filter-3d-content {
+  transform: translateY(0);
+  box-shadow: var(--filter-button-3d-active-inset) rgba(0, 0, 0, 0.4), inset 0px -1px 4px 0px
+    rgba(255, 255, 255, 0.2);
+}
+
+/* Meal Button */
+.filter-3d-meal .filter-3d-bg {
+  background: linear-gradient(145deg, var(--filter-meal-bg-start), var(--filter-meal-bg-end));
+}
+
+.filter-3d-meal .filter-3d-content {
+  background: linear-gradient(
+    to bottom,
+    var(--filter-meal-content-start),
+    var(--filter-meal-content-end)
+  );
+  box-shadow: inset -2px 4px 4px -2px var(--filter-meal-inset), inset 1px -2px 4px 0px
+    rgb(0 0 0 / 35%);
+}
+
+.filter-3d-meal:active .filter-3d-content {
+  box-shadow: inset -1px 4px 4px -2px rgba(0, 0, 0, 0.4), inset 0px -1px 4px 0px
+    var(--filter-meal-inset);
+}
+
+/* Cuisine Button */
+.filter-3d-cuisine .filter-3d-bg {
+  background: linear-gradient(145deg, var(--filter-cuisine-bg-start), var(--filter-cuisine-bg-end));
+}
+
+.filter-3d-cuisine .filter-3d-content {
+  background: linear-gradient(
+    to bottom,
+    var(--filter-cuisine-content-start),
+    var(--filter-cuisine-content-end)
+  );
+  box-shadow: inset -2px 4px 4px -2px var(--filter-cuisine-inset), inset 1px -2px 4px 0px
+    rgb(0 0 0 / 35%);
+}
+
+.filter-3d-cuisine:active .filter-3d-content {
+  box-shadow: inset -1px 4px 4px -2px rgba(0, 0, 0, 0.4), inset 0px -1px 4px 0px
+    var(--filter-cuisine-inset);
+}
+
+/* Atmosphere Button */
+.filter-3d-atmosphere .filter-3d-bg {
+  background: linear-gradient(
+    145deg,
+    var(--filter-atmosphere-bg-start),
+    var(--filter-atmosphere-bg-end)
+  );
+}
+
+.filter-3d-atmosphere .filter-3d-content {
+  background: linear-gradient(
+    to bottom,
+    var(--filter-atmosphere-content-start),
+    var(--filter-atmosphere-content-end)
+  );
+  box-shadow: inset -2px 4px 4px -2px var(--filter-atmosphere-inset), inset 1px -2px 4px 0px
+    rgb(0 0 0 / 35%);
+}
+
+.filter-3d-atmosphere:active .filter-3d-content {
+  box-shadow: inset -1px 4px 4px -2px rgba(0, 0, 0, 0.4), inset 0px -1px 4px 0px
+    var(--filter-atmosphere-inset);
+}
+
+/* Filter Badge - Notification count */
+.filter-badge {
+  width: var(--filter-badge-size);
+  height: var(--filter-badge-size);
+  font-size: 0.65rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

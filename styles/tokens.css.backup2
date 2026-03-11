@@ -1,0 +1,976 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   DESIGN TOKENS - Restaurant Platform 2025-2026
+   OKLCH color space for perceptual uniformity and eye-friendly long sessions
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   @theme BLOCK - Single Source of Truth for all design tokens
+   ═══════════════════════════════════════════════════════════════════════════════ */
+@theme {
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   BRAND COLORS - Restaurant platform palette
+	   Primary: Terracotta Coral (appetizing, warm, memorable)
+	   Secondary: Serene Blue (trust, reliability, calm)
+	   ───────────────────────────────────────────────────────────────────────────── */
+  --color-brand-primary: oklch(0.65 0.08 45.0);
+  --color-brand-secondary: oklch(0.58 0.14 250.0);
+
+  /* Color aliases for convenience and audit requirements */
+  --color-primary: var(--color-brand-primary);
+  --color-secondary: var(--color-brand-secondary);
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   ACCENT COLORS - 2025-2026 Trendy Palette
+	   Row 1 (Warm): shadi, rust, honey, amber, rose, berry
+	   Row 2 (Cool): sage, teal, lavender, indigo, emerald, azure, lime
+	   ───────────────────────────────────────────────────────────────────────────── */
+  /* Row 1 - Warm Tones */
+  --color-accent-shadi: oklch(0.60 0.19 40.0); /* Shadi brand orange (original, lighter) */
+  --color-accent-rust: oklch(0.58 0.15 50.0); /* Warmth, comfort */
+  --color-accent-honey: oklch(0.7 0.12 85.0); /* Golden yellow */
+  --color-accent-amber: oklch(0.72 0.16 70.0); /* Warm golden glow */
+  --color-accent-rose: oklch(0.65 0.16 350.0); /* Soft elegant pink */
+  --color-accent-berry: oklch(0.52 0.18 350.0); /* Deep pink-red */
+  /* Row 2 - Cool Tones */
+  --color-accent-sage: oklch(0.62 0.08 150.0); /* Fresh, organic */
+  --color-accent-teal: oklch(0.55 0.12 220.0); /* Sophisticated */
+  --color-accent-lavender: oklch(0.68 0.1 280.0); /* Soft elegant purple */
+  --color-accent-indigo: oklch(0.45 0.18 270.0); /* Deep blue-purple */
+  --color-accent-emerald: oklch(0.58 0.18 160.0); /* Rich premium green (Verdant Aura trend) */
+  --color-accent-azure: oklch(0.6 0.14 250.0); /* Bright sky blue (Digital Azure trend) */
+  --color-accent-lime: oklch(0.75 0.15 120.0); /* Vibrant green */
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   SEMANTIC COLORS - For UI states
+	   ───────────────────────────────────────────────────────────────────────────── */
+  --color-success: oklch(0.68 0.15 145.0);
+  --color-warning: oklch(0.72 0.14 85.0);
+  --color-error: oklch(0.55 0.2 25.0);
+  --color-info: oklch(0.58 0.14 250.0);
+
+  /* Rating & Favorite Colors */
+  --color-rating: oklch(0.75 0.15 120.0); /* Golden yellow for star ratings */
+  --color-favorite: oklch(0.55 0.2 25.0); /* Rose red for favorite hearts */
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   NEUTRAL SCALE - Eye-friendly grays (not pure black/white)
+	   ───────────────────────────────────────────────────────────────────────────── */
+  --color-white: oklch(1 0 0);
+  --color-black: oklch(0 0 0);
+  --color-gray-50: oklch(0.97 0.005 250.0);
+  --color-gray-100: oklch(0.94 0.008 250.0);
+  --color-gray-200: oklch(0.88 0.012 250.0);
+  --color-gray-300: oklch(0.78 0.018 250.0);
+  --color-gray-400: oklch(0.62 0.025 250.0);
+  --color-gray-500: oklch(0.48 0.028 250.0);
+  --color-gray-600: oklch(0.38 0.025 250.0);
+  --color-gray-700: oklch(0.3 0.022 250.0);
+  --color-gray-800: oklch(0.24 0.018 250.0);
+  --color-gray-900: oklch(0.18 0.015 250.0);
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   SPACING SCALE - 4px base unit (0.25rem)
+	   ───────────────────────────────────────────────────────────────────────────── */
+  --spacing-unit: 0.25rem;
+  --spacing-xs: calc(var(--spacing-unit) * 1); /* 0.25rem */
+  --spacing-sm: calc(var(--spacing-unit) * 2); /* 0.5rem */
+  --spacing-md: calc(var(--spacing-unit) * 4); /* 1rem */
+  --spacing-lg: calc(var(--spacing-unit) * 6); /* 1.5rem */
+  --spacing-xl: calc(var(--spacing-unit) * 8); /* 2rem */
+  --spacing-2xl: calc(var(--spacing-unit) * 12); /* 3rem */
+  --spacing-3xl: calc(var(--spacing-unit) * 16); /* 4rem */
+  --spacing-4xl: calc(var(--spacing-unit) * 24); /* 6rem */
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   TYPOGRAPHY SCALE
+	   ───────────────────────────────────────────────────────────────────────────── */
+  --font-size-2xs: 0.625rem;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  --font-size-5xl: 3rem;
+  --font-size-6xl: 3.75rem;
+  --font-size-search: 1.0625rem; /* 17px - search input text */
+
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Filter Button Font (from al-kabab new order/view reports buttons) */
+  --font-family-filter-btn: system-ui, -apple-system, sans-serif;
+  --font-weight-filter-btn: 600;
+  --letter-spacing-filter-btn: 0.5px;
+
+  /* Letter Spacing */
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0em;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   SEMANTIC HEADING TOKENS - Purpose-based heading sizes
+	   ───────────────────────────────────────────────────────────────────────────── */
+  --heading-page: var(--font-size-4xl); /* Main page titles */
+  --heading-section: var(--font-size-3xl); /* Section headers */
+  --heading-card: var(--font-size-2xl); /* Card titles */
+  --heading-hero: var(--font-size-6xl); /* Hero/display text */
+
+  /* Line Heights */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   BORDER WIDTHS
+	   ───────────────────────────────────────────────────────────────────────────── */
+  --border-width-thin: 1px;
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   BORDER RADIUS
+	   ───────────────────────────────────────────────────────────────────────────── */
+  --radius-xs: 0.125rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 2rem;
+  --radius-full: 9999px;
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   SHADOWS - Layered, depth-based system
+	   ───────────────────────────────────────────────────────────────────────────── */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+
+  /* Glass-specific shadows */
+  --shadow-glass: 0 8px 32px rgb(0 0 0 / 0.1);
+  --shadow-glass-strong: 0 8px 32px rgb(0 0 0 / 0.25);
+  --shadow-card: 0 10px 25px rgb(0 0 0 / 0.12);
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   CARD SYSTEM - Unified heights, fonts, and spacing
+	   4 variants: image, compact, detailed, list
+	   ───────────────────────────────────────────────────────────────────────────── */
+  --card-bg: var(--bg);
+  --card-accent-restaurant: oklch(0.65 0.16 45.0);
+  --card-accent-blog: oklch(0.58 0.14 250.0);
+
+  /* Card widths - Horizontal scroll cards */
+  --card-width-mobile: calc(50vw - var(--page-padding-x) * 2 - var(--spacing-md) * 0.5);
+  --card-width-sm: calc(33vw - var(--page-padding-x) * 2);
+  --card-width-md: calc(20vw - var(--page-padding-x) * 2);
+  --card-width-lg: 210px;
+  --card-width-xl: 240px;
+
+  /* List card image width */
+  --card-list-image-width: 120px;
+  --card-list-image-width-desktop: 280px;
+
+  /* Indicator dots */
+  --dot-size-xs: 2px;
+
+  /* Card heights - LOCKED, non-negotiable */
+  --card-height-image: 160px; /* Marquee/hero - square-ish */
+  --card-height-compact: 200px; /* Dense grids - image + 1 line */
+  --card-height-detailed: 280px; /* Primary listing - 4 lines */
+  --card-height-list: 120px; /* Horizontal - image left, content right */
+
+  /* Card font sizes - unified across all variants */
+  --card-title-xs: var(--font-size-xs); /* 12px - compact */
+  --card-title-sm: var(--font-size-sm); /* 14px - detailed */
+  --card-title-base: var(--font-size-base); /* 16px - list */
+  --card-meta-2xs: 0.5625rem; /* 9px - extra small badges */
+  --card-meta-xs: var(--font-size-2xs); /* 10px - metadata */
+  --card-meta-sm: var(--font-size-xs); /* 12px - badges */
+
+  /* Card spacing */
+  --card-gap-xs: var(--spacing-xs); /* 4px */
+  --card-gap-sm: var(--spacing-sm); /* 8px */
+  --card-gap-md: var(--spacing-md); /* 16px */
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   BADGE TOKENS - Unified badge styling across all cards
+	   ───────────────────────────────────────────────────────────────────────────── */
+  --badge-bg: oklch(from var(--color-favorite) l c h / 0.5); /* Favorite color 50% transparent */
+  --badge-blur: var(--blur-sm); /* 8px backdrop blur */
+  --badge-padding-x: var(--spacing-xs); /* 4px horizontal padding */
+  --badge-padding-y: var(--radius-xs); /* 2px vertical padding */
+  --badge-font-size: calc(var(--font-size-xs) * 0.85); /* Slightly smaller than xs */
+  --badge-radius: var(--radius-sm); /* Small radius, NOT rounded-full */
+  --badge-gap: var(--card-gap-xs); /* 4px gap between elements */
+  --badge-color: var(--color-white); /* Always white text */
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   CAROUSEL TOKENS - For image carousels in cards
+	   ───────────────────────────────────────────────────────────────────────────── */
+  /* Carousel heights */
+  --carousel-height-sm: 250px;
+  --carousel-height-md: 300px;
+  --carousel-height-lg: 400px;
+
+  /* Carousel indicators */
+  --carousel-indicator-width: 2rem;
+  --carousel-indicator-height: 0.5rem;
+  --carousel-indicator-dot-size: 0.5rem;
+  --carousel-indicator-gap: var(--spacing-xs);
+
+  /* Swipe gesture settings */
+  --swipe-threshold: 0.15; /* 15% of container width */
+  --swipe-speed-threshold: 0.5; /* pixels per ms */
+  --swipe-lock-duration: var(--duration-instant);
+
+  /* Carousel autoplay */
+  --carousel-autoplay-interval: 5000;
+  --carousel-autoplay-resume: 4000;
+
+  /* Carousel image sizes */
+  --carousel-image-quality: 70;
+  --carousel-image-sizes-mobile: 100vw;
+  --carousel-image-sizes-tablet: 50vw;
+  --carousel-image-sizes-desktop: 33vw;
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   BACKDROP BLUR - For glass effects
+	   ───────────────────────────────────────────────────────────────────────────── */
+  --blur-xs: 4px;
+  --blur-sm: 8px;
+  --blur-md: 12px;
+  --blur-lg: 16px;
+  --blur-xl: 24px;
+  --blur-2xl: 40px;
+
+  /* Backdrop blur aliases for glassmorphism */
+  --backdrop-blur-sm: 8px;
+  --backdrop-blur-md: 12px;
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   ANIMATIONS - Custom keyframes for modern micro-interactions
+	   ───────────────────────────────────────────────────────────────────────────── */
+  --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-fade-in-up: fade-in-up 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  --animate-slide-in-right: slide-in-right 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  --animate-slide-in-left: slide-in-left 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  --animate-scale-in: scale-in 0.2s ease-out;
+  --animate-float: float 3s ease-in-out infinite;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slide-in-left {
+    from {
+      opacity: 0;
+      transform: translateX(-100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  /* Marquee Animations - infinite scroll */
+  @keyframes marquee-scroll-left {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(var(--marquee-translate-percent));
+    }
+  }
+
+  @keyframes marquee-scroll-right {
+    0% {
+      transform: translateX(var(--marquee-translate-percent));
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+
+  /* Typing Animation - cursor blink */
+  @keyframes cursor-blink {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0;
+    }
+  }
+
+  /* Gradient animation */
+  @keyframes gradient-x {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   EASING FUNCTIONS - Modern, physics-based timing
+	   ───────────────────────────────────────────────────────────────────────────── */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   ANIMATION DURATIONS - For consistent timing across components
+	   ───────────────────────────────────────────────────────────────────────────── */
+  --duration-instant: 80ms;
+  --duration-fast: 120ms;
+  --duration-normal: 240ms;
+  --duration-slow: 500ms;
+
+  /* Spin/Rotate Animation Durations - for loading icons */
+  --duration-spin-fast: 2s;
+  --duration-spin-mid: 3s;
+  --duration-spin-slow: 4s;
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   OPACITY STATES - For consistent transparency levels
+	   ───────────────────────────────────────────────────────────────────────────── */
+  --opacity-hidden: 0;
+  --opacity-faint: 0.05;
+  --opacity-subtle: 0.1;
+  --opacity-subtle-light: 0.2;
+  --opacity-muted: 0.3;
+  --opacity-quiet: 0.4;
+  --opacity-medium: 0.5;
+  --opacity-strong: 0.7;
+  --opacity-full: 1;
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   FOCUS & ACCESSIBILITY - Focus ring sizes and offsets
+	   ───────────────────────────────────────────────────────────────────────────── */
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   3D & TRANSFORM - For perspective and hover effects
+	   ───────────────────────────────────────────────────────────────────────────── */
+  --perspective-3d: 1000px;
+  --hover-lift-y: -4px;
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   CAROUSEL HEIGHTS - Responsive carousel container sizes
+	   ───────────────────────────────────────────────────────────────────────────── */
+  --carousel-height-sm: 250px;
+  --carousel-height-md: 300px;
+  --carousel-height-lg: 350px;
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   GRID GAPS - Responsive grid spacing
+	   ───────────────────────────────────────────────────────────────────────────── */
+  --grid-gap-mobile: 0.5rem;
+  --grid-gap-tablet: 0.75rem;
+  --grid-gap-desktop: 1rem;
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   TEXT EFFECTS - Blur values for text morphing
+	   ───────────────────────────────────────────────────────────────────────────── */
+  --text-morph-blur: 0.4px;
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   BREAKPOINTS - Mobile-first
+	   ───────────────────────────────────────────────────────────────────────────── */
+  --breakpoint-sm: 40rem; /* 640px */
+  --breakpoint-md: 48rem; /* 768px */
+  --breakpoint-lg: 64rem; /* 1024px */
+  --breakpoint-xl: 80rem; /* 1280px */
+  --breakpoint-2xl: 96rem; /* 1536px */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   RUNTIME TOKENS - For inline styles, modals, portals, glassmorphism
+   These must be in :root (NOT @theme) for runtime access via var()
+   ═══════════════════════════════════════════════════════════════════════════════ */
+:root {
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   GLASSMORPHISM TOKENS - For glass effects (opacity < 1 required)
+	   Chrome requires: backdrop-filter, -webkit-backdrop-filter, alpha < 1
+	   Higher opacity for Chrome compatibility (renders more transparent than Safari)
+	   ───────────────────────────────────────────────────────────────────────────── */
+  --glass-blur: 20px;
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.12);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   :root - Light Mode (Eye-friendly off-white, not pure white)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+:root {
+  /* Foreground/Background - Cream off-white for reduced eye strain */
+  --fg: oklch(0.25 0.02 250.0);
+  --bg: oklch(0.98 0.005 85.0);
+
+  /* Logo blend mode for light mode - multiply for color, transparent container */
+  --logo-blend-mode: multiply;
+  --logo-bg: transparent;
+
+  /* Foreground/Background opacity variants (for borders, backgrounds, etc.) */
+  --fg-5: oklch(from var(--fg) l c h / 0.05);
+  --fg-8: oklch(from var(--fg) l c h / 0.08);
+  --fg-10: oklch(from var(--fg) l c h / 0.1);
+  --fg-20: oklch(from var(--fg) l c h / 0.2);
+  --fg-30: oklch(from var(--fg) l c h / 0.3);
+  --fg-40: oklch(from var(--fg) l c h / 0.45);
+  --fg-50: oklch(from var(--fg) l c h / 0.5);
+  --fg-70: oklch(from var(--fg) l c h / 0.7);
+  --fg-100: oklch(from var(--fg) l c h / 1);
+
+  /* Background opacity variants */
+  --bg-70: oklch(from var(--bg) l c h / 0.7);
+  --bg-80: oklch(from var(--bg) l c h / 0.8);
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+	   COMPONENT-SPECIFIC TOKENS - Sizing & Spacing (PRESERVED)
+	   ───────────────────────────────────────────────────────────────────────────── */
+
+  /* Border radius for curved cards */
+  --radius-curved-card-bottom: 1.5rem; /* 3xl */
+  --radius-curved-card-top: 0.5rem; /* lg */
+
+  /* ═══════════════════════════════════════════════════════════════════════════════
+	   BUSINESS CARD TOKENS - Unified styling for business cards
+	   ═══════════════════════════════════════════════════════════════════════════════ */
+
+  /* Card title styling */
+  --card-title-weight: 700; /* font-bold */
+  --card-title-size: var(--font-size-lg); /* 1.125rem */
+  --card-title-color: var(--fg);
+  --card-title-margin: 0.5rem; /* mb-2 */
+
+  /* Card subtitle/description styling */
+  --card-text-size: var(--font-size-sm); /* 0.875rem */
+  --card-text-color: var(--fg-50);
+
+  /* Card CTA/link styling */
+  --card-cta-size: var(--font-size-xs); /* 0.75rem */
+  --card-cta-color: var(--color-primary);
+
+  /* Card spacing */
+  --card-padding: 1.25rem; /* p-5 equivalent */
+  --card-padding-side: 5rem; /* pr-20 for side accent */
+  --card-action-gap: 0.5rem; /* gap-2 */
+  --card-action-margin: 0.75rem; /* mt-3 */
+
+  /* Side accent bar */
+  --card-side-accent-width: 4rem; /* w-16 */
+
+  /* Header - KEEP ALL SIZING/SPACING AS IS */
+  --header-width: 98%;
+  --header-offset-top: var(--spacing-md);
+  --header-padding-y: var(--spacing-sm);
+  --header-padding-x-normal: var(--spacing-xl);
+  --header-padding-x-scrolled: var(--spacing-3xl);
+  --header-logo-size: 2.8rem;
+  --header-logo-gap: var(--spacing-md);
+  --header-actions-gap: var(--spacing-xl);
+  --header-height: 4rem;
+  --header-total-height: calc(
+    var(--header-offset-top) +
+    var(--header-padding-y) +
+    var(--header-logo-size) +
+    var(--header-padding-y)
+  );
+  --header-icon-center-y: calc(
+    var(--header-offset-top) +
+    var(--header-padding-y) +
+    var(--header-logo-size) /
+    2
+  );
+
+  /* Panel/Modal - KEEP WIDTH AS IS */
+  --panel-offset-top: calc(var(--header-height) + 1.5rem);
+  --panel-width: auto;
+  --panel-radius: var(--radius-2xl);
+  --side-menu-width: 13.2rem;
+  --theme-modal-inset: var(--spacing-md);
+  --theme-modal-slide-distance: var(--spacing-xl);
+  --ring-width: 1px;
+  --ring-width-focus: 2px;
+  --ring-offset: var(--spacing-xs);
+  --icon-scale-down: 0.85;
+  --theme-modal-top-aligned: calc(
+    var(--header-icon-center-y) -
+    var(--spacing-md) -
+    var(--icon-size-lg) /
+    2
+  );
+
+  /* Page Layout */
+  --context-bar-height: 3.5rem;
+  --page-top-offset: calc(var(--header-total-height) + var(--context-bar-height));
+  --layout-min-height: 100vh;
+  --section-gap-sm: var(--spacing-2xl);
+  --section-gap-md: var(--spacing-3xl);
+  --section-gap-lg: var(--spacing-4xl);
+  --section-padding: var(--spacing-xl);
+
+  /* Unified section spacing - vertical gap between sections */
+  --section-spacing-mobile: var(--spacing-xl); /* 32px between sections on mobile */
+  --section-spacing-tablet: var(--section-gap-sm); /* 48px on tablet */
+  --section-spacing-desktop: var(--section-gap-md); /* 64px on desktop */
+
+  /* Page Container */
+  --page-max-width: 1200px;
+  --page-padding-x: clamp(var(--spacing-md), 4vw, var(--spacing-xl));
+
+  /* Max Widths */
+  --max-w-xl: 42rem;
+  --max-w-2xl: 64rem;
+  --header-max-width: var(--max-w-2xl);
+  --form-max-width: 28rem;
+
+  /* Hero Section */
+  --hero-bg-height: 600px;
+  --hero-deco-1-top: -10%;
+  --hero-deco-1-left: -10%;
+  --hero-deco-1-size: 40%;
+  --hero-deco-2-bottom: 20%;
+  --hero-deco-2-right: -5%;
+  --hero-deco-2-size: 30%;
+
+  /* Icons */
+  --icon-size-xs: 0.75rem;
+  --icon-size-sm: 1rem;
+  --icon-size-md: 1.25rem;
+  --icon-size-lg: 1.875rem;
+  --icon-size-xl: 2.5rem;
+  --icon-size-search: 1.3125rem; /* 21px - search container icons */
+
+  /* Structural */
+  --divider-width: 1px;
+  --indicator-width: 3px;
+
+  /* Toggle Switch */
+  --toggle-width: 44px;
+  --toggle-height: 24px;
+  --toggle-thumb-size: 20px;
+  --toggle-thumb-gap: 2px;
+  --toggle-thumb-on-position: 22px; /* width - thumb-size - gap */
+
+  /* Modal Widths - for Modal component */
+  --modal-width-xs: 20rem; /* 320px */
+  --modal-width-sm: 24rem; /* 384px */
+  --modal-width-md: 28rem; /* 448px */
+  --modal-width-lg: 32rem; /* 512px */
+  --modal-width-xl: 36rem; /* 576px */
+  --modal-width-full: 100%; /* Full width */
+  --modal-height-full: 100vh; /* Full height */
+
+  /* Cursor (Typing Animation) */
+  --cursor-width: 2px;
+  --cursor-gap: 2px;
+  --cursor-height-ratio: 1.2;
+  --cursor-blink-duration: 1s;
+
+  /* Hover Effects */
+  --hover-lift-translate: -0.0625rem; /* -1px */
+  --hover-scale-factor: 1.05;
+
+  /* Logo Sizes */
+  --logo-size-footer: calc(var(--icon-size-lg) * 1.5);
+  --logo-size-hero: calc(var(--icon-size-lg) * 2);
+  --logo-size-page: 4rem;
+
+  /* Touch Targets (Accessibility) */
+  --touch-target-min: 2.75rem;
+
+  /* Z-Index Layers */
+  --z-skip-link: 200;
+  --z-header: 100;
+  --z-side-menu: 110;
+  --z-side-menu-backdrop: 60;
+  --z-modal: 1040; /* Generic modal for Modal component */
+  --z-theme-modal: 120;
+  --z-theme-modal-backdrop: 80;
+  --z-marquee-content: 10;
+  --z-dropdown: 9999; /* Filter dropdowns on mobile */
+
+  /* Dropdown */
+  --dropdown-min-width: 180px;
+  --dropdown-max-height: 300px;
+
+  /* Marquee - Component-specific tokens - Enhanced from shadi-nextjs-uae */
+  --marquee-gap: var(--spacing-md);
+  --marquee-gap-mobile: var(--spacing-xs);
+  --marquee-row-gap: var(--spacing-md);
+  --marquee-row-gap-mobile: var(--spacing-sm);
+
+  /* Marquee card sizes - responsive clamp for fluid sizing */
+  --marquee-card-size-mobile: 100px; /* Perfect square for mobile */
+  --marquee-card-size-tablet: 100px;
+  --marquee-card-size-desktop: 120px;
+  --marquee-card-size-large: 140px;
+
+  /* Marquee card fluid sizing with clamp */
+  --marquee-card-fluid: clamp(var(--marquee-card-size-mobile), 12vw, var(--marquee-card-size-large));
+
+  /* Non-square cards for other uses (CardPreview component) */
+  --marquee-card-width: 280px;
+  --marquee-card-height: 180px;
+
+  /* Marquee animation */
+  --marquee-fade-width: 32px;
+  /* NEW: Percentage-based fade for responsive behavior */
+  --marquee-fade-start-mobile: 40%;
+  --marquee-fade-start-tablet: 30%;
+  --marquee-fade-start-desktop: 22%;
+  --marquee-fade-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --marquee-container-height: 320px;
+  --marquee-speed: 50px; /* pixels per second */
+  --marquee-duration-min: 15s;
+  --marquee-duration: var(--marquee-duration-min);
+  --marquee-translate-percent: -50%;
+
+  /* Marquee hover effects */
+  --marquee-hover-scale: 1.05;
+  --marquee-hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  --marquee-base-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  /* Marquee 3D - Enhanced visual depth with GPU acceleration */
+  --marquee-3d-card-width: 144px;
+  --marquee-3d-gap: 16px;
+  --marquee-3d-card-fluid: clamp(120px, 14vw, 160px);
+
+  /* 3D Illusion - Simple rotateZ + unequal spacing (zero performance cost) */
+  --marquee-rotate-z: 15deg; /* Clock ~1:30 diagonal direction */
+  --marquee-gap-tight: 0.75rem; /* Creates depth perception */
+  --marquee-gap-normal: 1.25rem;
+  --marquee-gap-loose: 1.75rem;
+
+  /* Animation durations - variable speed control */
+  --marquee-duration-fast: 15s;
+  --marquee-duration-mid: 20s;
+  --marquee-duration-slow: 25s;
+  --marquee-3d-duration: var(--marquee-duration-mid);
+
+  /* Hero Layout - Component-specific tokens */
+  --hero-gap: var(--spacing-xl);
+  --hero-gap-tight: var(--spacing-md);
+
+  /* Hero Vertical Spacing (Mobile) */
+  --hero-subtitle-gap: 0.5rem; /* 8px - very small spacing for typing */
+  --hero-marquee-gap: 2rem; /* 32px - 4× subtitle gap for marquee */
+
+  /* Hero Title - Prefix text (lines 1 & 3) are 85% of morph size */
+  --hero-prefix-size: 0.85em;
+
+  /* Hero Headline Typography */
+  --hero-headline-size: clamp(2.5rem, 5vw, 5.5rem);
+  --hero-headline-size-landscape: clamp(2rem, 3.5vw, 3rem);
+  --hero-display-size: clamp(2.5rem, 5vw, 5.5rem);
+  --hero-display-size-landscape: clamp(2rem, 3.5vw, 3rem);
+  --hero-display-line-height: 1.04;
+
+  /* Hero Title Sizes - per element (MUCH LARGER) */
+  --hero-title-size: clamp(3rem, 7vw, 6rem);
+  --hero-title-size-landscape: clamp(2rem, 4vw, 4rem);
+  --hero-morph-size: clamp(3.2rem, 7.5vw, 6.5rem);
+  --hero-morph-size-landscape: clamp(2rem, 4vw, 4rem);
+  --hero-subtitle-size: clamp(1rem, 2vw, 1.25rem);
+  --hero-title-gap: var(--spacing-sm);
+
+  /* 3D Marquee Transforms - unified with best practice tokens above */
+
+  /* -------------------- SINGLE ADAPTIVE MARQUEE - SSOT -------------------- */
+  /* Single marquee that scales for both mobile and desktop */
+  --marquee-card-size: clamp(60px, 12vw, 140px);
+  --marquee-adaptive-gap-tight: clamp(0.5rem, 1vw, 0.75rem);
+  --marquee-adaptive-gap-medium: clamp(1rem, 2vw, 1.25rem);
+  --marquee-adaptive-gap-loose: clamp(1.5rem, 3vw, 1.75rem);
+
+  /* -------------------- FLOATING LIGHTS ANIMATION -------------------- */
+  --float-lights-duration: 30s;
+  --float-lights-blur: 100px;
+
+  /* -------------------- GRADIENT OVERLAY -------------------- */
+  --gradient-overlay-primary: rgba(255, 90, 95, 0.2);
+  --gradient-overlay-secondary: rgba(255, 179, 126, 0.15);
+  --gradient-overlay-tertiary: rgba(255, 230, 161, 0.1);
+
+  /* Status Badges */
+  --status-open-bg: oklch(from var(--color-success) l c h / 0.15);
+  --status-open-fg: var(--color-success);
+  --status-closed-bg: oklch(from var(--fg) l c h / 0.08);
+  --status-closed-fg: var(--fg-70);
+  --status-busy-bg: oklch(from var(--color-warning) l c h / 0.15);
+  --status-busy-fg: var(--color-warning);
+  --status-coming-soon-bg: oklch(from var(--color-info) l c h / 0.15);
+  --status-coming-soon-fg: var(--color-info);
+  --status-temp-closed-bg: oklch(from var(--color-error) l c h / 0.15);
+  --status-temp-closed-fg: var(--color-error);
+
+  /* ═══════════════════════════════════════════════════════════════════════════════
+     FILTER SYSTEM - Unified color coding for all filters
+     ═══════════════════════════════════════════════════════════════════════════════ */
+
+  /* Filter z-index layers */
+  --z-filter-backdrop: 50;
+  --z-filter-sheet: 51;
+  --z-filter-bar: 52;
+
+  /* Filter Badge Colors - Theme-aware, consistent across all modes */
+  --filter-badge-meal: #f97316; /* Orange */
+  --filter-badge-cuisine: #ef4444; /* Red (from al-kabab atmosphere) */
+  --filter-badge-atmosphere: #3b82f6; /* Blue */
+  --filter-badge-location: #8b5cf6; /* Purple */
+  --filter-badge-shadi: #a855f7; /* Purple */
+
+  /* Filter Button 3D Gradients - Background colors */
+  --filter-meal-bg-start: #f97316;
+  --filter-meal-bg-end: #ea580c;
+  --filter-meal-content-start: #fdba74;
+  --filter-meal-content-end: #fb923c;
+
+  /* Cuisine - Red theme (from al-kabab atmosphere) */
+  --filter-cuisine-bg-start: #ef4444;
+  --filter-cuisine-bg-end: #dc2626;
+  --filter-cuisine-content-start: #fca5a5;
+  --filter-cuisine-content-end: #f87171;
+
+  --filter-atmosphere-bg-start: #3b82f6;
+  --filter-atmosphere-bg-end: #2563eb;
+  --filter-atmosphere-content-start: #93c5fd;
+  --filter-atmosphere-content-end: #60a5fa;
+
+  /* Filter Button Sizes */
+  --filter-button-size: 3rem; /* 48px */
+  --filter-button-expanded: 9rem; /* 144px */
+  --filter-badge-size: 1.25rem; /* 20px */
+  --filter-label-width-collapsed: 0;
+  --filter-label-width-expanded: 7rem; /* 112px */
+
+  /* Filter Button 3D Effects */
+  --filter-button-3d-shadow-offset: -3px 3px 0 0;
+  --filter-button-3d-shadow-blur: -6px 6px 3px 0;
+  --filter-button-3d-shadow-color: 0 0 0 / 15%;
+  --filter-button-3d-shadow-blur-color: 0 0 0 / 10%;
+  --filter-button-3d-inset-shadow: inset -2px 4px 4px -2px;
+  --filter-button-3d-inset-dark: inset 1px -2px 4px 0px rgb(0 0 0 / 35%);
+  --filter-button-3d-active-inset: inset -1px 4px 4px -2px;
+
+  /* Filter Sheet - Bottom sheet */
+  --filter-sheet-height: 14rem;
+  --filter-sheet-swipe-threshold: 6.25rem; /* 100px - swipe down to close */
+
+  /* Filter Thresholds */
+  --filter-drag-threshold: 6.25rem; /* 100px */
+  --filter-scroll-threshold: 3.125rem; /* 50px */
+  --filter-animation-duration: 700ms;
+  --filter-easing: cubic-bezier(0.25, 1, 0.5, 1);
+
+  /* ═══════════════════════════════════════════════════════════════════════════════
+     3D BUTTON TOKENS - Single reusable style with color variants
+     ═══════════════════════════════════════════════════════════════════════════════ */
+
+  /* Button Size & Radius */
+  --button-3d-radius: 12px;
+
+  /* Blue Button - For Sign In (uses brand secondary) */
+  --btn-blue-bg-start: var(--color-brand-secondary);
+  --btn-blue-bg-end: oklch(from var(--color-brand-secondary) calc(l - 0.05) c h);
+  --btn-blue-content-start: oklch(from var(--color-brand-secondary) calc(l + 0.15) c h);
+  --btn-blue-content-end: oklch(from var(--color-brand-secondary) calc(l + 0.10) c h);
+
+  /* Gray Button - For Theme/Language/Settings widgets */
+  --btn-gray-bg-start: var(--color-gray-500);
+  --btn-gray-bg-end: var(--color-gray-600);
+  --btn-gray-content-start: var(--color-gray-400);
+  --btn-gray-content-end: var(--color-gray-500);
+
+  /* ═══════════════════════════════════════════════════════════════════════════════
+     NEON ROTATING LIGHT ANIMATION - From al-kabab-recovery project
+     Applied to search box and filter buttons for hover/focus glow effect
+     ═══════════════════════════════════════════════════════════════════════════════ */
+
+  /* Neon animation - Rotating gradient shine */
+  --neon-spin-duration: 3s;
+  --neon-spin-easing: linear;
+
+  /* Neon glow colors for different elements */
+
+  /* Neon filter drop-shadow for glow effect */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   THEME-SPECIFIC NEON GLOW COLORS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+[data-theme="dark"] {
+  /* Dark mode: Bright white glow (same as filter buttons) */
+}
+
+[data-theme="warm"] {
+  /* Warm mode: stronger glow for visibility on light background */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Mobile Header Overrides - KEEP SIZING AS IS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  :root {
+    --header-logo-size: 2.38rem;
+    --header-logo-gap: var(--spacing-sm);
+    --header-actions-gap: 0.75rem;
+    --header-padding-x-normal: var(--spacing-sm);
+    --header-padding-x-scrolled: var(--spacing-md);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Dark Mode - Deep blue-gray (not pure black) for reduced eye strain
+   ═══════════════════════════════════════════════════════════════════════════════ */
+[data-theme="dark"] {
+  --fg: oklch(0.88 0.008 250.0);
+  --bg: oklch(0.22 0.02 250.0);
+
+  /* Shadows - use white for visibility on dark backgrounds */
+  --shadow-sm: 0 1px 2px 0 rgb(255 255 255 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(255 255 255 / 0.1), 0 2px 4px -2px rgb(255 255 255 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(255 255 255 / 0.1), 0 4px 6px -4px rgb(255 255 255 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(255 255 255 / 0.12), 0 8px 10px -6px rgb(255 255 255 / 0.12);
+  --shadow-2xl: 0 25px 50px -12px rgb(255 255 255 / 0.25);
+
+  /* Glass primitives - stronger for dark mode (higher opacity for Chrome) */
+  --glass-blur: 24px;
+  --glass-bg: rgba(30, 35, 45, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+
+  /* Logo blend mode for dark mode - container matches glass card color */
+  --logo-blend-mode: normal;
+  --logo-bg: rgba(30, 35, 45, 0.75);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Warm Mode - Honeyed beige for cozy, comfortable browsing
+   ═══════════════════════════════════════════════════════════════════════════════ */
+[data-theme="warm"] {
+  --fg: oklch(0.3 0.04 65.0);
+  --bg: oklch(0.94 0.02 75.0);
+
+  /* Warm glass (higher opacity for Chrome) */
+  --glass-blur: 18px;
+  --glass-bg: rgba(245, 235, 220, 0.8);
+  --glass-border: rgba(200, 180, 150, 0.4);
+  --glass-shadow: 0 8px 32px rgba(90, 70, 50, 0.2);
+
+  /* Logo blend mode for warm mode - multiply makes black blend with warm bg */
+  --logo-blend-mode: multiply;
+  --logo-bg: oklch(0.94 0.02 75.0);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Logo Inversion - Applied immediately based on data-theme (before React hydration)
+   Prevents logo color flash on dark mode page load
+   Warm mode keeps black logo (no inversion)
+   Only invert logo-correct.svg, exclude profile logos with embedded backgrounds
+   ═══════════════════════════════════════════════════════════════════════════════ */
+[data-theme="dark"] img[src*="/LOGO/shadi-logo-correct.svg"] {
+  filter: invert(1);
+}
+
+/* Logo wrapper container colors - all modes use transparent */
+:root .logo-wrapper,
+[data-theme="warm"] .logo-wrapper,
+[data-theme="dark"] .logo-wrapper {
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   BRAND LOGO COLORS - For currentColor SVG logos
+   ═══════════════════════════════════════════════════════════════════════════════ */
+:root {
+  --logo-color: #111111;
+}
+
+[data-theme="warm"] {
+  --logo-color: #2b1b0f;
+}
+
+[data-theme="dark"] {
+  --logo-color: #ffffff;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   BRAND LOGO HEIGHT TOKEN - Single source of truth for header logo sizing
+   Both icon and text logos use the same height for visual consistency
+   ═══════════════════════════════════════════════════════════════════════════════ */
+:root {
+  --header-logo-height: 1.75rem;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --header-logo-height: 2rem;
+  }
+}

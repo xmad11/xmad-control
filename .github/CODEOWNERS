@@ -1,0 +1,32 @@
+# ═══════════════════════════════════════════════════════════════
+# CODEOWNERS - File Ownership Rules
+# ═══════════════════════════════════════════════════════════════
+#
+# Format: <pattern> <@username>
+# - Wildcards (*) are supported
+# - Use @* for "any owner"
+# - Last match wins (most specific at bottom)
+#
+# ═══════════════════════════════════════════════════════════════
+
+# Global fallback - anyone can own most files
+* @ahmadabdullah
+
+# ═══════════════════════════════════════════════════════════════
+# PROTECTED PATHS - Require explicit ownership
+# ═══════════════════════════════════════════════════════════════
+
+# Design tokens (core styling system)
+styles/tokens.css @ahmadabdullah
+
+# Global styles
+styles/globals.css @ahmadabdullah
+
+# Audit & governance scripts
+scripts/audit/ @ahmadabdullah
+
+# GitHub workflows & actions
+.github/ @ahmadabdullah
+
+# Documentation
+documentation/ @ahmadabdullah

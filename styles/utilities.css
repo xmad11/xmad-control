@@ -1,0 +1,106 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   BADGE COLOR UTILITIES - Cuisine badges use brand primary color
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.text-badge-primary {
+  color: var(--color-primary);
+}
+
+.bg-badge-primary {
+  background-color: var(--color-primary);
+}
+
+.bg-badge-primary\/10 {
+  background-color: color-mix(in oklab, var(--color-primary) 10%, transparent);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   FADE UTILITIES - GPU-safe mask-image fades for marquees
+   NEW: Simpler percentage-based fade with lighter intermediate opacity
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   HORIZONTAL FADE - Adaptive, smooth easing for 2D marquees
+   Mobile 35% → Tablet 28% → Desktop 20%
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.fade-horizontal {
+  --fade: 15%;
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(0, 0, 0, 0.4) calc(var(--fade) * 0.5),
+    black var(--fade),
+    black calc(100% - var(--fade)),
+    rgba(0, 0, 0, 0.4) calc(100% - var(--fade) * 0.5),
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(0, 0, 0, 0.4) calc(var(--fade) * 0.5),
+    black var(--fade),
+    black calc(100% - var(--fade)),
+    rgba(0, 0, 0, 0.4) calc(100% - var(--fade) * 0.5),
+    transparent 100%
+  );
+}
+
+@media (min-width: 768px) {
+  .fade-horizontal {
+    --fade: 12%;
+  }
+}
+
+@media (min-width: 1024px) {
+  .fade-horizontal {
+    --fade: 10%;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   3D FADE - ALL 4 EDGES using mask-composite (fixes container leak)
+   Uses intersect to combine horizontal + vertical masks
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.fade-3d {
+  --fade: 22%;
+  -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0, 0, 0, 0.3) calc(var(--fade) * 0.5),
+      black var(--fade),
+      black calc(100% - var(--fade)),
+      rgba(0, 0, 0, 0.3) calc(100% - var(--fade) * 0.5),
+      transparent 100%
+    ),
+    linear-gradient(
+      to right,
+      transparent 0%,
+      rgba(0, 0, 0, 0.3) calc(var(--fade) * 0.5),
+      black var(--fade),
+      black calc(100% - var(--fade)),
+      rgba(0, 0, 0, 0.3) calc(100% - var(--fade) * 0.5),
+      transparent 100%
+    );
+  -webkit-mask-composite: intersect;
+  mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0, 0, 0, 0.3) calc(var(--fade) * 0.5),
+      black var(--fade),
+      black calc(100% - var(--fade)),
+      rgba(0, 0, 0, 0.3) calc(100% - var(--fade) * 0.5),
+      transparent 100%
+    ),
+    linear-gradient(
+      to right,
+      transparent 0%,
+      rgba(0, 0, 0, 0.3) calc(var(--fade) * 0.5),
+      black var(--fade),
+      black calc(100% - var(--fade)),
+      rgba(0, 0, 0, 0.3) calc(100% - var(--fade) * 0.5),
+      transparent 100%
+    );
+  mask-composite: intersect;
+}

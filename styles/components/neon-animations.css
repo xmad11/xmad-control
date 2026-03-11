@@ -1,0 +1,193 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   NEON ROTATING LIGHT ANIMATION - For search box and filter buttons
+   From al-kabab-recovery project - GPU accelerated rotating gradient shine
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* Neon shine effect - pseudo-element with rotating gradient (SMALL for filter buttons) */
+.neon-shine::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 100px;
+  height: 200px;
+  margin: auto;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--neon-glow-search) 50%,
+    transparent 100%
+  );
+  opacity: 0;
+  animation: neon-spin var(--neon-spin-duration) var(--neon-spin-easing) infinite;
+  animation-play-state: paused;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Hover state - show and start spinning */
+.filter-button-base:hover .neon-shine::before,
+.filter-button-base:focus .neon-shine::before {
+  opacity: 1;
+  animation-play-state: running;
+}
+
+/* Search input neon shine - show when input is focused (using focus-within) */
+*:focus-within > .neon-shine::before,
+.neon-shine-focused::before,
+.search-neon-active .neon-shine::before {
+  opacity: 1;
+  animation-play-state: running;
+}
+
+/* Neon animation keyframes */
+@keyframes neon-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Accessibility - respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .neon-shine::before {
+    animation: none;
+  }
+}
+
+::selection {
+  background-color: oklch(from var(--color-brand-primary) l c h / 0.3);
+  color: inherit;
+}
+
+/* MARQUEE STYLES */
+@media (max-width: 768px) {
+  main:has(.marquee-full-width) {
+    padding-inline: 0;
+  }
+}
+
+.marquee-full-width {
+  position: relative;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  display: flex;
+  flex-direction: column;
+  gap: var(--marquee-row-gap, var(--spacing-md));
+}
+
+@media (max-width: 768px) {
+  .marquee-full-width {
+    width: 100%;
+    margin-left: 0;
+    padding-inline: 0;
+    gap: var(--marquee-row-gap-mobile);
+  }
+}
+
+.marquee-container {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  /* Off-screen optimization */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 200px;
+}
+
+.marquee-track-vertical {
+  flex-direction: column;
+}
+
+.marquee-row {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+.marquee-row-mobile {
+  height: var(--marquee-card-size-mobile);
+}
+
+/* ACCESSIBILITY */
+*:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-brand-primary);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-sm);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Search input - remove focus ring, keep rounded shape */
+input[type="search"]:focus,
+input[type="search"]:focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  border-radius: 9999px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (pointer: coarse) {
+  .touch-target {
+    min-width: var(--touch-target-min);
+    min-height: var(--touch-target-min);
+  }
+}
+
+.no-scrollbar,
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* UTILITY COMPONENTS */
+.spinner {
+  border: var(--ring-width) solid var(--color-primary);
+  border-top-color: transparent;
+  border-radius: var(--radius-full);
+  animation: spin var(--duration-normal) linear infinite;
+}
+
+.contain-optimization {
+  contain: layout style paint;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* BUSINESS CTA */
+.accent-gradient {
+  clip-path: polygon(30% 0%, 100% 0%, 100% 100%, 0% 100%);
+  background: linear-gradient(
+    to bottom,
+    var(--color-primary),
+    color-mix(in srgb, var(--color-primary) 85%, var(--color-black))
+  );
+}

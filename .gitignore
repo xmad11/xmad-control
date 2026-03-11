@@ -1,0 +1,69 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Next.js
+.next/
+out/
+
+# Production
+/build
+dist
+
+# Turbopack
+.turbo
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local env files
+.env.local
+.env*.local
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Bun
+bun.lock
+bun.lockb
+
+# One-off scripts
+fix-ui-tokens.sh
+*.sh
+
+# Test/build artifacts in root
+test.html
+*.html
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+
+# Audit & Governance
+# Keep .audit/ tracked as single source of truth for project health
+# Only exclude temporary extraction/guard folders
+.extraction/
+.guard/
+
+# Documentation hashes are tracked for verification
+# Keep documentation/hashes/ tracked

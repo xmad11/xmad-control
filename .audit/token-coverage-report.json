@@ -1,0 +1,15 @@
+{
+  "generatedAt": "2026-01-30T12:53:03.354Z",
+  "summary": {
+    "totalTokens": 60,
+    "usedTokens": 21
+  },
+  "tokenUsage": {},
+  "componentCoverage": [
+    {
+      "component": "components/search/SearchContainer.tsx",
+      "coverage": 1,
+      "unusedTokens": []
+    }
+  ]
+}

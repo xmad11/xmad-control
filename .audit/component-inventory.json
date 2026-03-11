@@ -1,0 +1,27 @@
+{
+  "generatedAt": "2026-01-30T12:53:03.354Z",
+  "components": [
+    {
+      "name": "SearchContainer",
+      "path": "components/search/SearchContainer.tsx",
+      "linesOfCode": 620,
+      "propsCount": 1,
+      "usesTokens": true,
+      "inlineStyles": false,
+      "responsiveStrategy": "mobile-first",
+      "heavy": true,
+      "memoized": true,
+      "tokenCoverage": 1,
+      "exceptions": [],
+      "violations": [],
+      "warnings": [
+        {
+          "type": "TOUCH_TARGET",
+          "component": "components/search/SearchContainer.tsx",
+          "line": 576,
+          "message": "Touch target 10px is below 44px minimum"
+        }
+      ]
+    }
+  ]
+}

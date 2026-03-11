@@ -1,0 +1,112 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   THEMES.CSS - LOCKED (THEME SWITCHING ONLY)
+   Theme switching ONLY
+   ❌ No components
+   ❌ No utilities
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   RUNTIME TOKENS - For inline styles, modals, portals
+   ───────────────────────────────────────────────────────────────────────────── */
+:root {
+  /* Glassmorphism tokens - stronger blur for better glass effect */
+  --glass-blur: 32px;
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.12);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+
+  /* Absolute gray token – never derived */
+  --gray: oklch(0.48 0.028 250.0);
+
+  /* Component tokens - filter dropdown system */
+  --dropdown-width: 280px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   LIGHT MODE (Default)
+   ───────────────────────────────────────────────────────────────────────────── */
+:root {
+  --fg: oklch(0.25 0.02 250.0);
+  --bg: oklch(0.98 0.005 85.0);
+
+  /* Foreground/Background opacity variants */
+  --fg-5: oklch(from var(--fg) l c h / 0.05);
+  --fg-8: oklch(from var(--fg) l c h / 0.08);
+  --fg-10: oklch(from var(--fg) l c h / 0.1);
+  --fg-20: oklch(from var(--fg) l c h / 0.2);
+  --fg-30: oklch(from var(--fg) l c h / 0.3);
+  --fg-40: oklch(from var(--fg) l c h / 0.4);
+  --fg-50: oklch(from var(--fg) l c h / 0.5);
+  --fg-70: oklch(from var(--fg) l c h / 0.7);
+  --fg-100: oklch(var(--fg) l c h / 1);
+
+  /* Background opacity variants */
+  --bg-70: oklch(from var(--bg) l c h / 0.7);
+  --bg-80: oklch(from var(--bg) l c h / 0.8);
+
+  /* Semantic text tokens - RELATIVE, contrast-safe */
+  --text-secondary: oklch(from var(--fg) l c h / 0.62);
+  --text-tertiary: oklch(from var(--fg) l c h / 0.42);
+
+  /* Hero gradient - peach overlay for light mode */
+  --hero-gradient: linear-gradient(
+    180deg,
+    oklch(0.96 0.06 80 / 0.4) 0%,
+    oklch(0.96 0.06 80 / 0.3) 40%,
+    oklch(0.96 0.06 80 / 0.15) 70%,
+    transparent 100%
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   DARK MODE
+   ───────────────────────────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --fg: oklch(0.88 0.008 250.0);
+  --bg: oklch(0.22 0.02 250.0);
+
+  /* Glass primitives - stronger for dark mode */
+  --glass-blur: 40px;
+  --glass-bg: rgba(30, 35, 45, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+
+  /* Hero gradient - hidden in dark mode */
+  --hero-gradient: transparent;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   WARM MODE
+   ───────────────────────────────────────────────────────────────────────────── */
+[data-theme="warm"] {
+  --fg: oklch(0.3 0.04 65.0);
+  --bg: oklch(0.94 0.02 75.0);
+
+  /* Warm glass - stronger blur */
+  --glass-blur: 28px;
+  --glass-bg: rgba(245, 235, 220, 0.8);
+  --glass-border: rgba(200, 180, 150, 0.4);
+  --glass-shadow: 0 8px 32px rgba(90, 70, 50, 0.2);
+
+  /* Hero gradient - warmer peach for warm mode */
+  --hero-gradient: linear-gradient(
+    180deg,
+    oklch(0.95 0.08 75 / 0.45) 0%,
+    oklch(0.95 0.08 75 / 0.35) 40%,
+    oklch(0.95 0.08 75 / 0.18) 70%,
+    transparent 100%
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   LOGO INVERSION - Applied immediately based on data-theme
+   ───────────────────────────────────────────────────────────────────────────── */
+/* Dark mode only - warm mode has light background so logo stays dark */
+[data-theme="dark"] img[src*="/LOGO/"] {
+  filter: invert(1);
+}
+
+/* Footer logo - Always brand primary color */
+footer img[src*="/LOGO/"] {
+  filter: brightness(0) saturate(100%) sepia(100%) saturate(500%) hue-rotate(-30deg);
+}

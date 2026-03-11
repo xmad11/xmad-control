@@ -1,0 +1,241 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   MARQUEE SYSTEM - Normal horizontal marquee only (3D removed)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   MARQUEE TOKENS - Component-specific design tokens
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Marquee - Component-specific tokens */
+  --marquee-gap: var(--spacing-md);
+  --marquee-gap-mobile: var(--spacing-xs);
+  --marquee-row-gap: var(--spacing-md);
+  --marquee-row-gap-mobile: var(--spacing-sm);
+
+  /* Marquee card sizes - responsive clamp for fluid sizing */
+  --marquee-card-size-mobile: 100px;
+  --marquee-card-size-tablet: 100px;
+  --marquee-card-size-desktop: 120px;
+  --marquee-card-size-large: 140px;
+
+  /* Marquee card fluid sizing with clamp */
+  --marquee-card-fluid: clamp(var(--marquee-card-size-mobile), 12vw, var(--marquee-card-size-large));
+
+  /* Non-square cards for other uses (CardPreview component) */
+  --marquee-card-width: 280px;
+  --marquee-card-height: 180px;
+
+  /* Marquee animation */
+  --marquee-fade-width: 32px;
+  --marquee-fade-start-mobile: 40%;
+  --marquee-fade-start-tablet: 30%;
+  --marquee-fade-start-desktop: 22%;
+  --marquee-fade-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --marquee-container-height: 320px;
+  --marquee-speed: 50px;
+  --marquee-duration-min: 15s;
+  --marquee-duration: var(--marquee-duration-min);
+  --marquee-translate-percent: -50%;
+
+  /* Marquee hover effects */
+  --marquee-hover-scale: 1.05;
+  --marquee-hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  --marquee-base-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  /* SINGLE ADAPTIVE MARQUEE */
+  --marquee-card-size: clamp(60px, 12vw, 140px);
+  --marquee-adaptive-gap-tight: clamp(0.5rem, 1vw, 0.75rem);
+  --marquee-adaptive-gap-medium: clamp(1rem, 2vw, 1.25rem);
+  --marquee-adaptive-gap-loose: clamp(1.5rem, 3vw, 1.75rem);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   SCROLL ANIMATION KEYFRAMES
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@keyframes marquee-scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(var(--marquee-translate-percent));
+  }
+}
+
+@keyframes marquee-scroll-right {
+  0% {
+    transform: translateX(var(--marquee-translate-percent));
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   SCROLL ANIMATION UTILITIES
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.animate-scroll-left {
+  animation: marquee-scroll-left 35s linear infinite;
+}
+
+.animate-scroll-right {
+  animation: marquee-scroll-right 40s linear infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   HORIZONTAL MARQUEE STYLES
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  main:has(.marquee-full-width) {
+    padding-inline: 0;
+  }
+}
+
+.marquee-full-width {
+  position: relative;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  display: flex;
+  flex-direction: column;
+  gap: var(--marquee-row-gap, var(--spacing-md));
+}
+
+@media (max-width: 768px) {
+  .marquee-full-width {
+    width: 100%;
+    margin-left: 0;
+    padding-inline: 0;
+    gap: var(--marquee-row-gap-mobile);
+  }
+}
+
+.marquee-container {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 200px;
+}
+
+.marquee-row {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+.marquee-row::before,
+.marquee-row::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.marquee-row::before {
+  left: 0;
+  background: linear-gradient(to right, var(--bg), transparent);
+}
+
+.marquee-row::after {
+  right: 0;
+  background: linear-gradient(to left, var(--bg), transparent);
+}
+
+.marquee-track {
+  display: flex;
+  gap: 0.5rem;
+  animation: marquee-scroll-left 30s linear infinite;
+  animation-play-state: var(--marquee-play, running);
+}
+
+.marquee-track-reverse {
+  display: flex;
+  gap: 0.5rem;
+  animation: marquee-scroll-right 40s linear infinite;
+  animation-play-state: var(--marquee-play, running);
+}
+
+@media (min-width: 1024px) {
+  .marquee-track,
+  .marquee-track-reverse {
+    gap: var(--spacing-md);
+  }
+}
+
+.marquee-card {
+  width: var(--marquee-card-size);
+  height: var(--marquee-card-size);
+  flex-shrink: 0;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  backface-visibility: hidden;
+}
+
+.marquee-card:hover {
+  transform: scale(var(--marquee-hover-scale));
+}
+
+.marquee-horizontal-container {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  min-height: auto;
+  display: flex;
+  align-items: center;
+}
+
+@media (min-width: 1024px) {
+  .marquee-horizontal-container {
+    min-height: 160px;
+  }
+}
+
+.fade-horizontal {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+.fade-horizontal::before,
+.fade-horizontal::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 15px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+@media (min-width: 1024px) {
+  .fade-horizontal::before,
+  .fade-horizontal::after {
+    width: 60px;
+  }
+}
+
+.fade-horizontal::before {
+  left: 0;
+  background: linear-gradient(to right, var(--bg) 0%, var(--bg) 50%, transparent 100%);
+}
+
+.fade-horizontal::after {
+  right: 0;
+  background: linear-gradient(to left, var(--bg) 0%, var(--bg) 50%, transparent 100%);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   REDUCED MOTION SUPPORT
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none !important;
+  }
+}
