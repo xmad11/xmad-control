@@ -1,6 +1,7 @@
 /* GLOBAL STYLES */
 @import "./tokens.css";
 @import "./tokens/mask.css";
+@import "./themes.css";
 @import "./utilities.css";
 
 /* Component-scoped CSS imports */
