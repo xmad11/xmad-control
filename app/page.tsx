@@ -1,8 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════════════════════
-   FAVORITES PAGE - Saved restaurants and blogs with localStorage
-   Using favorites feature from /features/favorites
+   XMAD CONTROL - Simple Starter Template
+   Clean page with header, side menu, and theme toggle
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-import { FavoritesPage } from "@/features/favorites"
+import { HomeClient } from "@/features/home/HomeClient"
 
-export default FavoritesPage
+export default function HomePage() {
+  return <HomeClient />
+}

@@ -5,17 +5,12 @@
 
 "use client"
 
-import { mockBlogsWithBlurHash } from "@/__mock__/blogs-with-blurhash"
 import {
   type ShadiRestaurantWithBlurHash,
   mockRestaurantsWithBlurHash,
 } from "@/__mock__/restaurants-with-blurhash"
 import { OptimizedPreviewCard } from "@/components/cards/optimized"
-import {
-  BlogPreviewCard,
-  BlogSkeletonPreviewCard,
-  SkeletonPreviewCard,
-} from "@/components/cards/preview"
+import { SkeletonPreviewCard } from "@/components/cards/preview"
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react"
 import Link from "next/link"
 import { memo, useCallback, useMemo, useRef, useState } from "react"
@@ -79,7 +74,7 @@ const _CARD_INDICES = Array.from({ length: 8 }, (_, i) => i)
 export interface ScrollableCardsProps {
   itemCount: number
   categorySlug?: string
-  cardType?: "restaurant" | "blog"
+  cardType?: "restaurant"
 }
 
 export const ScrollableCards = memo(function ScrollableCards({
@@ -96,9 +91,6 @@ export const ScrollableCards = memo(function ScrollableCards({
     () => mockRestaurantsWithBlurHash.slice(0, itemCount),
     [itemCount]
   )
-
-  // Get first N blogs from mock data with blurhash
-  const displayBlogs = useMemo(() => mockBlogsWithBlurHash.slice(0, itemCount), [itemCount])
 
   // Scroll handlers
   const scroll = useCallback((direction: "left" | "right") => {
@@ -149,67 +141,28 @@ export const ScrollableCards = memo(function ScrollableCards({
         className="flex gap-[var(--spacing-md)] overflow-x-auto overflow-y-hidden pb-[var(--spacing-md)] scrollbar-hide snap-x snap-mandatory snap-start scroll-smooth"
       >
         {/* Restaurant Cards */}
-        {cardType === "restaurant" &&
-          displayRestaurants.map((restaurant) => (
-            <div
-              key={restaurant.id}
-              className="flex-shrink-0 w-[var(--card-width-mobile)] sm:w-[var(--card-width-sm)] md:w-[var(--card-width-md)] lg:w-[var(--card-width-lg)] xl:w-[var(--card-width-xl)] snap-start"
-            >
-              <OptimizedPreviewCard
-                id={restaurant.id}
-                title={restaurant.name}
-                image={restaurant.image}
-                blurHash={restaurant.blurHash}
-                cuisine={restaurant.cuisine}
-                rating={restaurant.rating}
-                href={`/restaurants/${restaurant.slug}`}
-                location={`${restaurant.district}, ${restaurant.emirate}`}
-              />
-            </div>
-          ))}
-
-        {/* Blog Cards */}
-        {cardType === "blog" &&
-          displayBlogs.map((blog) => {
-            // Use @the.ss profile for first 2 categories (food-guides, hidden-gems-stories)
-            const useTheSS =
-              categorySlug?.includes("food-guides") || categorySlug?.includes("hidden-gems-stories")
-
-            return (
-              <div
-                key={blog.id}
-                className="flex-shrink-0 w-[var(--card-width-mobile)] sm:w-[var(--card-width-sm)] md:w-[var(--card-width-md)] lg:w-[var(--card-width-lg)] xl:w-[var(--card-width-xl)] snap-start"
-              >
-                <BlogPreviewCard
-                  id={blog.id}
-                  title={blog.title}
-                  image={blog.images[0]}
-                  blurHash={blog.imageBlurHash}
-                  avatarBlurHash={blog.avatarBlurHash}
-                  category={blog.readTime || "Blog"}
-                  readTime={blog.readTime}
-                  date={blog.date}
-                  href={blog.href}
-                  avatar={useTheSS ? "/images/avatar-the-ss.jpg" : blog.avatar}
-                  username={useTheSS ? "@the.ss" : blog.username}
-                  location={blog.location}
-                  likes={blog.likes}
-                  comments={blog.comments}
-                />
-              </div>
-            )
-          })}
-
-        {/* Show More Card - Use blog skeleton for blog cards */}
-        {cardType === "blog" ? (
-          <div className="flex-shrink-0 w-[var(--card-width-mobile)] sm:w-[var(--card-width-sm)] md:w-[var(--card-width-md)] lg:w-[var(--card-width-lg)] xl:w-[var(--card-width-xl)] snap-start">
-            <BlogSkeletonPreviewCard href={categorySlug} label="Show more" />
+        {displayRestaurants.map((restaurant) => (
+          <div
+            key={restaurant.id}
+            className="flex-shrink-0 w-[var(--card-width-mobile)] sm:w-[var(--card-width-sm)] md:w-[var(--card-width-md)] lg:w-[var(--card-width-lg)] xl:w-[var(--card-width-xl)] snap-start"
+          >
+            <OptimizedPreviewCard
+              id={restaurant.id}
+              title={restaurant.name}
+              image={restaurant.image}
+              blurHash={restaurant.blurHash}
+              cuisine={restaurant.cuisine}
+              rating={restaurant.rating}
+              href={`/restaurants/${restaurant.slug}`}
+              location={`${restaurant.district}, ${restaurant.emirate}`}
+            />
           </div>
-        ) : (
-          <div className="flex-shrink-0 w-[var(--card-width-mobile)] sm:w-[var(--card-width-sm)] md:w-[var(--card-width-md)] lg:w-[var(--card-width-lg)] xl:w-[var(--card-width-xl)] snap-start">
-            <SkeletonPreviewCard href={categorySlug} label="Show more" />
-          </div>
-        )}
+        ))}
+
+        {/* Show More Card */}
+        <div className="flex-shrink-0 w-[var(--card-width-mobile)] sm:w-[var(--card-width-sm)] md:w-[var(--card-width-md)] lg:w-[var(--card-width-lg)] xl:w-[var(--card-width-xl)] snap-start">
+          <SkeletonPreviewCard href={categorySlug} label="Show more" />
+        </div>
       </div>
 
       {/* Right scroll button */}

@@ -8,30 +8,21 @@ import { Toaster } from "sonner"
 
 export const metadata: Metadata = {
   title: {
-    default: "Shadi Shawqi | UAE Restaurant Reviews & Recommendations",
-    template: "%s | Shadi Shawqi",
+    default: "XMAD Control",
+    template: "%s | XMAD",
   },
   description:
-    "Discover the UAE's best restaurants, cafes, and dining experiences through the eyes of Shadi Shawqi (@the.ss). Every restaurant personally visited, photographed, and honestly reviewed. Explore curated recommendations, in-depth reviews, and exclusive foodie insights.",
+    "XMAD Control - Your centralized dashboard for managing projects and deployments.",
   keywords: [
-    "UAE restaurants",
-    "Dubai food blogger",
-    "Abu Dhabi dining",
-    "restaurant reviews UAE",
-    "Shadi Shawqi",
-    "the.ss",
-    "food blogger UAE",
-    "cafe recommendations",
-    "best restaurants Dubai",
-    "dining guide UAE",
-    "halal restaurants",
-    "food reviews",
-    "restaurant ratings",
-    "UAE food scene",
+    "XMAD",
+    "control",
+    "dashboard",
+    "projects",
+    "management",
   ],
-  authors: [{ name: "Shadi Shawqi", url: "https://instagram.com/the.ss" }],
-  creator: "Shadi Shawqi",
-  publisher: "Shadi Shawqi",
+  authors: [{ name: "XMAD" }],
+  creator: "XMAD",
+  publisher: "XMAD",
   icons: {
     icon: "/favicon.ico",
     apple: [
@@ -46,32 +37,22 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Shadi Shawqi",
+    title: "XMAD Control",
   },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://shadi-v2.vercel.app",
-    title: "Shadi Shawqi | UAE Restaurant Reviews & Recommendations",
+    url: "https://xmad-control.vercel.app",
+    title: "XMAD Control",
     description:
-      "Discover the UAE's best restaurants, cafes, and dining experiences through the eyes of Shadi Shawqi (@the.ss). Every restaurant personally visited, photographed, and honestly reviewed.",
-    siteName: "Shadi Shawqi | UAE Food Reviews",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Shadi Shawqi - UAE Restaurant Reviews",
-      },
-    ],
+      "XMAD Control - Your centralized dashboard for managing projects and deployments.",
+    siteName: "XMAD Control",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Shadi Shawqi | UAE Restaurant Reviews & Recommendations",
+    title: "XMAD Control",
     description:
-      "Discover the UAE's best restaurants, cafes, and dining experiences through the eyes of Shadi Shawqi (@the.ss). Every restaurant personally visited and honestly reviewed.",
-    creator: "@the.ss",
-    images: ["/og-image.png"],
+      "XMAD Control - Your centralized dashboard for managing projects and deployments.",
   },
   robots: {
     index: true,
@@ -84,9 +65,9 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  metadataBase: new URL("https://shadi-v2.vercel.app"),
+  metadataBase: new URL("https://xmad-control.vercel.app"),
   alternates: {
-    canonical: "https://shadi-v2.vercel.app",
+    canonical: "https://xmad-control.vercel.app",
   },
 }
 

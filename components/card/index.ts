@@ -26,9 +26,6 @@ export type {
 
 export { PRICE_LABELS, formatPrice, priceTierValue, toRestaurantLocation } from "@/types/restaurant"
 
-export { BlogCard } from "./BlogCard"
-export type { BlogCardProps, BlogCardData } from "./BlogCard"
-
 // Variants (pure UI components)
 export * from "./variants"
 

@@ -1,27 +1,109 @@
 {
   "meta": {
-    "timestamp": "2026-01-30T12:53:03.353Z",
+    "timestamp": "2026-03-11T22:44:44.118Z",
     "project": "starter-template-v1",
     "mode": "inspect",
-    "mobileFirstScore": 1,
-    "duration": 18
+    "mobileFirstScore": 0.2,
+    "duration": 75
   },
   "summary": {
-    "componentsScanned": 1,
-    "violations": 0,
-    "warnings": 1,
-    "exceptions": 0,
-    "duplications": 0,
-    "tokenCoverage": 1
+    "componentsScanned": 87,
+    "violations": 4,
+    "warnings": 3,
+    "exceptions": 19,
+    "duplications": 6,
+    "tokenCoverage": 0.71
   },
-  "violations": [],
+  "violations": [
+    {
+      "type": "INLINE_STYLE",
+      "severity": "critical",
+      "component": "components/ui/SkeletonCard.tsx",
+      "line": 41,
+      "message": "Inline style detected",
+      "fix": "Use Tailwind utility classes with design tokens or CSS classes in globals.css"
+    },
+    {
+      "type": "INLINE_STYLE",
+      "severity": "critical",
+      "component": "components/ui/rich-text-editor/index.tsx",
+      "line": 233,
+      "message": "Inline style detected",
+      "fix": "Use Tailwind utility classes with design tokens or CSS classes in globals.css"
+    },
+    {
+      "type": "INLINE_STYLE",
+      "severity": "critical",
+      "component": "components/layout/ThemeModal.tsx",
+      "line": 148,
+      "message": "Inline style detected",
+      "fix": "Use Tailwind utility classes with design tokens or CSS classes in globals.css"
+    },
+    {
+      "type": "HARDCODED_COLOR",
+      "severity": "critical",
+      "component": "components/cards/preview/BlogPreviewCard.tsx",
+      "line": 54,
+      "message": "Hardcoded hex color detected - use OKLCH token",
+      "fix": "Use design token: oklch(var(--color-brand-primary)) or bg-primary/text-primary"
+    }
+  ],
   "warnings": [
     {
       "type": "TOUCH_TARGET",
+      "component": "components/card/variants/list.tsx",
+      "line": 137,
+      "message": "Touch target 4px is below 44px minimum"
+    },
+    {
+      "type": "TOUCH_TARGET",
+      "component": "components/layout/ThemeModal.tsx",
+      "line": 141,
+      "message": "Touch target 32px is below 44px minimum"
+    },
+    {
+      "type": "TOUCH_TARGET",
       "component": "components/search/SearchContainer.tsx",
-      "line": 576,
+      "line": 653,
       "message": "Touch target 10px is below 44px minimum"
     }
   ],
-  "recommendations": []
+  "recommendations": [
+    {
+      "priority": "p1",
+      "category": "maintainability",
+      "description": "Duplicate component names detected: Card, Card",
+      "estimatedEffort": "1-2 hours"
+    },
+    {
+      "priority": "p1",
+      "category": "maintainability",
+      "description": "Duplicate component names detected: LoadingStates, LoadingStates",
+      "estimatedEffort": "1-2 hours"
+    },
+    {
+      "priority": "p1",
+      "category": "maintainability",
+      "description": "Duplicate component names detected: index, index",
+      "estimatedEffort": "1-2 hours"
+    },
+    {
+      "priority": "p1",
+      "category": "maintainability",
+      "description": "Duplicate component names detected: OfflineSupport, OfflineSupport",
+      "estimatedEffort": "1-2 hours"
+    },
+    {
+      "priority": "p1",
+      "category": "maintainability",
+      "description": "Duplicate component names detected: OfflineBanner, OfflineBanner",
+      "estimatedEffort": "1-2 hours"
+    },
+    {
+      "priority": "p1",
+      "category": "maintainability",
+      "description": "Duplicate component names detected: InstallPrompt, InstallPrompt",
+      "estimatedEffort": "1-2 hours"
+    }
+  ]
 }

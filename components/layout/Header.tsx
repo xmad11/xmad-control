@@ -159,12 +159,10 @@ function AppHeaderComponent({
               href="/"
               className="flex items-center gap-[var(--header-logo-gap)] group bg-transparent"
             >
-              {/* Icon logo */}
-              <img
-                src="/LOGO/logo.svg"
-                alt="Shadi"
-                className="h-[var(--header-logo-size)] w-auto"
-              />
+              {/* XMAD Logo */}
+              <span className="text-[var(--font-size-xl)] font-black tracking-tight text-[var(--fg)]">
+                XMAD
+              </span>
 
               {/* Show title/subtitle if provided */}
               {title && (
