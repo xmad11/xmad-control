@@ -22,7 +22,7 @@ export default function DashboardLayout({
   ]
 
   return (
-    <div className="flex min-h-screen dashboard-bg">
+    <div className="flex min-h-screen dashboard-bg -mt-[var(--header-total-height)] pt-[var(--header-total-height)]">
       {/* Sidebar - Glass morphism style */}
       <aside className="w-64 glass-morph-card border-r border-white/10 p-[var(--spacing-lg)] m-2 rounded-[var(--radius-2xl)]">
         <div className="mb-[var(--spacing-xl)]">
