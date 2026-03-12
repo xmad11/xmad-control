@@ -11,15 +11,8 @@ export const metadata: Metadata = {
     default: "XMAD Control",
     template: "%s | XMAD",
   },
-  description:
-    "XMAD Control - Your centralized dashboard for managing projects and deployments.",
-  keywords: [
-    "XMAD",
-    "control",
-    "dashboard",
-    "projects",
-    "management",
-  ],
+  description: "XMAD Control - Your centralized dashboard for managing projects and deployments.",
+  keywords: ["XMAD", "control", "dashboard", "projects", "management"],
   authors: [{ name: "XMAD" }],
   creator: "XMAD",
   publisher: "XMAD",
@@ -44,15 +37,13 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://xmad-control.vercel.app",
     title: "XMAD Control",
-    description:
-      "XMAD Control - Your centralized dashboard for managing projects and deployments.",
+    description: "XMAD Control - Your centralized dashboard for managing projects and deployments.",
     siteName: "XMAD Control",
   },
   twitter: {
     card: "summary_large_image",
     title: "XMAD Control",
-    description:
-      "XMAD Control - Your centralized dashboard for managing projects and deployments.",
+    description: "XMAD Control - Your centralized dashboard for managing projects and deployments.",
   },
   robots: {
     index: true,

@@ -28,11 +28,11 @@ const useMorphingText = (texts: string[], isPaused: boolean) => {
       if (!current1 || !current2) return
 
       current2.style.filter = `blur(${Math.min(8 / fraction - 8, 100)}px)`
-      current2.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`
+      current2.style.opacity = `${fraction ** 0.4 * 100}%`
 
       const invertedFraction = 1 - fraction
       current1.style.filter = `blur(${Math.min(8 / invertedFraction - 8, 100)}px)`
-      current1.style.opacity = `${Math.pow(invertedFraction, 0.4) * 100}%`
+      current1.style.opacity = `${invertedFraction ** 0.4 * 100}%`
 
       current1.textContent = memoizedTexts[textIndexRef.current % memoizedTexts.length]
       current2.textContent = memoizedTexts[(textIndexRef.current + 1) % memoizedTexts.length]

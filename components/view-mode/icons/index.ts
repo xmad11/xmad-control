@@ -1,7 +1,0 @@
-export { Grid2Icon } from "./Grid2Icon"
-export { Grid3Icon } from "./Grid3Icon"
-export { Grid4Icon } from "./Grid4Icon"
-export { ListIconComponent as ListIcon } from "./ListIcon"
-export { Grid1Icon } from "./Grid1Icon"
-export type { GridIconProps } from "./Grid2Icon"
-export type { GridIconPropsResponsive } from "./Grid3Icon"
