@@ -29,6 +29,19 @@
   --fg: oklch(0.25 0.02 250.0);
   --bg: oklch(0.98 0.005 85.0);
 
+  /* Secondary background - for cards, sidebars, panels */
+  --bg-secondary: oklch(0.96 0.008 85.0);
+
+  /* Dashboard background - gradient for glass morphism effect */
+  --bg-dashboard: linear-gradient(135deg, oklch(0.15 0.02 250.0) 0%, oklch(0.12 0.03 280.0) 50%, oklch(0.18 0.02 220.0) 100%);
+
+  /* Glow colors for cards/tabs */
+  --glow-cyan: oklch(0.7 0.15 190.0);
+  --glow-purple: oklch(0.6 0.2 290.0);
+  --glow-blue: oklch(0.55 0.2 250.0);
+  --glow-pink: oklch(0.65 0.2 350.0);
+  --glow-green: oklch(0.65 0.18 150.0);
+
   /* Foreground/Background opacity variants */
   --fg-5: oklch(from var(--fg) l c h / 0.05);
   --fg-8: oklch(from var(--fg) l c h / 0.08);
@@ -65,6 +78,19 @@
   --fg: oklch(0.88 0.008 250.0);
   --bg: oklch(0.22 0.02 250.0);
 
+  /* Secondary background - for cards, sidebars, panels */
+  --bg-secondary: oklch(0.28 0.02 250.0);
+
+  /* Dashboard background - gradient for glass morphism effect */
+  --bg-dashboard: linear-gradient(135deg, oklch(0.15 0.02 250.0) 0%, oklch(0.12 0.03 280.0) 50%, oklch(0.18 0.02 220.0) 100%);
+
+  /* Glow colors for cards/tabs */
+  --glow-cyan: oklch(0.7 0.15 190.0);
+  --glow-purple: oklch(0.6 0.2 290.0);
+  --glow-blue: oklch(0.55 0.2 250.0);
+  --glow-pink: oklch(0.65 0.2 350.0);
+  --glow-green: oklch(0.65 0.18 150.0);
+
   /* Glass primitives - stronger for dark mode */
   --glass-blur: 40px;
   --glass-bg: rgba(30, 35, 45, 0.75);
@@ -81,6 +107,19 @@
 [data-theme="warm"] {
   --fg: oklch(0.3 0.04 65.0);
   --bg: oklch(0.94 0.02 75.0);
+
+  /* Secondary background - for cards, sidebars, panels */
+  --bg-secondary: oklch(0.9 0.02 75.0);
+
+  /* Dashboard background - gradient for glass morphism effect */
+  --bg-dashboard: linear-gradient(135deg, oklch(0.92 0.02 75.0) 0%, oklch(0.88 0.03 85.0) 50%, oklch(0.9 0.02 70.0) 100%);
+
+  /* Glow colors for cards/tabs */
+  --glow-cyan: oklch(0.7 0.15 190.0);
+  --glow-purple: oklch(0.6 0.2 290.0);
+  --glow-blue: oklch(0.55 0.2 250.0);
+  --glow-pink: oklch(0.65 0.2 350.0);
+  --glow-green: oklch(0.65 0.18 150.0);
 
   /* Warm glass - stronger blur */
   --glass-blur: 28px;

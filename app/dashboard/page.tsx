@@ -1,8 +1,11 @@
 /**
  * Control Center Dashboard Page
  * Main dashboard for XMAD system monitoring and control
+ * Optimized for all screen sizes (mobile-first)
+ * Features glass morphism design with colored glow effects
  */
 
+import { Database, LayoutGrid, MessageSquare, Server, Settings, Wifi } from "@/components/icons"
 import { xmadApi } from "@/lib/xmad-api"
 
 export const metadata = {
@@ -30,130 +33,176 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="p-[var(--spacing-xl)]">
-      <h1 className="text-[var(--font-size-4xl)] font-bold mb-[var(--spacing-xl)]">
-        XMAD Control Center
-      </h1>
+    <div className="min-h-screen p-3 sm:p-4 md:p-6 lg:p-8">
+      {/* Header */}
+      <header className="mb-4 md:mb-6 lg:mb-8">
+        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white">
+          XMAD Control Center
+        </h1>
+        <p className="text-sm md:text-base text-white/60 mt-1">
+          Monitor and control your AI infrastructure
+        </p>
+      </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[var(--spacing-lg)]">
-        {/* System Stats Widget */}
-        <div className="bg-[var(--bg-secondary)] rounded-[var(--radius-xl)] p-[var(--spacing-lg)]">
-          <h2 className="text-[var(--font-size-xl)] font-semibold mb-[var(--spacing-md)]">
-            System Stats
-          </h2>
+      {/* Status Cards Grid - Mobile First with Glow Effects */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4 lg:gap-6 mb-6 md:mb-8">
+        {/* System Stats Card - Cyan Glow */}
+        <div className="glass-morph-card glow-cyan p-4 md:p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 md:p-3 rounded-lg md:rounded-xl bg-[var(--glow-cyan)]/20">
+              <Server className="w-5 h-5 md:w-6 md:h-6 text-[var(--glow-cyan)]" />
+            </div>
+            <h2 className="text-base md:text-lg lg:text-xl font-semibold text-white">
+              System Stats
+            </h2>
+          </div>
           {systemStats?.memory && systemStats.disk ? (
-            <div className="space-y-[var(--spacing-sm)]">
-              <div className="flex justify-between">
-                <span>CPU:</span>
-                <span>{systemStats.cpu?.toFixed(1) || "0.0"}%</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Memory:</span>
-                <span>{systemStats.memory?.percentage?.toFixed(1) || "0.0"}%</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Disk:</span>
-                <span>{systemStats.disk?.percentage?.toFixed(1) || "0.0"}%</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Uptime:</span>
-                <span>{Math.floor(systemStats.uptime / 3600)}h</span>
-              </div>
+            <div className="space-y-2 md:space-y-3">
+              <StatRow label="CPU" value={`${systemStats.cpu?.toFixed(1) || "0.0"}%`} />
+              <StatRow
+                label="Memory"
+                value={`${systemStats.memory?.percentage?.toFixed(1) || "0.0"}%`}
+              />
+              <StatRow
+                label="Disk"
+                value={`${systemStats.disk?.percentage?.toFixed(1) || "0.0"}%`}
+              />
+              <StatRow label="Uptime" value={`${Math.floor(systemStats.uptime / 3600)}h`} />
             </div>
           ) : (
-            <p className="text-[var(--fg-muted)]">Loading...</p>
+            <p className="text-sm text-white/60">Loading...</p>
           )}
         </div>
 
-        {/* OpenClaw Status Widget */}
-        <div className="bg-[var(--bg-secondary)] rounded-[var(--radius-xl)] p-[var(--spacing-lg)]">
-          <h2 className="text-[var(--font-size-xl)] font-semibold mb-[var(--spacing-md)]">
-            OpenClaw Status
-          </h2>
+        {/* OpenClaw Status Card - Purple Glow */}
+        <div className="glass-morph-card glow-purple p-4 md:p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 md:p-3 rounded-lg md:rounded-xl bg-[var(--glow-purple)]/20">
+              <Wifi className="w-5 h-5 md:w-6 md:h-6 text-[var(--glow-purple)]" />
+            </div>
+            <h2 className="text-base md:text-lg lg:text-xl font-semibold text-white">
+              OpenClaw Gateway
+            </h2>
+          </div>
           {openclawStatus ? (
-            <div className="space-y-[var(--spacing-sm)]">
+            <div className="space-y-2 md:space-y-3">
               <div className="flex justify-between items-center">
-                <span>Status:</span>
-                <span className={openclawStatus.running ? "text-success" : "text-error"}>
-                  {openclawStatus.running ? "Running" : "Stopped"}
-                </span>
+                <span className="text-sm text-white/60">Status:</span>
+                <StatusBadge isOnline={openclawStatus.running} />
               </div>
-              {openclawStatus.pid && (
-                <div className="flex justify-between">
-                  <span>PID:</span>
-                  <span>{openclawStatus.pid}</span>
-                </div>
-              )}
+              {openclawStatus.pid && <StatRow label="PID" value={String(openclawStatus.pid)} />}
             </div>
           ) : (
-            <p className="text-[var(--fg-muted)]">Loading...</p>
+            <p className="text-sm text-white/60">Loading...</p>
           )}
         </div>
 
-        {/* Tailscale Status Widget */}
-        <div className="bg-[var(--bg-secondary)] rounded-[var(--radius-xl)] p-[var(--spacing-lg)]">
-          <h2 className="text-[var(--font-size-xl)] font-semibold mb-[var(--spacing-md)]">
-            Tailscale VPN
-          </h2>
+        {/* Tailscale Status Card - Blue Glow */}
+        <div className="glass-morph-card glow-blue p-4 md:p-6 sm:col-span-2 xl:col-span-1">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 md:p-3 rounded-lg md:rounded-xl bg-[var(--glow-blue)]/20">
+              <svg
+                className="w-5 h-5 md:w-6 md:h-6 text-[var(--glow-blue)]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                role="img"
+                aria-label="Tailscale VPN"
+              >
+                <title>Tailscale VPN</title>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+                />
+              </svg>
+            </div>
+            <h2 className="text-base md:text-lg lg:text-xl font-semibold text-white">
+              Tailscale VPN
+            </h2>
+          </div>
           {tailscaleStatus ? (
-            <div className="space-y-[var(--spacing-sm)]">
+            <div className="space-y-2 md:space-y-3">
               <div className="flex justify-between items-center">
-                <span>Status:</span>
-                <span className={tailscaleStatus.connected ? "text-success" : "text-error"}>
-                  {tailscaleStatus.connected ? "Connected" : "Disconnected"}
-                </span>
+                <span className="text-sm text-white/60">Status:</span>
+                <StatusBadge isOnline={tailscaleStatus.connected} />
               </div>
-              {tailscaleStatus.ip && (
-                <div className="flex justify-between">
-                  <span>IP:</span>
-                  <span className="font-mono text-sm">{tailscaleStatus.ip}</span>
-                </div>
-              )}
+              {tailscaleStatus.ip && <StatRow label="IP" value={tailscaleStatus.ip} mono />}
             </div>
           ) : (
-            <p className="text-[var(--fg-muted)]">Loading...</p>
+            <p className="text-sm text-white/60">Loading...</p>
           )}
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="mt-[var(--spacing-xl)]">
-        <h2 className="text-[var(--font-size-2xl)] font-semibold mb-[var(--spacing-lg)]">
+      {/* Quick Actions - Different Glow Colors */}
+      <section>
+        <h2 className="text-lg md:text-xl lg:text-2xl font-semibold text-white mb-3 md:mb-4">
           Quick Actions
         </h2>
-        <div className="flex flex-wrap gap-[var(--spacing-md)]">
-          <a
-            href="/dashboard/chat"
-            className="px-[var(--spacing-lg)] py-[var(--spacing-md)] bg-[var(--color-primary)] text-white rounded-[var(--radius-lg)] hover:opacity-80 transition-opacity"
-          >
-            AI Chat
-          </a>
-          <a
-            href="/dashboard/memory"
-            className="px-[var(--spacing-lg)] py-[var(--spacing-md)] bg-[var(--bg-secondary)] rounded-[var(--radius-lg)] hover:opacity-80 transition-opacity"
-          >
-            Memory Editor
-          </a>
-          <a
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-3 lg:gap-4">
+          <ActionButton href="/dashboard/chat" icon={MessageSquare} label="AI Chat" glow="purple" />
+          <ActionButton href="/dashboard/memory" icon={Database} label="Memory" glow="blue" />
+          <ActionButton
             href="/dashboard/automation"
-            className="px-[var(--spacing-lg)] py-[var(--spacing-md)] bg-[var(--bg-secondary)] rounded-[var(--radius-lg)] hover:opacity-80 transition-opacity"
-          >
-            Automation
-          </a>
-          <a
-            href="/dashboard/screen"
-            className="px-[var(--spacing-lg)] py-[var(--spacing-md)] bg-[var(--bg-secondary)] rounded-[var(--radius-lg)] hover:opacity-80 transition-opacity"
-          >
-            Screen Viewer
-          </a>
-          <a
-            href="/dashboard/backups"
-            className="px-[var(--spacing-lg)] py-[var(--spacing-md)] bg-[var(--bg-secondary)] rounded-[var(--radius-lg)] hover:opacity-80 transition-opacity"
-          >
-            Backups
-          </a>
+            icon={LayoutGrid}
+            label="Automation"
+            glow="pink"
+          />
+          <ActionButton href="/dashboard/screen" icon={Server} label="Screen" glow="green" />
+          <ActionButton href="/dashboard/settings" icon={Settings} label="Settings" glow="cyan" />
         </div>
-      </div>
+      </section>
     </div>
+  )
+}
+
+// Helper Components
+function StatRow({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div className="flex justify-between items-center">
+      <span className="text-sm text-white/60">{label}:</span>
+      <span className={`text-sm md:text-base text-white ${mono ? "font-mono" : ""}`}>{value}</span>
+    </div>
+  )
+}
+
+function StatusBadge({ isOnline }: { isOnline: boolean }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${
+        isOnline
+          ? "bg-[var(--color-success)]/20 text-[var(--color-success)]"
+          : "bg-[var(--color-error)]/20 text-[var(--color-error)]"
+      }`}
+    >
+      <span
+        className={`w-1.5 h-1.5 rounded-full ${isOnline ? "bg-[var(--color-success)]" : "bg-[var(--color-error)]"}`}
+      />
+      {isOnline ? "Online" : "Offline"}
+    </span>
+  )
+}
+
+function ActionButton({
+  href,
+  icon: Icon,
+  label,
+  glow = "cyan",
+}: {
+  href: string
+  icon: React.ComponentType<{ className?: string }>
+  label: string
+  glow?: "cyan" | "purple" | "blue" | "pink" | "green"
+}) {
+  return (
+    <a
+      href={href}
+      className={`flex flex-col items-center justify-center gap-2 p-3 md:p-4 glass-morph-card glow-${glow} touch-target transition-all hover:scale-105`}
+    >
+      <Icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
+      <span className="text-xs md:text-sm font-medium text-white">{label}</span>
+    </a>
   )
 }
