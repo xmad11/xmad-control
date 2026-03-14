@@ -1,0 +1,47 @@
+{
+  "name": "xmad-control",
+  "version": "1.0.0",
+  "description": "XMAD Control Platform - Local AI Operating Layer",
+  "updated": "2026-03-14",
+
+  "services": {
+    "gateway": {
+      "port": 9870,
+      "path": "modules/core/server/api-gateway.js",
+      "health": "/health"
+    },
+    "dashboard": {
+      "port": 3333,
+      "type": "nextjs",
+      "mode": "dev"
+    },
+    "openclaw": {
+      "port": 18789,
+      "path": "modules/openclaw",
+      "managed_by": "agent-1"
+    }
+  },
+
+  "modules": [
+    "core",
+    "guardian",
+    "monitor",
+    "network",
+    "claude",
+    "ai-tools",
+    "optimizer"
+  ],
+
+  "storage": {
+    "logs": "storage/logs",
+    "backups": "storage/backups",
+    "automation": "storage/automation",
+    "config": "storage/config"
+  },
+
+  "bootstrap": {
+    "start": "bootstrap/start-platform.sh",
+    "stop": "bootstrap/stop-platform.sh",
+    "health": "bootstrap/health-platform.sh"
+  }
+}

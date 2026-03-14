@@ -1,0 +1,36 @@
+#!/bin/bash
+# Clean up Claude processes and temporary files
+
+echo "Cleaning up Claude processes..."
+
+# Find and kill orphaned Claude processes (excluding the current terminal session)
+CURRENT_PID=$$
+ps aux | grep -E "(claude|Claude)" | grep -v grep | grep -v $$ | awk '{print $2}' | while read pid; do
+  if [ "$pid" != "$CURRENT_PID" ]; then
+    echo "Killing process $pid"
+    kill -9 "$pid" 2>/dev/null || true
+  fi
+done
+
+# Kill MCP servers
+pkill -f "@modelcontextprotocol" 2>/dev/null || true
+pkill -f "mcp-server" 2>/dev/null || true
+
+# Clean up temporary files
+echo "Cleaning temporary files..."
+rm -rf /private/tmp/bunx-* 2>/dev/null || true
+rm -rf /tmp/claude-* 2>/dev/null || true
+
+# Clean old debug logs (keep last 5)
+find ~/.config/claude-code/debug -name "*.txt" -type f | sort -r | tail -n +6 | xargs rm -f 2>/dev/null || true
+
+# Clear cache if it's too large
+if [ -d ~/.config/claude-code/cache ]; then
+  cache_size=$(du -sm ~/.config/claude-code/cache 2>/dev/null | cut -f1)
+  if [ "$cache_size" -gt 100 ]; then
+    echo "Clearing large cache (${cache_size}MB)..."
+    rm -rf ~/.config/claude-code/cache/*
+  fi
+fi
+
+echo "Cleanup complete!"

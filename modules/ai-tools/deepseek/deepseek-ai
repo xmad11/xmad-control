@@ -1,0 +1,4 @@
+#!/bin/zsh
+
+# Run claude-selector with option 1 and DeepSeek environment variables
+echo "1" | ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic" ANTHROPIC_API_KEY="$DEEPSEEK_API_KEY" /Users/ahmadabdullah/.local/bin/claude-selector

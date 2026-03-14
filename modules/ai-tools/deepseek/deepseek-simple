@@ -1,0 +1,9 @@
+#!/bin/zsh
+export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"
+export ANTHROPIC_AUTH_TOKEN="$DEEPSEEK_API_KEY"
+export ANTHROPIC_MODEL="deepseek-reasoner"
+export ANTHROPIC_MAX_TOKENS=8192
+export ANTHROPIC_TEMPERATURE=0.7
+export ANTHROPIC_REASONING_EFFORT="high"
+echo "🤖 Using DeepSeek V3.1 Reasoner (reasoning_effort: high)"
+~/.bun/bin/claude "$@"
