@@ -5,7 +5,8 @@
  * Features glass morphism design with colored glow effects
  */
 
-import { Database, LayoutGrid, MessageSquare, Server, Settings, Wifi } from "@/components/icons"
+"use client"
+
 import { xmadApi } from "@/lib/xmad-api"
 import { TabContentWrapper } from "@/components/dashboard/TabContentWrapper"
 
