@@ -7,6 +7,7 @@
 
 import { Database, LayoutGrid, MessageSquare, Server, Settings, Wifi } from "@/components/icons"
 import { xmadApi } from "@/lib/xmad-api"
+import { TabContentWrapper } from "@/components/dashboard/TabContentWrapper"
 
 export const metadata = {
   title: "Dashboard | XMAD Control",
@@ -33,7 +34,9 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen p-3 sm:p-4 md:p-6 lg:p-8">
+    <div className="min-h-screen overflow-x-hidden">
+      <main className="flex-1 overflow-auto">
+        <div className="max-w-[1920px] mx-auto p-[var(--spacing-lg)] md:p-[var(--spacing-xl)]">
       {/* Header */}
       <header className="mb-4 md:mb-6 lg:mb-8">
         <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white">
@@ -45,7 +48,8 @@ export default async function DashboardPage() {
       </header>
 
       {/* Status Cards Grid - Mobile First with Glow Effects */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4 lg:gap-6 mb-6 md:mb-8">
+      <TabContentWrapper>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-[var(--spacing-md)] md:gap-[var(--spacing-lg)] lg:gap-[var(--spacing-xl)] mb-[var(--spacing-lg)] md:mb-[var(--spacing-xl)]">
         {/* System Stats Card - Cyan Glow */}
         <div className="glass-morph-card glow-cyan p-4 md:p-6">
           <div className="flex items-center gap-3 mb-4">
@@ -136,12 +140,12 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Quick Actions - Different Glow Colors */}
-      <section>
-        <h2 className="text-lg md:text-xl lg:text-2xl font-semibold text-white mb-3 md:mb-4">
+      {/* Quick Actions */}
+      <section className="mb-[var(--spacing-lg)] md:mb-[var(--spacing-xl)]">
+        <h2 className="text-lg md:text-xl lg:text-2xl font-semibold text-white mb-[var(--spacing-lg)] md:mb-[var(--spacing-xl)]">
           Quick Actions
         </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-3 lg:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-[var(--spacing-md)] md:gap-[var(--spacing-lg)] lg:gap-[var(--spacing-xl)]">
           <ActionButton href="/dashboard/chat" icon={MessageSquare} label="AI Chat" glow="purple" />
           <ActionButton href="/dashboard/memory" icon={Database} label="Memory" glow="blue" />
           <ActionButton
@@ -154,7 +158,9 @@ export default async function DashboardPage() {
           <ActionButton href="/dashboard/settings" icon={Settings} label="Settings" glow="cyan" />
         </div>
       </section>
-    </div>
+      </div>
+    </main>
+  </div>
   )
 }
 

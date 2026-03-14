@@ -156,6 +156,13 @@
   --shadow-card: 0 10px 25px rgb(0 0 0 / 0.12);
 
   /* ─────────────────────────────────────────────────────────────────────────────
+	   DASHBOARD LAYOUT - Tab content and responsive spacing
+	   ───────────────────────────────────────────────────────────────────────────── */
+  --dashboard-tab-section: var(--spacing-lg); /* Vertical spacing between tab sections */
+  --dashboard-card-group: var(--spacing-lg); /* Spacing after card groups */
+  --dashboard-container-max: 1920px; /* Max width for super-admin */
+
+  /* ─────────────────────────────────────────────────────────────────────────────
 	   CARD SYSTEM - Unified heights, fonts, and spacing
 	   4 variants: image, compact, detailed, list
 	   ───────────────────────────────────────────────────────────────────────────── */
@@ -459,6 +466,19 @@
   --bg-70: oklch(from var(--bg) l c h / 0.7);
   --bg-80: oklch(from var(--bg) l c h / 0.8);
 
+  /* Secondary background - for cards, sidebars, panels */
+  --bg-secondary: oklch(0.96 0.008 85.0);
+
+  /* Dashboard background - gradient for glass morphism effect */
+  --bg-dashboard: linear-gradient(135deg, oklch(0.15 0.02 250.0) 0%, oklch(0.12 0.03 280.0) 50%, oklch(0.18 0.02 220.0) 100%);
+
+  /* Glow colors for cards/tabs */
+  --glow-cyan: oklch(0.7 0.15 190.0);
+  --glow-purple: oklch(0.6 0.2 290.0);
+  --glow-blue: oklch(0.55 0.2 250.0);
+  --glow-pink: oklch(0.65 0.2 350.0);
+  --glow-green: oklch(0.65 0.18 150.0);
+
   /* ─────────────────────────────────────────────────────────────────────────────
 	   COMPONENT-SPECIFIC TOKENS - Sizing & Spacing (PRESERVED)
 	   ───────────────────────────────────────────────────────────────────────────── */
@@ -671,6 +691,19 @@
   --fg: oklch(0.88 0.008 250.0);
   --bg: oklch(0.22 0.02 250.0);
 
+  /* Secondary background - for cards, sidebars, panels */
+  --bg-secondary: oklch(0.28 0.02 250.0);
+
+  /* Dashboard background - gradient for glass morphism effect */
+  --bg-dashboard: linear-gradient(135deg, oklch(0.15 0.02 250.0) 0%, oklch(0.12 0.03 280.0) 50%, oklch(0.18 0.02 220.0) 100%);
+
+  /* Glow colors for cards/tabs */
+  --glow-cyan: oklch(0.7 0.15 190.0);
+  --glow-purple: oklch(0.6 0.2 290.0);
+  --glow-blue: oklch(0.55 0.2 250.0);
+  --glow-pink: oklch(0.65 0.2 350.0);
+  --glow-green: oklch(0.65 0.18 150.0);
+
   /* Shadows - use white for visibility on dark backgrounds */
   --shadow-sm: 0 1px 2px 0 rgb(255 255 255 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(255 255 255 / 0.1), 0 2px 4px -2px rgb(255 255 255 / 0.1);
@@ -691,6 +724,19 @@
 [data-theme="warm"] {
   --fg: oklch(0.3 0.04 65.0);
   --bg: oklch(0.94 0.02 75.0);
+
+  /* Secondary background - for cards, sidebars, panels */
+  --bg-secondary: oklch(0.9 0.02 75.0);
+
+  /* Dashboard background - gradient for glass morphism effect */
+  --bg-dashboard: linear-gradient(135deg, oklch(0.92 0.02 75.0) 0%, oklch(0.88 0.03 85.0) 50%, oklch(0.9 0.02 70.0) 100%);
+
+  /* Glow colors for cards/tabs */
+  --glow-cyan: oklch(0.7 0.15 190.0);
+  --glow-purple: oklch(0.6 0.2 290.0);
+  --glow-blue: oklch(0.55 0.2 250.0);
+  --glow-pink: oklch(0.65 0.2 350.0);
+  --glow-green: oklch(0.65 0.18 150.0);
 
   /* Warm glass (higher opacity for Chrome) */
   --glass-blur: 18px;
