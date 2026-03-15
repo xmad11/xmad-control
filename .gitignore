@@ -92,3 +92,5 @@ tsconfig.tsbuildinfo
 # Secrets
 .env.local
 .env.production
+# OpenClaw workspace env files (temp Vercel tokens)
+openclaw/workspace/.env*
