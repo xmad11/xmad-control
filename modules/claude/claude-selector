@@ -1,0 +1,23 @@
+#!/bin/zsh
+echo "Choose backend:"
+echo "1) Claude Code (Anthropic AUTH)"
+echo "2) Claude Code (DeepSeek API)"
+read -r choice
+
+case $choice in
+  1)
+    unset ANTHROPIC_BASE_URL
+    unset ANTHROPIC_AUTH_TOKEN
+    ~/.bun/bin/claude "$@"
+    ;;
+  2)
+    export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"
+    export ANTHROPIC_AUTH_TOKEN="$DEEPSEEK_API_KEY"
+    export ANTHROPIC_MODEL="deepseek-reasoner"
+    ~/.bun/bin/claude "$@"
+    ;;
+  *)
+    echo "❌ Invalid choice"
+    exit 1
+    ;;
+esac

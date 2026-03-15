@@ -2,8 +2,8 @@
    CREATE ADMIN USER - Script to create admin user in Supabase
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-import { readFileSync } from "fs"
-import { join } from "path"
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
 import { createClient } from "@supabase/supabase-js"
 import dotenv from "dotenv"
 
@@ -49,12 +49,12 @@ async function createAdminUser(
   name = "Admin"
 ): Promise<CreateAdminResult> {
   try {
-    console.log(`\n🔐 Creating admin user...`)
+    console.log("\n🔐 Creating admin user...")
     console.log(`   Email: ${email}`)
     console.log(`   Password: ${password}`)
 
     // Check if user already exists
-    const { data: existingUser, error: checkError } = await supabase
+    const { data: existingUser } = await supabase
       .from("profiles")
       .select("id, email, role")
       .eq("email", email)
@@ -177,7 +177,7 @@ async function main() {
 
   const result = await createAdminUser(email, password, name)
 
-  console.log("\n" + "─".repeat(60))
+  console.log(`\n${"─".repeat(60)}`)
   console.log("📋 RESULT")
   console.log("─".repeat(60))
 
@@ -198,10 +198,10 @@ async function main() {
     console.log("   2. Verify NEXT_PUBLIC_SUPABASE_URL in .env.local")
     console.log("   3. Check if profiles table exists in database")
     console.log("   4. Try accessing Supabase dashboard:")
-    console.log(`      {supabaseUrl}/project/_/auth/users`)
+    console.log("      {supabaseUrl}/project/_/auth/users")
   }
 
-  console.log("─".repeat(60) + "\n")
+  console.log(`${"─".repeat(60)}\n`)
 }
 
 // Run the script

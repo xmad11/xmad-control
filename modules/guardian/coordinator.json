@@ -1,0 +1,101 @@
+{
+  "version": "2.0.0",
+  "updated": "2026-02-25",
+  "guardian": {
+    "model": "glm-5",
+    "provider": "zhipu-ai",
+    "role": "orchestrator-auditor-reviewer",
+    "paid": true,
+    "context_window": 200000
+  },
+  "agents": [
+    {
+      "id": "coder",
+      "name": "Kimi K2",
+      "model": "moonshotai/kimi-k2-instruct",
+      "provider": "groq",
+      "role": "primary_coder",
+      "free": true,
+      "context_window": 262000,
+      "daily_limit": 1000,
+      "tpm": 10000,
+      "best_for": ["CODE_GEN", "BUG_FIX", "REFACTOR", "MULTI_FILE"],
+      "notes": "2026 upgrade. Beats GPT-4o on coding benchmarks. Agentic tool use."
+    },
+    {
+      "id": "reasoning",
+      "name": "GPT-OSS-120B",
+      "model": "openai/gpt-oss-120b",
+      "provider": "groq",
+      "role": "deep_reasoning",
+      "free": true,
+      "context_window": 128000,
+      "daily_limit": 1000,
+      "tpm": 8000,
+      "best_for": ["ARCHITECTURE", "ALGORITHM", "COMPLEX_LOGIC", "SECURITY"],
+      "notes": "NEW 2026. OpenAI first open-source model. Apache 2.0. Near o4-mini reasoning."
+    },
+    {
+      "id": "fast",
+      "name": "Llama 4 Scout",
+      "model": "meta-llama/llama-4-scout-17b-16e-instruct",
+      "provider": "groq",
+      "role": "fast_worker",
+      "free": true,
+      "context_window": 131000,
+      "daily_limit": 1000,
+      "tpm": 30000,
+      "best_for": ["GENERAL", "CRUD", "SIMPLE_EDITS", "QUICK_QUESTIONS"],
+      "notes": "2026 upgrade from Llama 3.3. Vision capable. 30K TPM."
+    },
+    {
+      "id": "planner",
+      "name": "Gemini 2.5 Flash",
+      "model": "gemini-2.5-flash",
+      "provider": "google",
+      "role": "planner_analyzer",
+      "free": true,
+      "context_window": 1000000,
+      "daily_limit": 250,
+      "rpm": 10,
+      "best_for": ["PLANNING", "ANALYSIS", "LARGE_CODEBASE", "DOCUMENTATION"],
+      "notes": "1M context = entire codebase in one shot. Best planner in free tier."
+    },
+    {
+      "id": "workhorse",
+      "name": "Qwen3 32B",
+      "model": "qwen/qwen3-32b",
+      "provider": "groq",
+      "role": "high_volume_worker",
+      "free": true,
+      "context_window": 128000,
+      "daily_limit": 14400,
+      "tpm": 60000,
+      "best_for": ["REPETITIVE", "FORMATTING", "DOCS", "ROUTING_FALLBACK"],
+      "notes": "Highest rate limits on Groq free tier. Use when other agents hit limits."
+    }
+  ],
+  "fallback_chain": {
+    "CODE_GEN": ["coder", "reasoning", "deepseek-v3", "openrouter-free"],
+    "ARCHITECTURE": ["reasoning", "coder", "deepseek-r1"],
+    "ANALYSIS": ["planner", "fast", "workhorse"],
+    "GENERAL": ["fast", "workhorse", "coder"],
+    "CRUD": ["fast", "workhorse"]
+  },
+  "routing_rules": {
+    "complexity_high": "reasoning",
+    "complexity_medium": "coder",
+    "complexity_low": "fast",
+    "task_type_CODE_GEN": "coder",
+    "task_type_ARCHITECTURE": "reasoning",
+    "task_type_ANALYSIS": "planner",
+    "task_type_CRUD": "fast"
+  },
+  "memory_constraints": {
+    "max_ram_mb": 8192,
+    "target_usage_mb": 120,
+    "framework": "bash-native",
+    "no_python_frameworks": true,
+    "max_concurrent_agents": 2
+  }
+}

@@ -3,6 +3,8 @@
  * Manage and review memory system
  */
 
+import { TabContentWrapper } from "@/components/dashboard/TabContentWrapper"
+
 export const metadata = {
   title: "Memory | XMAD Control",
 }

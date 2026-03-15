@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "lancedb": "^0.0.1"
+  }
+}

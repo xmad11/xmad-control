@@ -1,0 +1,148 @@
+{
+  "meta": {
+    "lastTouchedVersion": "2026.3.11",
+    "lastTouchedAt": "2026-03-12T18:21:47.590Z"
+  },
+  "env": {
+    "shellEnv": {
+      "enabled": true,
+      "timeoutMs": 30000
+    },
+    "vars": {
+      "NODE_ENV": "production"
+    }
+  },
+  "logging": {
+    "level": "warn",
+    "file": "/Users/ahmadabdullah/.openclaw/logs/openclaw.log",
+    "consoleLevel": "error",
+    "consoleStyle": "pretty"
+  },
+  "update": {
+    "channel": "stable",
+    "checkOnStart": false,
+    "auto": {
+      "enabled": true
+    }
+  },
+  "browser": {
+    "enabled": false
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "zai/glm-4.7",
+        "fallbacks": ["zai/glm-5"]
+      },
+      "workspace": "/Users/ahmadabdullah/.openclaw/workspace",
+      "contextPruning": {
+        "mode": "cache-ttl",
+        "ttl": "1h"
+      },
+      "compaction": {
+        "mode": "safeguard",
+        "reserveTokensFloor": 24000,
+        "identifierPolicy": "strict"
+      },
+      "thinkingDefault": "off",
+      "blockStreamingDefault": "on",
+      "blockStreamingBreak": "text_end",
+      "blockStreamingChunk": {
+        "minChars": 3000,
+        "maxChars": 4000
+      },
+      "blockStreamingCoalesce": {
+        "minChars": 1500,
+        "idleMs": 1000
+      },
+      "humanDelay": {
+        "mode": "natural"
+      },
+      "timeoutSeconds": 300,
+      "heartbeat": {
+        "every": "30m"
+      },
+      "maxConcurrent": 1,
+      "sandbox": {
+        "mode": "off"
+      }
+    }
+  },
+  "tools": {
+    "profile": "full",
+    "allow": ["bash", "process", "read", "write", "edit"],
+    "deny": ["browser", "canvas", "nodes", "cron", "discord", "gateway"],
+    "elevated": {
+      "enabled": true,
+      "allowFrom": {
+        "whatsapp": ["+971504042000", "+971502059116", "+971562713967"]
+      }
+    },
+    "exec": {
+      "host": "node",
+      "security": "full",
+      "ask": "off",
+      "timeoutSec": 180
+    }
+  },
+  "messages": {
+    "tts": {
+      "auto": "inbound",
+      "provider": "edge"
+    }
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "restart": true,
+    "ownerDisplay": "raw"
+  },
+  "hooks": {
+    "enabled": false
+  },
+  "channels": {
+    "whatsapp": {
+      "enabled": true,
+      "dmPolicy": "pairing",
+      "allowFrom": ["+971504042000", "+971502059116", "+971562713967"],
+      "groupAllowFrom": ["+971504042000", "+971502059116", "+971562713967"],
+      "groupPolicy": "allowlist",
+      "textChunkLimit": 4000,
+      "chunkMode": "length",
+      "blockStreaming": true,
+      "debounceMs": 0,
+      "mediaMaxMb": 5
+    }
+  },
+  "canvasHost": {
+    "enabled": false
+  },
+  "gateway": {
+    "port": 18789,
+    "mode": "local",
+    "bind": "loopback",
+    "controlUi": {
+      "enabled": true
+    },
+    "auth": {
+      "mode": "token",
+      "token": "a49b6ef672db3a62018a9e23ad56c7717231b6f01ba9a550"
+    }
+  },
+  "skills": {
+    "allowBundled": ["apple-notes", "apple-reminders", "github", "gog", "coding-agent", "weather"],
+    "load": {
+      "extraDirs": ["/Users/ahmadabdullah/.openclaw/skills"]
+    }
+  },
+  "plugins": {
+    "entries": {
+      "whatsapp": {
+        "enabled": true
+      },
+      "memory-lancedb": {
+        "enabled": false
+      }
+    }
+  }
+}

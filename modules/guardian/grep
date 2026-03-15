@@ -1,0 +1,1 @@
+{"ok": true, "job_id": "job-1773032186-11172", "status": "RUNNING", "task": "Audit the current XMad-control-center project structure, Identify issues and provide recommendations", "mode": "-i", "project": "2", "message": "Guardian is working. Poll status with: status job-1773032186-11172", "log_file": "/Users/ahmadabdullah/.guardian-orchestrator/logs/job-1773032186-11172.log"}

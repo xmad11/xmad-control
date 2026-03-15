@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "profiles": {
+    "zai": {
+      "type": "api_key",
+      "provider": "zai",
+      "apiKey": "4ee8f8d1f6214b5690ae0bab05ef0333.I15u7DOEDtcBTkmn",
+      "key": "4ee8f8d1f6214b5690ae0bab05ef0333.I15u7DOEDtcBTkmn"
+    },
+    "qwen-portal:qwen-cli": {
+      "type": "oauth",
+      "provider": "qwen-portal",
+      "access": "LHuy-_3Qm4VjqPY2HBQZ-EzuUloPT0r83FvyIVB7qpzN-k3ipNKgpHkHzZrPUBi8nKzDwSpVtaQoo-3PxWgo4Q",
+      "refresh": "UXjRoeNtpY3O8ndk9mVrdVWfZo1PgluWWMh-hhqhPFsubeBy5WEEkulFzdDWYjk48DlSR8Rxs4oR0_9kE-gbnw",
+      "expires": 1761039099030
+    }
+  },
+  "usageStats": {
+    "zai": {
+      "errorCount": 0,
+      "lastUsed": 1773521477668,
+      "lastFailureAt": 1773196722648
+    }
+  }
+}

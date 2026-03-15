@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>ai.openclaw.gateway</string>
+
+    <key>Comment</key>
+    <string>OpenClaw Gateway (SSOT @ xmad-control/openclaw)</string>
+    <key>RunAtLoad</key><true/>
+    <key>KeepAlive</key><true/>
+    <key>ThrottleInterval</key><integer>5</integer>
+
+    <key>ProgramArguments</key>
+    <array>
+      <string>/bin/bash</string>
+      <string>/Users/ahmadabdullah/xmad-control/openclaw/scripts/start-ssot.sh</string>
+    </array>
+
+    <key>StandardOutPath</key>
+    <string>/Users/ahmadabdullah/xmad-control/openclaw/logs/gateway.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/ahmadabdullah/xmad-control/openclaw/logs/gateway.err.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+      <key>NODE_ENV</key>
+      <string>production</string>
+      <key>HOME</key>
+      <string>/Users/ahmadabdullah</string>
+      <key>OPENCLAW_STATE_DIR</key>
+      <string>/Users/ahmadabdullah/xmad-control/openclaw</string>
+      <key>OPENCLAW_CONFIG_PATH</key>
+      <string>/Users/ahmadabdullah/xmad-control/openclaw/configs/openclaw.json</string>
+      <key>PATH</key>
+      <string>/Users/ahmadabdullah/.bun/bin:/Users/ahmadabdullah/.nvm/versions/node/v22.16.0/bin:/usr/local/bin:/usr/bin:/bin</string>
+    </dict>
+  </dict>
+</plist>

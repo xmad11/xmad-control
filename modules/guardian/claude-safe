@@ -1,0 +1,299 @@
+#!/usr/bin/env bash
+# =============================================================================
+# claude-safe — Guardian Orchestrator 2026 Main Entry Point
+# Dual-Mode System: --suggest (default) | --execute | --dry-run | --rollback
+#
+# Usage:
+#   ./claude-safe "your task"                    # suggest mode (default)
+#   ./claude-safe --suggest "task" /path         # suggest mode (explicit)
+#   ./claude-safe --execute "task" /path         # execute mode (apply changes)
+#   ./claude-safe --dry-run "task" /path         # preview execute (no changes)
+#   ./claude-safe --rollback <session_id>        # restore from backup
+#   ./claude-safe --status                        # check all agents
+#   ./claude-safe --models                        # list all models
+#   ./claude-safe --help                          # show help
+# =============================================================================
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/.env" 2>/dev/null || {
+    echo "❌ ERROR: .env not found. Run: bash install.sh" >&2
+    exit 1
+}
+
+LOG_DIR="${HOME}/.guardian-orchestrator/logs"
+LOG_FILE="${LOG_DIR}/orchestrator-$(date +%Y%m%d).log"
+mkdir -p "$LOG_DIR"
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+log() { echo "[$(date '+%H:%M:%S')] $*" | tee -a "$LOG_FILE" >&2; }
+
+# ── Temp session dir ──────────────────────────────────────────────────────────
+SESSION_DIR=$(mktemp -d)
+trap 'rm -rf "$SESSION_DIR"' EXIT INT TERM HUP
+
+# ── Status check ─────────────────────────────────────────────────────────────
+cmd_status() {
+    echo ""
+    echo "╔══════════════════════════════════════════════════╗"
+    echo "║  Guardian Orchestrator — Agent Status           ║"
+    echo "╚══════════════════════════════════════════════════╝"
+
+    source "${SCRIPT_DIR}/scripts/api-call.sh"
+
+    check_agent() {
+        local label="$1"
+        local spec="$2"
+        local test_prompt="Reply with just: OK"
+        if result=$(api_call "$spec" "$test_prompt" "" "10" 2>/dev/null) && [[ -n "$result" ]]; then
+            echo "  ✅ $label"
+        else
+            echo "  ❌ $label — offline or key missing"
+        fi
+    }
+
+    check_agent "GLM-5 (Guardian)"              "glm:${GUARDIAN_MODEL}"
+    check_agent "Kimi K2 / Groq (Coder)"        "groq:${GROQ_CODER_MODEL}"
+    check_agent "GPT-OSS-120B / Groq (Reason)"  "groq:${GROQ_REASONING_MODEL}"
+    check_agent "Llama 4 Scout / Groq (Fast)"   "groq:${GROQ_FAST_MODEL}"
+    check_agent "Qwen3 32B / Groq (Workhorse)"  "groq:${GROQ_WORKHORSE_MODEL}"
+    check_agent "Gemini 2.5 Flash (Planner)"    "gemini:${GEMINI_PLANNER_MODEL}"
+    echo ""
+}
+
+# ── List models ───────────────────────────────────────────────────────────────
+cmd_models() {
+    echo ""
+    echo "┌──────────────────────┬────────────────────────────────────────────────────┬────────────┬─────────┐"
+    echo "│ Role                 │ Model                                              │ Provider   │ Free    │"
+    echo "├──────────────────────┼────────────────────────────────────────────────────┼────────────┼─────────┤"
+    printf "│ %-20s │ %-50s │ %-10s │ %-7s │\n" "Guardian/Reviewer" "${GUARDIAN_MODEL}"         "Zhipu AI" "No (paid)"
+    printf "│ %-20s │ %-50s │ %-10s │ %-7s │\n" "Coder"             "${GROQ_CODER_MODEL}"       "Groq"     "Yes"
+    printf "│ %-20s │ %-50s │ %-10s │ %-7s │\n" "Reasoning"         "${GROQ_REASONING_MODEL}"   "Groq"     "Yes"
+    printf "│ %-20s │ %-50s │ %-10s │ %-7s │\n" "Fast Worker"       "${GROQ_FAST_MODEL}"        "Groq"     "Yes"
+    printf "│ %-20s │ %-50s │ %-10s │ %-7s │\n" "Workhorse"         "${GROQ_WORKHORSE_MODEL}"   "Groq"     "Yes"
+    printf "│ %-20s │ %-50s │ %-10s │ %-7s │\n" "Planner"           "${GEMINI_PLANNER_MODEL}"   "Google"   "Yes"
+    echo "└──────────────────────┴────────────────────────────────────────────────────┴────────────┴─────────┘"
+    echo ""
+}
+
+# ── Help ──────────────────────────────────────────────────────────────────────
+cmd_help() {
+    cat << 'EOF'
+
+Guardian Orchestrator 2026 — Usage
+
+MODES:
+  ./claude-safe "task"              Suggest mode (default) - output only
+  ./claude-safe --suggest "task"    Suggest mode (explicit)
+  ./claude-safe --execute "task"    Execute mode - apply changes to files
+  ./claude-safe --dry-run "task"    Preview what execute would do
+  ./claude-safe --rollback <id>     Restore files from backup session
+
+OTHER:
+  ./claude-safe --status            Check all agent connectivity
+  ./claude-safe --models            List all configured models
+  ./claude-safe --help              Show this help
+
+Examples:
+  ./claude-safe "Fix the login bug in auth.ts"
+  ./claude-safe --execute "Add rate limiting to the API" ./my-project
+  ./claude-safe --dry-run "Refactor UserService" .
+  ./claude-safe --rollback session-20260309-120000
+
+Pipeline:
+  Task → Analyze → Plan → Guardian Audit → Worker → Review → [Execute]
+
+EOF
+}
+
+# ── Rollback command ──────────────────────────────────────────────────────────
+cmd_rollback() {
+    local session_id="$1"
+    bash "${SCRIPT_DIR}/scripts/executor.sh" --rollback "$session_id"
+}
+
+# ── Main orchestration pipeline ───────────────────────────────────────────────
+run_task() {
+    local mode="${1:---suggest}"
+    local task=""
+    local project_path=""
+
+    # Parse mode and arguments
+    case "$mode" in
+        --suggest|--execute|--dry-run)
+            task="${2:-}"
+            project_path="${3:-$(pwd)}"
+            ;;
+        *)
+            # No mode flag, first arg is task
+            task="$mode"
+            project_path="${2:-$(pwd)}"
+            mode="--suggest"
+            ;;
+    esac
+
+    if [[ -z "$task" ]]; then
+        cmd_help
+        exit 1
+    fi
+
+    echo ""
+    echo "╔══════════════════════════════════════════════════════════╗"
+    echo "║  Guardian Orchestrator 2026                             ║"
+    echo "╚══════════════════════════════════════════════════════════╝"
+    echo ""
+    log "SESSION START: ${task:0:80}"
+    log "Project: $project_path"
+    log "Mode: $mode"
+
+    local analysis_file="${SESSION_DIR}/analysis.json"
+    local plan_file="${SESSION_DIR}/plan.md"
+    local audit_file="${SESSION_DIR}/audit.json"
+    local worker_file="${SESSION_DIR}/worker_output.md"
+    local review_file="${SESSION_DIR}/review.json"
+
+    # ── Stage 1: Analyze ─────────────────────────────────────────────────────
+    echo ""
+    echo "━━━ Stage 1/5: ANALYZE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    bash "${SCRIPT_DIR}/scripts/analyze-task.sh" "$task" "$project_path" > "$analysis_file"
+    local complexity task_type agent
+    complexity=$(jq -r '.complexity_level' "$analysis_file")
+    task_type=$(jq -r '.task_type' "$analysis_file")
+    agent=$(jq -r '.resolved_agent' "$analysis_file")
+    log "Analysis: complexity=$complexity type=$task_type agent=$agent"
+    echo "  → Complexity: $complexity | Type: $task_type | Agent: $agent"
+
+    # ── Stage 2: Plan ────────────────────────────────────────────────────────
+    echo ""
+    echo "━━━ Stage 2/5: PLAN ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "📋 GENERATING PLAN with Gemini 2.5 Flash…"
+    bash "${SCRIPT_DIR}/scripts/generate-plan.sh" \
+        "$task" \
+        "$(cat "$analysis_file")" \
+        "$project_path" \
+        "$plan_file" > /dev/null
+    log "Plan generated: $plan_file"
+    echo "✅ Plan saved to: $plan_file"
+    echo "📄 Plan preview:"
+    head -30 "$plan_file" | sed 's/^/     /'
+
+    # ── Stage 3: Guardian Audit ───────────────────────────────────────────────
+    echo ""
+    echo "━━━ Stage 3/5: GUARDIAN AUDIT ━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "🛡️  GUARDIAN AUDIT: Reviewing plan…"
+    local audit_exit=0
+    bash "${SCRIPT_DIR}/scripts/guardian-audit.sh" \
+        "$(cat "$plan_file")" \
+        "$task" > "$audit_file" || audit_exit=$?
+
+    local audit_status audit_risk
+    audit_status=$(jq -r '.status' "$audit_file")
+    audit_risk=$(jq -r '.risk_level // 0' "$audit_file")
+
+    if [[ $audit_exit -eq 2 ]]; then
+        echo ""
+        echo "🚫 BLOCKED by Guardian. Task halted."
+        jq -r '.blocked_reasons[]?' "$audit_file"
+        log "BLOCKED: $task"
+        exit 2
+    elif [[ $audit_exit -eq 1 ]]; then
+        echo ""
+        echo "⚠  Warnings detected. Proceeding with caution."
+        jq -r '.warnings[]?' "$audit_file" 2>/dev/null || true
+    else
+        echo ""
+        echo "✅ AUDIT RESULT: $audit_status (Risk: $audit_risk/10)"
+        echo ""
+    fi
+
+    # ── Stage 4: Worker ───────────────────────────────────────────────────────
+    echo ""
+    echo "━━━ Stage 4/5: WORKER EXECUTION ━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "⚙  WORKER AGENT DISPATCHING"
+    echo "   Role:      $(echo "$agent" | tr '[:lower:]' '[:upper:]')"
+    echo "   Agent:     $agent"
+    echo "   Task Type: $task_type | Complexity: $complexity"
+    echo ""
+    echo "🚀 Executing task with agent: $agent"
+    bash "${SCRIPT_DIR}/scripts/worker-agent.sh" \
+        "$task" \
+        "$(cat "$analysis_file")" \
+        "$plan_file" \
+        "$project_path" > "$worker_file"
+    log "Worker complete. Output: $(wc -l < "$worker_file") lines"
+    echo ""
+    echo "✅ WORKER COMPLETE"
+    echo "─────────────────────────────────────────────"
+
+    # ── Stage 5: Review ───────────────────────────────────────────────────────
+    echo ""
+    echo "━━━ Stage 5/5: REVIEW ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "🔍 REVIEWING CHANGES with Guardian…"
+    local review_exit=0
+    bash "${SCRIPT_DIR}/scripts/review-changes.sh" \
+        "$(cat "$worker_file")" \
+        "$task" \
+        "$(cat "$analysis_file")" > "$review_file" || review_exit=$?
+
+    local quality_score review_status
+    quality_score=$(jq -r '.quality_score' "$review_file")
+    review_status=$(jq -r '.review_status' "$review_file")
+    log "Review: status=$review_status quality=$quality_score/10"
+
+    echo ""
+    echo "📊 REVIEW SUMMARY"
+    echo "   Status:        $review_status"
+    echo "   Quality Score: $quality_score/10"
+    echo "   Completion:    $(jq -r '.completion_percentage // 100' "$review_file")%"
+    echo "   Issues:        $(jq -r '.issues | length // 0' "$review_file")"
+    echo ""
+
+    # ── Final Output ──────────────────────────────────────────────────────────
+    echo ""
+    echo "╔══════════════════════════════════════════════════════════╗"
+    echo "║  RESULT (Quality: ${quality_score}/10 | ${review_status})$(printf '%*s' $((26 - ${#quality_score} - ${#review_status})) '')║"
+    echo "╚══════════════════════════════════════════════════════════╝"
+    echo ""
+    cat "$worker_file"
+
+    # ── Stage 6: Execute (if --execute or --dry-run) ───────────────────────────
+    if [[ "$mode" == "--execute" || "$mode" == "--dry-run" ]]; then
+        echo ""
+        echo "━━━ EXECUTION: Applying Changes ━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        local dry_flag=""
+        [[ "$mode" == "--dry-run" ]] && dry_flag="--dry-run"
+        bash "${SCRIPT_DIR}/scripts/executor.sh" "$(cat "$worker_file")" "$project_path" $dry_flag
+        log "CHANGES APPLIED successfully"
+    else
+        echo ""
+        echo "ℹ  SUGGEST MODE: Changes not applied. Use --execute to apply."
+    fi
+
+    # Save session log
+    {
+        echo "# Session: $(date)"
+        echo "# Task: $task"
+        echo "# Mode: $mode"
+        echo "# Quality: $quality_score/10"
+        echo ""
+        cat "$worker_file"
+    } >> "${LOG_DIR}/sessions.log"
+
+    log "SESSION COMPLETE"
+}
+
+# ── Entry point ───────────────────────────────────────────────────────────────
+case "${1:-}" in
+    --status)   cmd_status  ;;
+    --models)   cmd_models  ;;
+    --help|-h)  cmd_help    ;;
+    --rollback) cmd_rollback "${2:-}" ;;
+    --suggest|--execute|--dry-run)
+        run_task "$@"
+        ;;
+    "")         cmd_help    ;;
+    *)          run_task "$@" ;;
+esac

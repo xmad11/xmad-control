@@ -67,3 +67,17 @@ Thumbs.db
 
 # Documentation hashes are tracked for verification
 # Keep documentation/hashes/ tracked
+
+# OpenClaw Runtime (has nested git)
+openclaw/workspace/.git/
+openclaw/logs/*.log
+openclaw/memory/*.sqlite
+openclaw/memory/*.sqlite-*
+
+# Runtime shadow system (will be removed)
+runtime/
+
+# Temp files
+memory-log.txt
+*.tmp
+*.temp

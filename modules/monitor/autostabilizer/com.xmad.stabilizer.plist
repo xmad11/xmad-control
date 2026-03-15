@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.xmad.stabilizer</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/ahmadabdullah/xmad-control/modules/monitor/autostabilizer/stabilizer.sh</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/Users/ahmadabdullah/xmad-control/storage/logs/stabilizer-stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/ahmadabdullah/xmad-control/storage/logs/stabilizer-stderr.log</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>RAM_WARNING_MB</key>
+        <string>1024</string>
+        <key>RAM_CRITICAL_MB</key>
+        <string>512</string>
+        <key>LOAD_WARNING</key>
+        <string>3.0</string>
+        <key>LOAD_CRITICAL</key>
+        <string>5.0</string>
+        <key>STUCK_WARNING</key>
+        <string>10</string>
+        <key>STUCK_CRITICAL</key>
+        <string>25</string>
+        <key>CHECK_INTERVAL</key>
+        <string>60</string>
+    </dict>
+</dict>
+</plist>

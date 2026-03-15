@@ -6,9 +6,9 @@
  * Example: bun run coordinator:clone /Users/ahmadabdullah/Desktop my-new-project
  */
 
-const fs = require("fs")
-const path = require("path")
-const { execSync } = require("child_process")
+const fs = require("node:fs")
+const path = require("node:path")
+const { execSync } = require("node:child_process")
 
 // Get arguments from command line
 const args = process.argv.slice(2)
@@ -87,7 +87,7 @@ try {
       },
     }
     fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
-    console.log(`✅ Created: package.json`)
+    console.log("✅ Created: package.json")
   }
 
   // Make scripts executable
@@ -129,16 +129,16 @@ try {
   }
 
   console.log(`\n${"=".repeat(60)}`)
-  console.log(`🎉 Coordinator System cloned successfully!`)
+  console.log("🎉 Coordinator System cloned successfully!")
   console.log(`${"=".repeat(60)}\n`)
   console.log(`📍 Location: ${newProjectPath}`)
   console.log(`📊 Files copied: ${copiedCount}`)
-  console.log(`\n🚀 To start the Coordinator in your new project:\n`)
-  console.log(`   Option 1 - Use alias (reload shell first):\n`)
+  console.log("\n🚀 To start the Coordinator in your new project:\n")
+  console.log("   Option 1 - Use alias (reload shell first):\n")
   console.log(`   claude2-${projectName}\n`)
-  console.log(`   Option 2 - Navigate and run:\n`)
+  console.log("   Option 2 - Navigate and run:\n")
   console.log(`   cd ${newProjectPath}`)
-  console.log(`   bun run coordinator\n`)
+  console.log("   bun run coordinator\n")
   console.log(`${"=".repeat(60)}\n`)
 } catch (err) {
   console.error(`\n❌ Error cloning Coordinator: ${err.message}\n`)

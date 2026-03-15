@@ -3,7 +3,7 @@
  * Only renders child page (navigation moved inside page)
  */
 
-import { ReactNode } from "react"
+import type { ReactNode } from "react"
 
 export default function DashboardLayout({
   children,

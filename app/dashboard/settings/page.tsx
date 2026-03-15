@@ -3,6 +3,8 @@
  * System configuration and preferences
  */
 
+import { TabContentWrapper } from "@/components/dashboard/TabContentWrapper"
+
 export const metadata = {
   title: "Settings | XMAD Control",
 }
@@ -49,13 +51,13 @@ export default function SettingsPage() {
             <div className="flex items-center justify-between">
               <span className="text-sm text-white">Email Alerts</span>
               <div className="relative inline-block w-12 h-6 bg-[var(--bg)] rounded-full transition-all">
-                <div className="absolute left-1 top-1 w-4 h-4 rounded-full bg-[var(--color-success)]"></div>
+                <div className="absolute left-1 top-1 w-4 h-4 rounded-full bg-[var(--color-success)]" />
               </div>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-white">SMS Alerts</span>
               <div className="relative inline-block w-12 h-6 bg-[var(--bg)] rounded-full transition-all">
-                <div className="absolute left-1 top-1 w-4 h-4 rounded-full bg-[var(--color-error)]"></div>
+                <div className="absolute left-1 top-1 w-4 h-4 rounded-full bg-[var(--color-error)]" />
               </div>
             </div>
           </div>
@@ -69,7 +71,10 @@ export default function SettingsPage() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-white/60">Two-Factor Auth</span>
-              <button className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg font-medium hover:opacity-80">
+              <button
+                type="button"
+                className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg font-medium hover:opacity-80"
+              >
                 Enable
               </button>
             </div>
@@ -101,7 +106,10 @@ export default function SettingsPage() {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-white/60">Animations</span>
-              <button className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg font-medium hover:opacity-80">
+              <button
+                type="button"
+                className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg font-medium hover:opacity-80"
+              >
                 Enabled
               </button>
             </div>
@@ -111,6 +119,7 @@ export default function SettingsPage() {
         {/* Save Button */}
         <div className="mt-[var(--spacing-lg)]">
           <button
+            type="button"
             className="w-full px-6 py-3 bg-[var(--color-primary)] text-white rounded-lg font-medium hover:opacity-80"
           >
             Save Settings

@@ -4,7 +4,7 @@
  * Uses design tokens for unified spacing system
  */
 
-import { ReactNode } from "react"
+import type { ReactNode } from "react"
 
 interface TabContentWrapperProps {
   children: ReactNode

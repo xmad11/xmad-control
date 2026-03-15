@@ -1,0 +1,11 @@
+{
+  "name": "@xmad/stt-tts",
+  "version": "1.0.0",
+  "description": "Zero-spike STT/TTS using Groq Whisper + ElevenLabs streaming",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

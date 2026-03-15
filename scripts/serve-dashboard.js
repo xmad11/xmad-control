@@ -5,16 +5,16 @@
  * Serves the HTML dashboard and provides API endpoint for cloning
  */
 
-const http = require("http")
-const fs = require("fs")
-const path = require("path")
-const { execSync } = require("child_process")
+const http = require("node:http")
+const fs = require("node:fs")
+const path = require("node:path")
+const { execSync } = require("node:child_process")
 
 const PORT = 3579
 const HTML_PATH = path.join(__dirname, "../dashboard/index.html")
 
 // MIME types
-const mimeTypes = {
+const _mimeTypes = {
   ".html": "text/html",
   ".js": "text/javascript",
   ".css": "text/css",
@@ -51,13 +51,13 @@ const server = http.createServer((req, res) => {
           return
         }
 
-        console.log(`\n📋 Clone request:`)
+        console.log("\n📋 Clone request:")
         console.log(`   Folder: ${folderPath}`)
         console.log(`   Project: ${projectName}\n`)
 
         // Run the clone script
         try {
-          const output = execSync(
+          const _output = execSync(
             `node ${path.join(__dirname, "clone-coordinator.js")} "${folderPath}" "${projectName}"`,
             { encoding: "utf8", cwd: path.join(__dirname, "..") }
           )
@@ -77,7 +77,7 @@ const server = http.createServer((req, res) => {
             })
           )
         }
-      } catch (err) {
+      } catch (_err) {
         res.writeHead(400, { "Content-Type": "application/json" })
         res.end(JSON.stringify({ error: "Invalid JSON" }))
       }
@@ -105,7 +105,7 @@ const server = http.createServer((req, res) => {
 })
 
 server.listen(PORT, () => {
-  console.log(`\n🚀 Coordinator Dashboard Server running at:`)
+  console.log("\n🚀 Coordinator Dashboard Server running at:")
   console.log(`   http://localhost:${PORT}\n`)
-  console.log(`💡 Press Ctrl+C to stop the server\n`)
+  console.log("💡 Press Ctrl+C to stop the server\n")
 })

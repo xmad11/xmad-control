@@ -3,6 +3,8 @@
  * Manage automation tasks
  */
 
+import { TabContentWrapper } from "@/components/dashboard/TabContentWrapper"
+
 export const metadata = {
   title: "Automation | XMAD Control",
 }
@@ -53,6 +55,7 @@ export default function AutomationPage() {
             <option>ssh-toggle</option>
           </select>
           <button
+            type="button"
             className="px-[var(--spacing-lg)] py-[var(--spacing-md)] bg-[var(--color-primary)] text-white rounded-[var(--radius-lg)] opacity-50 cursor-not-allowed"
             disabled
           >

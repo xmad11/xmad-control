@@ -1,0 +1,5 @@
+{
+  "name": "nova-voice",
+  "version": "1.0.0",
+  "description": "Voice reply protocol for Nova - generates voice summary for audio messages"
+}

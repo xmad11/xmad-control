@@ -1,0 +1,59 @@
+# Factory Monorepo - Git Ignore
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.local
+.env.*.local
+*.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Checkpoints (managed by safety-net)
+.checkpoints/
+
+# Generated projects (optional - uncomment if you want to ignore)
+# apps/generated-projects/*
+# !apps/generated-projects/.gitkeep
+
+# Environment files - NEVER commit these
+.env
+.env.local
+.env.*.local
+.env.infisical
+*.env
+
+# Secrets - NEVER commit these
+**/*secret*
+**/*token*
+**/*key*.txt
+.vercel
+.env*.local

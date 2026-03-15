@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# Claude CLI with Z AI proxy for GLM-4.6
+export ANTHROPIC_BASE_URL="https://api.z.ai/api/anthropic"
+export ANTHROPIC_AUTH_TOKEN="c6645e09e4bc4fb99120a0461bd7647e.isY3GgE277vVy9YA"
+export ANTHROPIC_DEFAULT_SONNET_MODEL="glm-4.6"
+export ANTHROPIC_DEFAULT_OPUS_MODEL="glm-4.6"
+
+echo "🔍 Claude Code CLI for Z AI (GLM-4.6)"
+echo "======================================"
+
+# Try different methods to find and execute Claude Code CLI
+CLAUDE_BIN=""
+METHOD=""
+
+# Method 1: Check for existing Bun global installation
+if [ -f "$HOME/.bun/bin/claude" ] && [ -d "$HOME/.bun/install/global/node_modules/@anthropic-ai/claude-code" ]; then
+    CLAUDE_BIN="$HOME/.bun/bin/claude"
+    METHOD="Bun global installation"
+else
+    echo "📦 Bun global installation not found, trying alternatives..."
+
+    # Method 2: Try bunx (may trigger installation)
+    if command -v bunx >/dev/null 2>&1; then
+        echo "🔄 Attempting bunx installation (this may take time)..."
+        CLAUDE_BIN="bunx @anthropic-ai/claude-code"
+        METHOD="Bunx"
+    else
+        # Method 3: Try npm/npx
+        if command -v npm >/dev/null 2>&1; then
+            echo "🔄 Attempting npm/npx installation..."
+            CLAUDE_BIN="npx @anthropic-ai/claude-code"
+            METHOD="NPX"
+        else
+            echo "❌ Error: Cannot find package manager"
+            echo "Please install Bun or npm first"
+            exit 1
+        fi
+    fi
+fi
+
+echo "🚀 Using method: $METHOD"
+echo "📡 Z AI Proxy: https://api.z.ai/api/anthropic"
+echo "🤖 Model: GLM-4.6"
+echo ""
+
+# Execute with error handling
+if ! exec $CLAUDE_BIN "$@"; then
+    echo ""
+    echo "❌ Claude Code CLI failed to start"
+    echo ""
+    echo "💡 Troubleshooting tips:"
+    echo "   • Check internet connection"
+    echo "   • Try: bun install -g @anthropic-ai/claude-code"
+    echo "   • Or use: claude-proxy (GLM wrapper)"
+    echo "   • Z AI API key appears to be working"
+    exit 1
+fi

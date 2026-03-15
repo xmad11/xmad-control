@@ -3,6 +3,8 @@
  * System backup management
  */
 
+import { TabContentWrapper } from "@/components/dashboard/TabContentWrapper"
+
 export const metadata = {
   title: "Backups | XMAD Control",
 }
@@ -22,21 +24,21 @@ export default function BackupsPage() {
           </h2>
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <div className="w-3 h-3 rounded-full bg-[var(--color-success)]"></div>
+              <div className="w-3 h-3 rounded-full bg-[var(--color-success)]" />
               <div>
                 <div className="text-sm text-white/60">Status:</div>
                 <div className="text-sm text-white font-medium">Active</div>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-3 h-3 rounded-full bg-[var(--color-success)]"></div>
+              <div className="w-3 h-3 rounded-full bg-[var(--color-success)]" />
               <div>
                 <div className="text-sm text-white/60">Last Backup:</div>
                 <div className="text-sm text-white font-medium">Today 8:00 PM</div>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-3 h-3 rounded-full bg-[var(--color-success)]"></div>
+              <div className="w-3 h-3 rounded-full bg-[var(--color-success)]" />
               <div>
                 <div className="text-sm text-white/60">Total Size:</div>
                 <div className="text-sm text-white font-medium">2.4 GB</div>
@@ -52,22 +54,31 @@ export default function BackupsPage() {
           </h2>
           <div className="space-y-4">
             <div>
-              <label className="text-sm text-white/60 block mb-2">Backup Name</label>
+              <label htmlFor="backup-name" className="text-sm text-white/60 block mb-2">
+                Backup Name
+              </label>
               <input
+                id="backup-name"
                 type="text"
                 className="w-full px-4 py-3 bg-[var(--bg)] rounded-lg border border-[var(--fg-20)] text-white"
                 placeholder="My System Backup - 2026-03-14"
               />
             </div>
             <div>
-              <label className="text-sm text-white/60 block mb-2">Backup Type</label>
-              <select className="w-full px-4 py-3 bg-[var(--bg)] rounded-lg border border-[var(--fg-20)] text-white">
+              <label htmlFor="backup-type" className="text-sm text-white/60 block mb-2">
+                Backup Type
+              </label>
+              <select
+                id="backup-type"
+                className="w-full px-4 py-3 bg-[var(--bg)] rounded-lg border border-[var(--fg-20)] text-white"
+              >
                 <option>Full System</option>
                 <option>Database Only</option>
                 <option>Configuration Only</option>
               </select>
             </div>
             <button
+              type="button"
               className="px-6 py-3 bg-[var(--color-primary)] text-white rounded-lg font-medium hover:opacity-80"
             >
               Start Backup

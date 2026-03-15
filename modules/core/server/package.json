@@ -1,0 +1,16 @@
+{
+  "name": "@xmad/core-gateway",
+  "version": "1.0.0",
+  "description": "XMAD Core API Gateway",
+  "main": "api-gateway.js",
+  "scripts": {
+    "start": "node api-gateway.js",
+    "dev": "nodemon api-gateway.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

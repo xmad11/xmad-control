@@ -142,7 +142,7 @@ function verifyRollback(checkpoint: string): boolean {
   if (verified) {
     const status = execSync("git status --porcelain", { encoding: "utf-8" }).trim()
     if (status) {
-      log(`Rollback has uncommitted changes`, "warn")
+      log("Rollback has uncommitted changes", "warn")
       return false
     }
     log("Rollback verified: working tree clean", "success")
@@ -360,7 +360,7 @@ function cmdFail(): void {
     console.log()
     log("Manual intervention required:", "warn")
     log(`  git reset --hard ${currentAttempt.checkpoint}`, "info")
-    log(`  git status`, "info")
+    log("  git status", "info")
     console.log(`${"═".repeat(60)}\n`)
     process.exit(1)
   }
@@ -500,7 +500,7 @@ function cmdCleanup(): void {
   log("Session archived", "success")
 
   // Remove checkpoint commits (reset to base)
-  if (session && session.baseCommit) {
+  if (session?.baseCommit) {
     log(`Resetting to base commit: ${session.baseCommit.substring(0, 8)}`, "info")
     try {
       execSync(`git reset --soft ${session.baseCommit}`, { stdio: "pipe" })

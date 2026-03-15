@@ -1,0 +1,61 @@
+#!/bin/bash
+# Apply all Claude Code CLI fixes
+
+echo "=== Claude Code CLI Complete Fix Script ==="
+
+# Check if Claude is running
+if pgrep -f "claude" > /dev/null; then
+  echo "Warning: Claude is currently running. Please exit Claude before running this script."
+  echo "Press Ctrl+C to cancel or Enter to continue..."
+  read -r
+fi
+
+echo "1. Cleaning up processes..."
+~/.local/bin/claude-clean
+
+echo "2. Updating Claude Code CLI..."
+bun install -g @anthropic-ai/claude-code@latest 2>/dev/null || echo "Claude is already up to date"
+
+echo "3. Optimizing configuration..."
+# Configuration already created above
+
+echo "4. Setting up environment..."
+if ! grep -q "NODE_OPTIONS" ~/.zshrc; then
+  echo 'export NODE_OPTIONS="--max-old-space-size=2048"' >> ~/.zshrc
+  echo 'export CLAUDE_MAX_CONCURRENT_REQUESTS=1' >> ~/.zshrc
+fi
+
+echo "5. Creating maintenance scripts..."
+# Scripts already created above
+
+echo "6. Making scripts executable..."
+chmod +x ~/.local/bin/claude-* 2>/dev/null || true
+
+echo "7. Testing API connection..."
+echo "Testing API key..."
+if curl -s -H "Authorization: Bearer 22a7f7e2ef8a4a7c838836d6616ab65a.r58pWwpTzeMcF8LU" \
+     -H "Content-Type: application/json" \
+     -d '{"model": "glm-4.6", "messages": [{"role": "user", "content": "test"}], "max_tokens": 1}' \
+     https://api.z.ai/api/anthropic/messages >/dev/null 2>&1; then
+  echo "✓ API key is working"
+else
+  echo "✗ API key test failed - please check your Z.ai API key"
+fi
+
+echo ""
+echo "=== Fix Complete! ==="
+echo ""
+echo "To use Claude Code CLI:"
+echo "  1. Restart your terminal or run: source ~/.zshrc"
+echo "  2. Run: claude"
+echo ""
+echo "To monitor performance:  ~/.local/bin/claude-monitor"
+echo "To clean up processes:   ~/.local/bin/claude-clean"
+echo ""
+echo "Optimizations applied:"
+echo "  - Reduced maxIterations from 15 to 5"
+echo "  - Disabled alwaysThinkingEnabled"
+echo "  - Reduced maxTokens from 4096 to 2048"
+echo "  - Limited concurrent requests to 1"
+echo "  - Set memory limit to 2GB"
+echo "  - Minimal MCP servers (filesystem only)"

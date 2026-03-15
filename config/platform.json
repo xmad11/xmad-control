@@ -22,15 +22,7 @@
     }
   },
 
-  "modules": [
-    "core",
-    "guardian",
-    "monitor",
-    "network",
-    "claude",
-    "ai-tools",
-    "optimizer"
-  ],
+  "modules": ["core", "guardian", "monitor", "network", "claude", "ai-tools", "optimizer"],
 
   "storage": {
     "logs": "storage/logs",

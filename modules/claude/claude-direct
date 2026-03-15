@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Direct Claude Code using npm with Z AI proxy
+export ANTHROPIC_BASE_URL="https://api.z.ai/api/anthropic"
+export ANTHROPIC_AUTH_TOKEN="c6645e09e4bc4fb99120a0461bd7647e.isY3GgE277vVy9YA"
+export ANTHROPIC_DEFAULT_SONNET_MODEL="glm-4.6"
+export ANTHROPIC_DEFAULT_OPUS_MODEL="glm-4.6"
+
+echo "🚀 Claude Code CLI with Z AI (GLM-4.6)"
+echo "========================================="
+
+# Use npm run to execute Claude Code
+exec npm run --silent @anthropic-ai/claude-code "$@"

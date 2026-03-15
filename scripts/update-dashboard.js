@@ -5,14 +5,14 @@
  * Run this after adding new prompts to prompts/prompts.json
  */
 
-const fs = require("fs")
-const path = require("path")
+const fs = require("node:fs")
+const path = require("node:path")
 
 const promptsPath = path.resolve(__dirname, "../prompts/prompts.json")
 const htmlPath = path.resolve(__dirname, "../dashboard/index.html")
 
 if (!fs.existsSync(promptsPath)) {
-  console.error("❌ prompts.json not found at " + promptsPath)
+  console.error(`❌ prompts.json not found at ${promptsPath}`)
   process.exit(1)
 }
 

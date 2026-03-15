@@ -5,9 +5,9 @@
  * Verifies all prerequisites are met before using Coordinator
  */
 
-const fs = require("fs")
-const { execSync } = require("child_process")
-const path = require("path")
+const fs = require("node:fs")
+const { execSync } = require("node:child_process")
+const _path = require("node:path")
 
 const checks = []
 let passed = 0

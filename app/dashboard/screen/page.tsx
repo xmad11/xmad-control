@@ -3,6 +3,9 @@
  * Display system status and controls
  */
 
+import { TabContentWrapper } from "@/components/dashboard/TabContentWrapper"
+import { Server } from "lucide-react"
+
 export const metadata = {
   title: "Screen | XMAD Control",
 }
@@ -55,10 +58,16 @@ export default function ScreenPage() {
             System Controls
           </h2>
           <div className="grid grid-cols-2 gap-4">
-            <button className="p-4 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-80">
+            <button
+              type="button"
+              className="p-4 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-80"
+            >
               Restart System
             </button>
-            <button className="p-4 bg-[var(--bg-secondary)] text-white rounded-lg hover:bg-[var(--bg)]">
+            <button
+              type="button"
+              className="p-4 bg-[var(--bg-secondary)] text-white rounded-lg hover:bg-[var(--bg)]"
+            >
               Clear Cache
             </button>
           </div>

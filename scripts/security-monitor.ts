@@ -19,7 +19,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 
 const PROJECT_ROOT = process.cwd()
-const APP_URL = process.env.APP_URL || "http://localhost:3000"
+const _APP_URL = process.env.APP_URL || "http://localhost:3000"
 const REPORT_DIR = join(PROJECT_ROOT, ".security")
 
 interface SecurityCheck {
@@ -188,7 +188,7 @@ function checkDangerousPatterns(): SecurityCheck {
     `grep -rn "innerHTML" app/ components/ --include="*.tsx" 2>/dev/null | grep -v "dangerouslySetInnerHTML" || true`
   )
   if (innerHTMLResult.output.trim()) {
-    issues.push(`Direct innerHTML manipulation found`)
+    issues.push("Direct innerHTML manipulation found")
   }
 
   // Check for any types
@@ -306,7 +306,7 @@ function generateReport(checks: SecurityCheck[]): SecurityReport {
 }
 
 function printReport(report: SecurityReport): void {
-  console.log("\n" + "═".repeat(60))
+  console.log(`\n${"═".repeat(60)}`)
   console.log("🔐 SECURITY MONITORING REPORT")
   console.log("═".repeat(60))
   console.log(`📅 Generated: ${report.timestamp}`)

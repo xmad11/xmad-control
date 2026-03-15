@@ -1,0 +1,25 @@
+{
+  "id": "c9046128-2438-43fe-9f39-030239816218",
+  "enqueuedAt": 1773499876341,
+  "channel": "whatsapp",
+  "to": "+971502059116",
+  "payloads": [
+    {
+      "text": "",
+      "mediaUrl": "/Users/ahmadabdullah/.openclaw/workspace/nova-reply.mp3",
+      "mediaUrls": ["/Users/ahmadabdullah/.openclaw/workspace/nova-reply.mp3"]
+    }
+  ],
+  "threadId": null,
+  "gifPlayback": false,
+  "mirror": {
+    "sessionKey": "agent:main:main",
+    "agentId": "main",
+    "text": "",
+    "mediaUrls": ["/Users/ahmadabdullah/.openclaw/workspace/nova-reply.mp3"],
+    "idempotencyKey": "85390d53-1dec-439b-a9d3-852590949a01"
+  },
+  "retryCount": 5,
+  "lastAttemptAt": 1773505013822,
+  "lastError": "No active WhatsApp Web listener (account: default). Start the gateway, then link WhatsApp with: openclaw channels login --channel whatsapp --account default."
+}
