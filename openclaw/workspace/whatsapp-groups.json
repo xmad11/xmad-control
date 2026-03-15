@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "owner": {
+    "name": "Ahmad",
+    "numbers": ["+971502059116", "+971504042000"]
+  },
+  "whatsapp": {
+    "authorized_numbers": {
+      "ahmad_primary": "+971502059116",
+      "ahmad_backup": "+971504042000"
+    },
+    "ignore_others": true,
+    "one_time_messaging": true,
+    "groups": {
+      "NOVA Group": {
+        "jid": "NOVA_GROUP@g.us",
+        "agents": ["NOVA"],
+        "purpose": "Main coordination with Ahmad",
+        "respond_to": ["+971502059116", "+971504042000"]
+      },
+      "Manager": {
+        "jid": "MANAGER@g.us",
+        "agents": ["Manager", "NOVA"],
+        "purpose": "Management and supervision tasks",
+        "respond_to": ["+971502059116", "+971504042000"],
+        "trigger_keywords": ["manage", "supervise", "coordinate", "assign", "status"]
+      },
+      "Developer": {
+        "jid": "DEVELOPER@g.us",
+        "agents": ["Developer", "NOVA"],
+        "purpose": "Coding, bug fixes, features",
+        "respond_to": ["+971502059116", "+971504042000"],
+        "trigger_keywords": ["code", "bug", "feature", "implement", "fix", "refactor", "develop"]
+      },
+      "Researcher": {
+        "jid": "RESEARCHER@g.us",
+        "agents": ["Researcher", "NOVA"],
+        "purpose": "Research, analysis, review",
+        "respond_to": ["+971502059116", "+971504042000"],
+        "trigger_keywords": ["research", "analyze", "compare", "review", "find", "lookup", "search"]
+      },
+      "Automator": {
+        "jid": "AUTOMATOR@g.us",
+        "agents": ["Automator", "NOVA"],
+        "purpose": "Automation, scripts, repetitive tasks",
+        "respond_to": ["+971502059116", "+971504042000"],
+        "trigger_keywords": ["automate", "script", "schedule", "cron", "batch", "run"]
+      }
+    }
+  },
+  "messaging_rules": {
+    "group_only": true,
+    "ignore_direct_messages": true,
+    "one_time_send": {
+      "enabled": true,
+      "require_command": true,
+      "command_pattern": "^send to \\+?[0-9]+"
+    },
+    "auto_reply": false
+  },
+  "guardian_orchestrator": {
+    "enabled": true,
+    "scripts_path": "/Users/ahmadabdullah/.claude-orchestrator",
+    "env_path": "/Users/ahmadabdullah/.claude-orchestrator/.env"
+  }
+}
