@@ -11,6 +11,7 @@
 @import "./components/filter-button.css";
 @import "./components/neon-animations.css";
 @import "./components/navigation.css";
+@import "./dashboard.css";
 
 /* Tailwind v4 - Exclude docs from scanning */
 @source not "../coordinator/**";

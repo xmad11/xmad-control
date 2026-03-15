@@ -42,7 +42,7 @@ const GlassTabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "relative inline-flex items-center justify-center gap-2",
+      "group relative inline-flex items-center justify-center gap-2",
       "rounded-xl px-3 py-2.5 text-sm font-medium",
       "text-white/60 transition-all duration-300 ease-out",
       "hover:text-white/80 hover:bg-white/5",
@@ -59,10 +59,10 @@ const GlassTabsTrigger = React.forwardRef<
     <span
       className={cn(
         "absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300",
-        "data-[state=active]:opacity-100",
-        bgClass
+        bgClass,
+        "group-data-[state=active]:opacity-100"
       )}
-      data-state={props["data-state"]}
+      aria-hidden="true"
     />
     {/* Icon */}
     {Icon && (
