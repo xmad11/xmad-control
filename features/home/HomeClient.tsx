@@ -67,6 +67,10 @@ import {
 
 import { WidgetCarousel } from "@/components/carousel/WidgetCarousel";
 
+import { ChatInterface } from "@/components/chat/ChatInterface";
+
+import { MemoryEditor } from "@/components/memory/MemoryEditor";
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // TABS CONFIGURATION
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -397,7 +401,8 @@ export function HomeClient() {
               CHAT TAB
               ═══════════════════════════════════════════════════════════════════ */}
           <GlassTabsContent value="chat" className="m-0">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+            {/* Stats Row */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
               {chatStats.map((stat) => (
                 <div key={stat.title} className="glass-dashboard-card p-4">
                   <div className="flex items-start justify-between">
@@ -423,34 +428,21 @@ export function HomeClient() {
               ))}
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-              <MiniStatWidget icon={Brain} label="Context Size" value="128K" glowColor="purple" />
-              <MiniStatWidget icon={Cpu} label="GPU Usage" value="60%" glowColor="cyan" />
-              <MiniStatWidget icon={Database} label="Cache Hits" value="94%" glowColor="green" />
-              <MiniStatWidget icon={Clock} label="Queue Time" value="0.3s" glowColor="amber" />
-            </div>
-
-            <div className="widget-row">
-              <WidgetCarousel gap="sm" itemsPerView={{ base: 1, sm: 1, lg: 2, xl: 2 }}>
-                <MultiGaugeWidget
-                  title="Model Usage"
-                  gauges={[
-                    { label: "Claude", value: 45, unit: "%", color: "purple" },
-                    { label: "GPT-4", value: 30, unit: "%", color: "cyan" },
-                    { label: "Local", value: 25, unit: "%", color: "green" },
-                  ]}
-                  glowColor="purple"
-                />
-                <MultiProgressWidget
-                  title="Resource Consumption"
-                  items={[
-                    { label: "Memory", value: 2.4, max: 8, unit: "GB", color: "purple" },
-                    { label: "GPU", value: 60, unit: "%", color: "cyan" },
-                    { label: "Queue", value: 12, max: 50, unit: "", color: "green" },
-                  ]}
-                  glowColor="cyan"
-                />
-              </WidgetCarousel>
+            {/* Chat Interface */}
+            <div className="glass-dashboard-card overflow-hidden" style={{ height: "500px" }}>
+              <ChatInterface
+                placeholder="Ask Nova..."
+                enableVoice={true}
+                enableTTS={true}
+                maxHeight="400px"
+                onSend={async (message) => {
+                  // TODO: Connect to actual AI backend
+                  console.log("Sending message:", message)
+                  // Simulated response
+                  await new Promise((resolve) => setTimeout(resolve, 1000))
+                  return `I received your message: "${message}". This is a simulated response. Connect to the AI backend for real responses.`
+                }}
+              />
             </div>
           </GlassTabsContent>
 
@@ -458,56 +450,23 @@ export function HomeClient() {
               MEMORY TAB
               ═══════════════════════════════════════════════════════════════════ */}
           <GlassTabsContent value="memory" className="m-0">
-            <div className="widget-row">
-              <WidgetCarousel gap="sm" itemsPerView={{ base: 1, sm: 2, lg: 3, xl: 4 }}>
-                <GlassWidgetBase size="md" width="sm" glowColor="blue">
-                  <div className="flex items-center gap-2 mb-2">
-                    <FileText className="h-4 w-4 text-white/60" />
-                    <span className="text-white/50 text-xs">Total Files</span>
-                  </div>
-                  <div className="text-2xl font-bold text-white">156</div>
-                  <div className="flex items-center gap-1 mt-1">
-                    <ArrowUpRight className="h-3 w-3 text-green-400" />
-                    <span className="text-xs text-green-400">+5</span>
-                  </div>
-                </GlassWidgetBase>
-                <GlassWidgetBase size="md" width="sm" glowColor="blue">
-                  <div className="flex items-center gap-2 mb-2">
-                    <HardDrive className="h-4 w-4 text-white/60" />
-                    <span className="text-white/50 text-xs">Total Size</span>
-                  </div>
-                  <div className="text-2xl font-bold text-white">2.4 MB</div>
-                </GlassWidgetBase>
-                <GlassWidgetBase size="md" width="sm" glowColor="blue">
-                  <div className="flex flex-col items-center py-2">
-                    <GaugeWidget label="Storage" value={35} unit="%" color="blue" size="sm" />
-                  </div>
-                </GlassWidgetBase>
-                <GlassWidgetBase size="md" width="sm" glowColor="cyan">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Clock className="h-4 w-4 text-white/60" />
-                    <span className="text-white/50 text-xs">Last Sync</span>
-                  </div>
-                  <div className="text-2xl font-bold text-white">5<span className="text-sm font-normal text-white/50 ml-1">min ago</span></div>
-                </GlassWidgetBase>
-              </WidgetCarousel>
-            </div>
-
+            {/* Stats Row */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-              <MiniStatWidget icon={FileText} label="Context Files" value="42" glowColor="blue" />
-              <MiniStatWidget icon={Database} label="Embeddings" value="1.2K" glowColor="purple" />
-              <MiniStatWidget icon={Binary} label="Vectors" value="8.4K" glowColor="cyan" />
-              <MiniStatWidget icon={RefreshCw} label="Updates" value="24/h" glowColor="green" />
+              <MiniStatWidget icon={FileText} label="Total Files" value="7" glowColor="blue" />
+              <MiniStatWidget icon={Database} label="Total Size" value="24KB" glowColor="purple" />
+              <MiniStatWidget icon={Binary} label="Last Modified" value="5m" glowColor="cyan" />
+              <MiniStatWidget icon={RefreshCw} label="Auto-Save" value="On" glowColor="green" />
             </div>
 
-            <div className="widget-row">
-              <WidgetCarousel gap="sm" itemsPerView={{ base: 1, sm: 2, lg: 3, xl: 4 }}>
-                {memoryFiles.map((file, i) => (
-                  <MemoryFileCard key={i} {...file} />
-                ))}
-                <MemoryFileCard name="user-preferences.json" size="4 KB" modified="5 hours ago" />
-                <MemoryFileCard name="session-data.bin" size="1 KB" modified="1 week ago" />
-              </WidgetCarousel>
+            {/* Memory Editor */}
+            <div className="glass-dashboard-card overflow-hidden" style={{ height: "500px" }}>
+              <MemoryEditor
+                initialFile="MEMORY.md"
+                height="450px"
+                onSave={(filename, content) => {
+                  console.log("Saved:", filename, content.length, "characters")
+                }}
+              />
             </div>
           </GlassTabsContent>
 

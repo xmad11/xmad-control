@@ -56,6 +56,9 @@ export interface DetailedVariantProps {
   badges?: ShadiBadge[]
   features?: string[]
   showCarousel?: boolean
+  showTitle?: boolean | "hover" | "always"
+  showRating?: boolean
+  showFavorite?: boolean
   isFavorite?: boolean
   href?: string
   onFavoriteToggle?: () => void
