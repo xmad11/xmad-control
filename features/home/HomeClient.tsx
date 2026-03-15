@@ -171,10 +171,10 @@ export function HomeClient() {
       <GlassTabs
         value={activeTab}
         onValueChange={handleTabChange}
-        className="relative z-10 h-screen overflow-hidden flex flex-col transition-all duration-500"
+        className="relative z-10 min-h-screen flex flex-col transition-all duration-500"
       >
-        {/* Content area - scrollable vertically */}
-        <div className="relative z-10 flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 md:px-4 lg:px-6 pb-24">
+        {/* Content area */}
+        <div className="relative z-10 flex-1 px-3 py-4 md:px-4 lg:px-6 pb-24">
 
           {/* ==================== OVERVIEW TAB ==================== */}
           <GlassTabsContent value="overview" className="m-0 mt-0">
@@ -184,20 +184,20 @@ export function HomeClient() {
                 <MultiGaugeWidget
                   title="System Resources"
                   gauges={[
-                    { label: "RAM", value: stats?.memory.percentage ?? 52, unit: "%", color: "purple" },
-                    { label: "CPU", value: stats?.cpu ?? 45, unit: "%", color: "cyan" },
-                    { label: "Disk", value: stats?.disk.percentage ?? 36, unit: "%", color: "green" },
+                    { label: "RAM", value: stats?.memory.percentage ?? 52, unit: "%", color: "green" },
+                    { label: "CPU", value: stats?.cpu ?? 45, unit: "%", color: "blue" },
+                    { label: "Disk", value: stats?.disk.percentage ?? 36, unit: "%", color: "cyan" },
                   ]}
                   glowColor="green"
                 />
                 <MultiProgressWidget
                   title="Usage"
                   items={[
-                    { label: "Memory", value: stats?.memory.used ?? 4.2, max: stats?.memory.total ?? 8, unit: "GB", color: "purple" },
-                    { label: "Disk", value: stats?.disk.used ?? 180, max: stats?.disk.total ?? 500, unit: "GB", color: "blue" },
-                    { label: "CPU Load", value: stats?.cpu ?? 45, unit: "%", color: "cyan" },
+                    { label: "RAM", value: stats?.memory.used ?? 4.2, max: stats?.memory.total ?? 8, unit: "GB", color: "green" },
+                    { label: "CPU Load", value: stats?.cpu ?? 45, unit: "%", color: "blue" },
+                    { label: "Disk", value: stats?.disk.used ?? 180, max: stats?.disk.total ?? 500, unit: "GB", color: "cyan" },
                   ]}
-                  glowColor="purple"
+                  glowColor="green"
                 />
                 <GlassWidgetBase size="lg" width="md" glowColor="blue">
                   <div className="text-sm text-white/60 mb-4 uppercase tracking-wider">System Forecast</div>

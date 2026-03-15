@@ -14,7 +14,7 @@ import * as React from "react"
 // TYPES
 // ═══════════════════════════════════════════════════════════════════════════════
 
-type GlowColor = "cyan" | "purple" | "green" | "amber" | "blue" | "pink" | "red"
+type GlowColor = "cyan" | "purple" | "green" | "amber" | "blue" | "pink" | "red" | "gray"
 type WidgetSize = "sm" | "md" | "lg" | "xl"
 type WidgetWidth = "sm" | "md" | "lg" | "xl" | "full"
 type StatusType = "online" | "offline" | "warning" | "error"
@@ -441,30 +441,8 @@ export function GaugeWidget({
   color = "cyan",
   className = "",
 }: GaugeWidgetProps) {
-  const [animatedValue, setAnimatedValue] = React.useState(0)
   const circumference = 2 * Math.PI * 40
-
-  // Animate value on mount
-  React.useEffect(() => {
-    const duration = 1500 // 1.5 seconds
-    const steps = 60
-    const stepValue = value / steps
-    let currentStep = 0
-
-    const interval = setInterval(() => {
-      currentStep++
-      if (currentStep <= steps) {
-        setAnimatedValue(Math.round(stepValue * currentStep))
-      } else {
-        setAnimatedValue(value)
-        clearInterval(interval)
-      }
-    }, duration / steps)
-
-    return () => clearInterval(interval)
-  }, [value])
-
-  const strokeDashoffset = circumference - (animatedValue / 100) * circumference
+  const targetOffset = circumference - (value / 100) * circumference
 
   return (
     <div className={`flex flex-col items-center ${className}`}>
@@ -489,8 +467,8 @@ export function GaugeWidget({
             strokeLinecap="round"
             strokeDasharray={circumference}
             initial={{ strokeDashoffset: circumference }}
-            animate={{ strokeDashoffset }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
+            animate={{ strokeDashoffset: targetOffset }}
+            transition={{ duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] }}
             className={gaugeColors[color]}
           />
         </svg>
@@ -498,10 +476,16 @@ export function GaugeWidget({
           <motion.span
             className="text-white font-bold"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
+            animate={{ opacity: 1, scale: [0.5, 1.1, 1] }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            {animatedValue}
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1.2 }}
+            >
+              {value}
+            </motion.span>
             {unit}
           </motion.span>
         </div>
@@ -539,22 +523,33 @@ export function MultiProgressWidget({
     <GlassWidgetBase size="lg" width="md" glowColor={glowColor} className={className}>
       {title && <div className="text-sm text-white/60 mb-4 uppercase tracking-wider">{title}</div>}
       <div className="space-y-4">
-        {items.map((item) => {
+        {items.map((item, index) => {
           const percentage = item.max ? (item.value / item.max) * 100 : item.value
           return (
             <div key={item.label}>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-white/60 text-xs">{item.label}</span>
-                <span className="text-white text-xs">
+                <motion.span
+                  className="text-white text-xs"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: index * 0.15 + 0.3, duration: 0.5 }}
+                >
                   {item.value}
                   {item.unit || ""}
                   {item.max && ` / ${item.max}${item.unit || ""}`}
-                </span>
+                </motion.span>
               </div>
               <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                <div
-                  className={`h-full bg-gradient-to-r ${progressColors[item.color || "cyan"]} rounded-full transition-all`}
-                  style={{ width: `${Math.min(percentage, 100)}%` }}
+                <motion.div
+                  className={`h-full bg-gradient-to-r ${progressColors[item.color || "cyan"]} rounded-full`}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.min(percentage, 100)}%` }}
+                  transition={{
+                    delay: index * 0.15,
+                    duration: 1,
+                    ease: [0.25, 0.46, 0.45, 0.94]
+                  }}
                 />
               </div>
             </div>

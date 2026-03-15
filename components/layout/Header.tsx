@@ -28,7 +28,6 @@ export interface AppHeaderProps {
 /* ─────────────────────────────────────────────────────────────────────────
    Component constants - defined outside render to prevent recreation
    ───────────────────────────────────────────────────────────────────────── */
-const SCROLL_HIDE_THRESHOLD = 50
 const SCROLL_GLASS_THRESHOLD = 20
 
 function AppHeaderComponent({
@@ -40,30 +39,18 @@ function AppHeaderComponent({
   const { mode, mounted: themeMounted } = useTheme()
   const { activePanel, openMenu, openTheme, closeAll, showBackButton } = useNavigation()
   const pathname = usePathname()
-  const [visible, setVisible] = useState(true)
   const [isScrolled, setIsScrolled] = useState(false)
-  const lastScrollY = useRef(0)
   const ticking = useRef(false)
 
   // Only show theme icon on home page
   const isHomePage = pathname === "/"
 
   /* ─────────────────────────────────────────────────────────────────────────
-     Scroll handler with requestAnimationFrame throttling
-     - Prevents layout thrashing
-     - Syncs with browser's paint cycle for smoother animations
+     Scroll handler - only for glass effect, header always visible
      ───────────────────────────────────────────────────────────────────────── */
   useEffect(() => {
     const updateScrollState = () => {
-      const currentScrollY = window.scrollY
-
-      // Visibility toggle on scroll direction
-      setVisible(currentScrollY < lastScrollY.current || currentScrollY < SCROLL_HIDE_THRESHOLD)
-
-      // Add glass effect when scrolled
-      setIsScrolled(currentScrollY > SCROLL_GLASS_THRESHOLD)
-
-      lastScrollY.current = currentScrollY
+      setIsScrolled(window.scrollY > SCROLL_GLASS_THRESHOLD)
       ticking.current = false
     }
 
@@ -124,16 +111,12 @@ function AppHeaderComponent({
      Pre-compute class names to reduce string operations on each render
      ───────────────────────────────────────────────────────────────────────── */
   const headerClasses = useMemo(() => {
-    const visibilityClasses = visible
-      ? "translate-y-0 opacity-[var(--opacity-full)]"
-      : "-translate-y-[calc(var(--header-height)*2)] opacity-[var(--opacity-faint)] pointer-events-none"
-
     const scrolledClasses = isScrolled
       ? "glass-header rounded-[var(--radius-3xl)] shadow-[var(--shadow-xl)] py-[var(--header-padding-y)] px-[var(--header-padding-x-scrolled)]"
       : "bg-transparent py-[var(--header-padding-y)] px-[var(--header-padding-x-normal)]"
 
-    return `fixed top-[var(--header-offset-top)] left-1/2 -translate-x-1/2 z-[var(--z-header)] w-[var(--header-width)] transition-all duration-700 var(--ease-out-quart) ${visibilityClasses} ${scrolledClasses}`
-  }, [visible, isScrolled])
+    return `fixed top-[var(--header-offset-top)] left-1/2 -translate-x-1/2 z-[var(--z-header)] w-[var(--header-width)] transition-all duration-500 ${scrolledClasses}`
+  }, [isScrolled])
 
   const ThemeIcon = THEME_ICONS[mode]
 
