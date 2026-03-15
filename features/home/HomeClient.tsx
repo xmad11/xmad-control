@@ -39,9 +39,9 @@ import {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const tabs = [
-  { value: "overview", icon: LayoutDashboard, label: "Overview" },
   { value: "memory", icon: Brain, label: "Memory" },
   { value: "automation", icon: Zap, label: "Automation" },
+  { value: "overview", icon: LayoutDashboard, label: "Overview" },
   { value: "screen", icon: Monitor, label: "Screen" },
   { value: "backups", icon: HardDrive, label: "Backups" },
 ];
@@ -171,7 +171,7 @@ export function HomeClient() {
       <GlassTabs
         value={activeTab}
         onValueChange={handleTabChange}
-        className="relative z-10 h-screen overflow-hidden pt-16 flex flex-col transition-all duration-500"
+        className="relative z-10 h-screen overflow-hidden flex flex-col transition-all duration-500"
       >
         {/* Content area - scrollable vertically */}
         <div className="relative z-10 flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 md:px-4 lg:px-6 pb-24">

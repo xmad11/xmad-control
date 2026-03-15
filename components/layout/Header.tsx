@@ -13,7 +13,6 @@ import { THEME_ICONS } from "@/components/theme-constants"
 import { type ThemeMode, useTheme } from "@/context/ThemeContext"
 import { usePathname } from "next/navigation"
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
-import LanguageToggle from "./LanguageToggle"
 import SideMenu from "./SideMenu"
 import ThemeModal from "./ThemeModal"
 
@@ -195,9 +194,6 @@ function AppHeaderComponent({
                 <ThemeIcon className="h-[var(--icon-size-lg)] w-[var(--icon-size-lg)] text-[var(--fg)] stroke-[2px]" />
               </button>
             )}
-
-            {/* Language Toggle */}
-            <LanguageToggle />
 
             {/* Menu Launcher */}
             <button

@@ -441,8 +441,30 @@ export function GaugeWidget({
   color = "cyan",
   className = "",
 }: GaugeWidgetProps) {
+  const [animatedValue, setAnimatedValue] = React.useState(0)
   const circumference = 2 * Math.PI * 40
-  const strokeDashoffset = circumference - (value / 100) * circumference
+
+  // Animate value on mount
+  React.useEffect(() => {
+    const duration = 1500 // 1.5 seconds
+    const steps = 60
+    const stepValue = value / steps
+    let currentStep = 0
+
+    const interval = setInterval(() => {
+      currentStep++
+      if (currentStep <= steps) {
+        setAnimatedValue(Math.round(stepValue * currentStep))
+      } else {
+        setAnimatedValue(value)
+        clearInterval(interval)
+      }
+    }, duration / steps)
+
+    return () => clearInterval(interval)
+  }, [value])
+
+  const strokeDashoffset = circumference - (animatedValue / 100) * circumference
 
   return (
     <div className={`flex flex-col items-center ${className}`}>
@@ -457,7 +479,7 @@ export function GaugeWidget({
             stroke="rgba(255,255,255,0.1)"
             strokeWidth="8"
           />
-          <circle
+          <motion.circle
             cx="48"
             cy="48"
             r="40"
@@ -466,15 +488,22 @@ export function GaugeWidget({
             strokeWidth="8"
             strokeLinecap="round"
             strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
+            initial={{ strokeDashoffset: circumference }}
+            animate={{ strokeDashoffset }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
             className={gaugeColors[color]}
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-white font-bold">
-            {value}
+          <motion.span
+            className="text-white font-bold"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            {animatedValue}
             {unit}
-          </span>
+          </motion.span>
         </div>
       </div>
       <span className="text-white/60 text-xs mt-2">{label}</span>
