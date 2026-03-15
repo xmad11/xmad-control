@@ -8,6 +8,30 @@
 
 ---
 
+## ⚠️ FIRST STEP: Create Your Branch
+
+**Before doing ANY work, create a new branch:**
+
+```bash
+# 1. Verify you're on feature/dashboard-spacing-fix
+git branch
+
+# 2. Pull latest changes
+git pull origin feature/dashboard-spacing-fix 2>/dev/null || true
+
+# 3. Create YOUR branch (Agent 2)
+git checkout -b cleanup/agent-2-frontend-monorepo
+
+# 4. Verify clean state
+git status --short
+```
+
+**Branch naming:**
+- Agent 1: `cleanup/agent-1-runtime-kernel`
+- Agent 2: `cleanup/agent-2-frontend-monorepo`
+
+---
+
 ## Mission
 
 Create a clean, scalable UI monorepo with zero duplication and proper documentation governance.
