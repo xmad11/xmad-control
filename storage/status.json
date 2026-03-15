@@ -1,17 +1,17 @@
 {
-  "ts": "2026-03-15T19:19:50Z",
+  "ts": "2026-03-15T19:39:25Z",
   "system": {
-    "free_kb": 4870728,
-    "load_avg": 3.84,
+    "free_kb": 4068188,
+    "load_avg": 2.96,
     "swap_delta": 0,
     "cooldown": 0,
-    "uptime_seconds": 10152
+    "uptime_seconds": 11326
   },
   "services": {
-    "openclaw": {"status": "online", "pid": "583", "memory_mb": "1"},
+    "openclaw": {"status": "online", "pid": "53465", "memory_mb": "1"},
     "watchdog": {"status": "online"},
     "bridge": {"status": "online"}
   },
   "ai_state": "RUNNING",
-  "top_processes": [{"name": "/Users/ahmadabdullah/.bun/bin/bun", "mem": "622.281", "cpu": "0.3"},{"name": "/Users/ahmadabdullah/.local/bin/claude", "mem": "526.312", "cpu": "0.1"},{"name": "/Users/ahmadabdullah/.local/bin/claude", "mem": "463.195", "cpu": "0.0"},{"name": "/Users/ahmadabdullah/.local/bin/claude", "mem": "462.52", "cpu": "16.2"},{"name": "/Users/ahmadabdullah/.local/bin/claude", "mem": "293.93", "cpu": "0.0"}]
+  "top_processes": [{"name": "next-server", "mem": "872.934", "cpu": "0.0"},{"name": "/Users/ahmadabdullah/.local/bin/claude", "mem": "573.797", "cpu": "20.8"},{"name": "/Users/ahmadabdullah/.bun/bin/bun", "mem": "532.367", "cpu": "0.0"},{"name": "/Users/ahmadabdullah/.local/bin/claude", "mem": "526.141", "cpu": "0.0"},{"name": "node", "mem": "498.082", "cpu": "251.7"}]
 }
