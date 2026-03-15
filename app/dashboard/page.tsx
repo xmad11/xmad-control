@@ -10,11 +10,7 @@ import { xmadApi } from "@/lib/xmad-api"
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 
-export const metadata = {
-  title: "Dashboard | XMAD Control",
-}
-
-export default async function DashboardPage() {
+export default function DashboardPage() {
   const [isExpanded, setIsExpanded] = useState(false)
   const pathname = usePathname()
 
@@ -36,24 +32,15 @@ export default async function DashboardPage() {
     }
   }, [])
 
-  // Fetch initial data server-side
-  let systemStats = null
-  let openclawStatus = null
-  let tailscaleStatus = null
-
-  try {
-    const [statsRes, openclawRes, tailscaleRes] = await Promise.allSettled([
-      xmadApi.getSystemStats(),
-      xmadApi.getOpenClawStatus(),
-      xmadApi.getTailscaleStatus(),
-    ])
-
-    if (statsRes.status === "fulfilled") systemStats = statsRes.value
-    if (openclawRes.status === "fulfilled") openclawStatus = openclawRes.value
-    if (tailscaleRes.status === "fulfilled") tailscaleStatus = tailscaleRes.value
-  } catch (error) {
-    console.error("Failed to fetch dashboard data:", error)
+  // Mock data for legacy dashboard (main dashboard is at features/home/HomeClient.tsx)
+  const systemStats = {
+    cpu: 45,
+    memory: { percentage: 62 },
+    disk: { percentage: 48 },
+    uptime: 86400,
   }
+  const openclawStatus = { running: true, pid: 12345 }
+  const tailscaleStatus = { connected: true, ip: "100.121.254.21" }
 
   const isCenterTab = pathname === "/dashboard"
 

@@ -1,6 +1,6 @@
 {
   "agent:main:main": {
-    "updatedAt": 1773521933300,
+    "updatedAt": 1773602467509,
     "deliveryContext": {
       "channel": "whatsapp",
       "to": "+971504042000",
@@ -75,7 +75,7 @@
     "contextTokens": 204800,
     "systemPromptReport": {
       "source": "run",
-      "generatedAt": 1773520834685,
+      "generatedAt": 1773602417844,
       "sessionId": "c34fb6a2-e4c2-44de-b52c-748b71537413",
       "sessionKey": "agent:main:main",
       "provider": "zai",
@@ -95,49 +95,49 @@
         "sandboxed": false
       },
       "systemPrompt": {
-        "chars": 32035,
-        "projectContextChars": 22075,
-        "nonProjectContextChars": 9960
+        "chars": 22270,
+        "projectContextChars": 12380,
+        "nonProjectContextChars": 9890
       },
       "injectedWorkspaceFiles": [
         {
           "name": "AGENTS.md",
           "path": "/Users/ahmadabdullah/xmad-control/openclaw/workspace/AGENTS.md",
           "missing": false,
-          "rawChars": 7804,
-          "injectedChars": 7804,
+          "rawChars": 7809,
+          "injectedChars": 7809,
           "truncated": false
         },
         {
           "name": "SOUL.md",
           "path": "/Users/ahmadabdullah/xmad-control/openclaw/workspace/SOUL.md",
           "missing": false,
-          "rawChars": 576,
-          "injectedChars": 576,
+          "rawChars": 1664,
+          "injectedChars": 1664,
           "truncated": false
         },
         {
           "name": "TOOLS.md",
           "path": "/Users/ahmadabdullah/xmad-control/openclaw/workspace/TOOLS.md",
           "missing": false,
-          "rawChars": 1053,
-          "injectedChars": 1053,
+          "rawChars": 850,
+          "injectedChars": 850,
           "truncated": false
         },
         {
           "name": "IDENTITY.md",
           "path": "/Users/ahmadabdullah/xmad-control/openclaw/workspace/IDENTITY.md",
           "missing": false,
-          "rawChars": 154,
-          "injectedChars": 154,
+          "rawChars": 633,
+          "injectedChars": 633,
           "truncated": false
         },
         {
           "name": "USER.md",
           "path": "/Users/ahmadabdullah/xmad-control/openclaw/workspace/USER.md",
           "missing": false,
-          "rawChars": 311,
-          "injectedChars": 311,
+          "rawChars": 474,
+          "injectedChars": 474,
           "truncated": false
         },
         {
@@ -151,17 +151,9 @@
         {
           "name": "BOOTSTRAP.md",
           "path": "/Users/ahmadabdullah/xmad-control/openclaw/workspace/BOOTSTRAP.md",
-          "missing": false,
-          "rawChars": 1449,
-          "injectedChars": 1449,
-          "truncated": false
-        },
-        {
-          "name": "MEMORY.md",
-          "path": "/Users/ahmadabdullah/xmad-control/openclaw/workspace/MEMORY.md",
-          "missing": false,
-          "rawChars": 9799,
-          "injectedChars": 9799,
+          "missing": true,
+          "rawChars": 0,
+          "injectedChars": 88,
           "truncated": false
         }
       ],
@@ -219,9 +211,9 @@
         ]
       }
     },
-    "inputTokens": 2,
-    "outputTokens": 482,
-    "cacheRead": 137211,
+    "inputTokens": 137213,
+    "outputTokens": 493,
+    "cacheRead": 0,
     "cacheWrite": 0,
     "totalTokens": 137213,
     "totalTokensFresh": true,

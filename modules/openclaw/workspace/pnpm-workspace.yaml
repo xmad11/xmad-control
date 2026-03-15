@@ -1,6 +1,0 @@
-# Factory Monorepo - PNPM Workspace Configuration
-packages:
-  - 'packages/*'
-  - 'tools/*'
-  - 'apps/generated-projects/*'
-  - 'templates/*'

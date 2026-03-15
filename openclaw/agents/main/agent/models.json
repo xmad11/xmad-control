@@ -8,7 +8,10 @@
           "id": "auto",
           "name": "OpenRouter Auto",
           "reasoning": false,
-          "input": ["text", "image"],
+          "input": [
+            "text",
+            "image"
+          ],
           "cost": {
             "input": 0,
             "output": 0,
@@ -22,7 +25,9 @@
           "id": "openrouter/hunter-alpha",
           "name": "Hunter Alpha",
           "reasoning": true,
-          "input": ["text"],
+          "input": [
+            "text"
+          ],
           "cost": {
             "input": 0,
             "output": 0,
@@ -36,7 +41,10 @@
           "id": "openrouter/healer-alpha",
           "name": "Healer Alpha",
           "reasoning": true,
-          "input": ["text", "image"],
+          "input": [
+            "text",
+            "image"
+          ],
           "cost": {
             "input": 0,
             "output": 0,
@@ -57,7 +65,9 @@
           "id": "coder-model",
           "name": "Qwen Coder",
           "reasoning": false,
-          "input": ["text"],
+          "input": [
+            "text"
+          ],
           "cost": {
             "input": 0,
             "output": 0,
@@ -71,7 +81,10 @@
           "id": "vision-model",
           "name": "Qwen Vision",
           "reasoning": false,
-          "input": ["text", "image"],
+          "input": [
+            "text",
+            "image"
+          ],
           "cost": {
             "input": 0,
             "output": 0,
