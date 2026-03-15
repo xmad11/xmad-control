@@ -14,7 +14,7 @@
     <key>ProgramArguments</key>
     <array>
       <string>/bin/bash</string>
-      <string>/Users/ahmadabdullah/xmad-control/openclaw/scripts/watchdog.sh</string>
+      <string>/Users/ahmadabdullah/xmad-control/openclaw/scripts/xmad-watchdog.sh</string>
     </array>
 
     <key>StandardOutPath</key>

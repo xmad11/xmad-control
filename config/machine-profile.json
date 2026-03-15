@@ -1,0 +1,30 @@
+{
+  "machine": "Mac mini Late 2014",
+  "cpu_cores": 2,
+  "ram_gb": 8,
+  "storage_type": "HDD",
+  "thresholds": {
+    "node_heap_mb": 480,
+    "max_parallel_ai": 1,
+    "ram_warn_pct": 52,
+    "ram_guard_pct": 60,
+    "ram_crit_pct": 70,
+    "ram_emerg_pct": 78,
+    "load_throttle": 2.2,
+    "load_cooldown": 2.8,
+    "load_emerg": 4.0,
+    "log_rotate_bytes": 10000000,
+    "log_max_files": 3,
+    "cleanup_interval_hours": 3,
+    "daily_backups": 1,
+    "sse_interval_ms": 6000,
+    "ai_requests_per_min": 4
+  },
+  "deployment": {
+    "dashboard": "vercel",
+    "runtime": "local",
+    "tunnel": "tailscale",
+    "local_api_port": 9870,
+    "openclaw_port": 18789
+  }
+}
