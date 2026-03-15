@@ -73,11 +73,13 @@
     "*.{ts,tsx}": ["biome check --write", "biome format --write"]
   },
   "dependencies": {
+    "@radix-ui/react-tabs": "^1.1.13",
     "@tailwindcss/postcss": "^4.2.1",
     "blurhash": "^2.0.5",
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.6.0",
     "eventsource-parser": "^3.0.6",
+    "framer-motion": "^12.36.0",
     "keen-slider": "^6.8.6",
     "lucide-react": "^0.562.0",
     "mapbox-gl": "^3.20.0",

@@ -1,162 +1,215 @@
 /* ═══════════════════════════════════════════════════════════════════════════════
    HOME CLIENT - XMAD Control Dashboard
-   Clean foundation for dashboard implementation
+   Pixel-perfect reproduction from ein-ui (Phase 1: Background + Bottom Tabs)
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { LayoutDashboard, MessageSquare, Brain, Zap, Monitor, HardDrive } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { GlassTabs, GlassTabsList, GlassTabsTrigger, GlassTabsContent } from "@/components/glass/glass-tabs";
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// TYPES
+// TABS CONFIGURATION (exact from ein-ui)
 // ═══════════════════════════════════════════════════════════════════════════════
 
-interface SystemStats {
-  cpu: number;
-  memory: { used: number; total: number; percentage: number };
-  disk: { used: number; total: number; percentage: number };
-  uptime: number;
-}
+const tabs = [
+  { value: "overview", icon: LayoutDashboard, label: "Overview" },
+  { value: "memory", icon: Brain, label: "Memory" },
+  { value: "automation", icon: Zap, label: "Automation" },
+  { value: "screen", icon: Monitor, label: "Screen" },
+  { value: "backups", icon: HardDrive, label: "Backups" },
+];
 
-interface ServiceStatus {
-  openclaw: { running: boolean; pid?: number; memoryUsage?: number };
-  tailscale: { connected: boolean; ip?: string };
-}
+// Tab collapse timing (exact from ein-ui: 2000ms)
+const TAB_COLLAPSE_DELAY = 2000;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export function HomeClient() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [stats, setStats] = useState<SystemStats | null>(null);
-  const [services, setServices] = useState<ServiceStatus | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("overview");
+  const [tabsExpanded, setTabsExpanded] = useState(true);
+  const collapseTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isInitialMount = useRef(true);
 
-  // Fetch system stats from API
-  const fetchStats = useCallback(async () => {
-    try {
-      const response = await fetch("/api/xmad/system/stats");
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data);
-        setError(null);
-      }
-    } catch (err) {
-      // Silently fail - stats endpoint may not be implemented yet
+  // Reset collapse timer (exact logic from ein-ui)
+  const resetCollapseTimer = useCallback(() => {
+    if (collapseTimerRef.current) {
+      clearTimeout(collapseTimerRef.current);
     }
+    setTabsExpanded(true);
+    collapseTimerRef.current = setTimeout(() => {
+      setTabsExpanded(false);
+    }, TAB_COLLAPSE_DELAY);
   }, []);
 
-  // Fetch service status from API
-  const fetchServices = useCallback(async () => {
-    try {
-      const response = await fetch("/api/xmad/services");
-      if (response.ok) {
-        const data = await response.json();
-        setServices(data);
-      }
-    } catch (err) {
-      // Silently fail - services endpoint may not be implemented yet
-    }
-  }, []);
-
-  // Initial data fetch
+  // Initial mount - start collapse timer
   useEffect(() => {
-    const init = async () => {
-      setIsLoading(true);
-      await Promise.all([fetchStats(), fetchServices()]);
-      setIsLoading(false);
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      collapseTimerRef.current = setTimeout(() => {
+        setTabsExpanded(false);
+      }, TAB_COLLAPSE_DELAY);
+    }
+    return () => {
+      if (collapseTimerRef.current) {
+        clearTimeout(collapseTimerRef.current);
+      }
     };
+  }, []);
 
-    init();
-
-    // Set up polling for live stats (every 5 seconds)
-    const interval = setInterval(fetchStats, 5000);
-    return () => clearInterval(interval);
-  }, [fetchStats, fetchServices]);
+  // Handle tab change
+  const handleTabChange = useCallback((value: string) => {
+    setActiveTab(value);
+    resetCollapseTimer();
+  }, [resetCollapseTimer]);
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
-      {/* Background */}
+    <>
+      {/* ════════════════════════════════════════════════════════════════════════
+          BACKGROUND - Pixel-perfect from ein-ui (lines 433-436)
+          ════════════════════════════════════════════════════════════════════════ */}
+      {/* Full-screen gradient background - covers body bg */}
       <div className="fixed inset-0 z-0 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900" />
+      <div className="fixed top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse z-0" />
+      <div className="fixed bottom-1/3 right-1/4 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-pulse z-0" />
+      <div className="fixed top-1/2 left-1/2 w-72 h-72 bg-cyan-500/15 rounded-full blur-3xl animate-pulse z-0" />
 
-      {/* Content */}
-      <div className="relative z-10 p-6 md:p-8 lg:p-12">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">XMAD Control</h1>
-          <p className="text-white/60 mt-2">Dashboard foundation ready for implementation</p>
+      {/* ════════════════════════════════════════════════════════════════════════
+          GLASS TABS CONTAINER (wraps entire page including floating tab bar)
+          ════════════════════════════════════════════════════════════════════════ */}
+      <GlassTabs
+        value={activeTab}
+        onValueChange={handleTabChange}
+        className="relative z-10 h-screen overflow-hidden pt-16 flex flex-col transition-all duration-500"
+      >
+        {/* Content area - scrollable vertically */}
+        <div className="relative z-10 flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 md:px-4 lg:px-6 pb-24">
+
+          {/* ==================== OVERVIEW TAB ==================== */}
+          <GlassTabsContent value="overview" className="m-0 mt-0">
+            <div className="flex flex-col items-center justify-center h-[60vh] text-white">
+              <LayoutDashboard className="h-16 w-16 text-cyan-400 mb-4" />
+              <h2 className="text-2xl font-bold mb-2">Overview</h2>
+              <p className="text-white/60">Dashboard content will be implemented here</p>
+            </div>
+          </GlassTabsContent>
+
+          {/* ==================== MEMORY TAB ==================== */}
+          <GlassTabsContent value="memory" className="m-0 mt-0">
+            <div className="flex flex-col items-center justify-center h-[60vh] text-white">
+              <Brain className="h-16 w-16 text-green-400 mb-4" />
+              <h2 className="text-2xl font-bold mb-2">Memory</h2>
+              <p className="text-white/60">Memory editor will be implemented here</p>
+            </div>
+          </GlassTabsContent>
+
+          {/* ==================== AUTOMATION TAB ==================== */}
+          <GlassTabsContent value="automation" className="m-0 mt-0">
+            <div className="flex flex-col items-center justify-center h-[60vh] text-white">
+              <Zap className="h-16 w-16 text-orange-400 mb-4" />
+              <h2 className="text-2xl font-bold mb-2">Automation</h2>
+              <p className="text-white/60">Automation tasks will be implemented here</p>
+            </div>
+          </GlassTabsContent>
+
+          {/* ==================== SCREEN TAB ==================== */}
+          <GlassTabsContent value="screen" className="m-0 mt-0">
+            <div className="flex flex-col items-center justify-center h-[60vh] text-white">
+              <Monitor className="h-16 w-16 text-indigo-400 mb-4" />
+              <h2 className="text-2xl font-bold mb-2">Screen</h2>
+              <p className="text-white/60">VNC screen will be implemented here</p>
+            </div>
+          </GlassTabsContent>
+
+          {/* ==================== BACKUPS TAB ==================== */}
+          <GlassTabsContent value="backups" className="m-0 mt-0">
+            <div className="flex flex-col items-center justify-center h-[60vh] text-white">
+              <HardDrive className="h-16 w-16 text-blue-400 mb-4" />
+              <h2 className="text-2xl font-bold mb-2">Backups</h2>
+              <p className="text-white/60">Backup management will be implemented here</p>
+            </div>
+          </GlassTabsContent>
+
         </div>
 
-        {/* Loading State */}
-        {isLoading && (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-white/60">Loading...</div>
-          </div>
-        )}
-
-        {/* Error State */}
-        {error && (
-          <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400">
-            {error}
-          </div>
-        )}
-
-        {/* Stats Grid - Placeholder */}
-        {!isLoading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* CPU */}
-            <div className="p-4 rounded-lg bg-white/5 border border-white/10">
-              <div className="text-white/60 text-sm">CPU Usage</div>
-              <div className="text-2xl font-bold text-white mt-1">
-                {stats?.cpu ?? "--"}%
-              </div>
-            </div>
-
-            {/* Memory */}
-            <div className="p-4 rounded-lg bg-white/5 border border-white/10">
-              <div className="text-white/60 text-sm">Memory</div>
-              <div className="text-2xl font-bold text-white mt-1">
-                {stats?.memory?.percentage ?? "--"}%
-              </div>
-            </div>
-
-            {/* Disk */}
-            <div className="p-4 rounded-lg bg-white/5 border border-white/10">
-              <div className="text-white/60 text-sm">Disk</div>
-              <div className="text-2xl font-bold text-white mt-1">
-                {stats?.disk?.percentage ?? "--"}%
-              </div>
-            </div>
-
-            {/* OpenClaw Status */}
-            <div className="p-4 rounded-lg bg-white/5 border border-white/10">
-              <div className="text-white/60 text-sm">OpenClaw</div>
-              <div className="text-2xl font-bold mt-1">
-                <span className={services?.openclaw?.running ? "text-green-400" : "text-red-400"}>
-                  {services?.openclaw?.running ? "Online" : "Offline"}
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Tailscale Status */}
-        {!isLoading && services?.tailscale && (
-          <div className="mt-4 p-4 rounded-lg bg-white/5 border border-white/10">
-            <div className="text-white/60 text-sm">Tailscale VPN</div>
-            <div className="flex items-center gap-2 mt-1">
-              <span className={services.tailscale.connected ? "text-green-400" : "text-red-400"}>
-                {services.tailscale.connected ? "Connected" : "Disconnected"}
-              </span>
-              {services.tailscale.ip && (
-                <span className="text-white/40 text-sm">({services.tailscale.ip})</span>
+        {/* ════════════════════════════════════════════════════════════════════════
+            FLOATING TAB BAR - Pixel-perfect from ein-ui (lines 1156-1222)
+            Must be INSIDE GlassTabs for Radix context
+            ════════════════════════════════════════════════════════════════════════ */}
+        <div className="fixed bottom-0 left-0 right-0 z-20 flex justify-center pb-4 pt-2 pointer-events-none">
+          {/* Single centered container */}
+          <div className="relative flex flex-col items-center pointer-events-auto">
+            {/* Chat icon above - only visible when expanded */}
+            <AnimatePresence>
+              {tabsExpanded && (
+                <motion.button
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.2 }}
+                  className="mb-2 p-2 rounded-lg bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/15 transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.2)]"
+                  aria-label="Open chat"
+                >
+                  <MessageSquare className="h-4 w-4 text-white" />
+                </motion.button>
               )}
+            </AnimatePresence>
+
+            {/* Collapsed state - single floating button */}
+            <button
+              onClick={resetCollapseTimer}
+              className={`
+                transition-all duration-300 ease-out select-none
+                ${tabsExpanded ? "opacity-0 scale-75 pointer-events-none absolute" : "opacity-100 scale-100"}
+                relative p-3 rounded-xl
+                bg-white/10 backdrop-blur-xl border border-white/20
+                shadow-[0_4px_16px_rgba(0,0,0,0.2)]
+                hover:bg-white/15 active:scale-95
+                before:absolute before:inset-0 before:rounded-xl
+                before:bg-gradient-to-b before:from-white/20 before:to-transparent before:pointer-events-none
+              `}
+              aria-label="Expand navigation"
+            >
+              <div className="relative z-10 flex items-center justify-center">
+                {(() => {
+                  const activeTabData = tabs.find((t) => t.value === activeTab);
+                  const TabIcon = activeTabData?.icon || LayoutDashboard;
+                  return <TabIcon className="h-4 w-4 text-white" />;
+                })()}
+              </div>
+              <div className="absolute -inset-1 rounded-xl bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 blur-lg opacity-60" />
+            </button>
+
+            {/* Expanded state - tabs */}
+            <div
+              className={`
+                transition-all duration-300 ease-out origin-bottom
+                ${tabsExpanded ? "opacity-100 scale-100" : "opacity-0 scale-75 pointer-events-none absolute"}
+              `}
+            >
+              {/* The tab bar */}
+              <GlassTabsList className="flex items-center justify-center gap-0.5 px-1.5 py-1 h-auto">
+                {tabs.map((tab) => (
+                  <GlassTabsTrigger
+                    key={tab.value}
+                    value={tab.value}
+                    className="group p-2 transition-all duration-200 rounded-lg"
+                    onClick={resetCollapseTimer}
+                  >
+                    <tab.icon className="h-3.5 w-3.5" />
+                    <span className="ml-1.5 text-xs hidden group-data-[state=active]:inline whitespace-nowrap">{tab.label}</span>
+                  </GlassTabsTrigger>
+                ))}
+              </GlassTabsList>
             </div>
           </div>
-        )}
-      </div>
-    </div>
+        </div>
+      </GlassTabs>
+    </>
   );
 }
 

@@ -1,147 +1,102 @@
-/* ═══════════════════════════════════════════════════════════════════════════════
-   Glass Tabs Component
-   ═══════════════════════════════════════════════════════════════════════════════ */
+"use client"
 
-"use client";
+import * as React from "react"
+import * as TabsPrimitive from "@radix-ui/react-tabs"
+import { motion, AnimatePresence } from "framer-motion"
+import { cn } from "@/lib/utils"
 
-import { createContext, useContext, useState, ReactNode } from "react";
-import { LucideIcon } from "lucide-react";
+const GlassTabs = TabsPrimitive.Root
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// TYPES
-// ═══════════════════════════════════════════════════════════════════════════════
+const GlassTabsList = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.List>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
+>(({ className, ...props }, ref) => (
+  <div className="relative inline-flex">
+    <motion.div
+      className="absolute -inset-1 rounded-2xl bg-linear-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 blur-lg"
+      animate={{
+        opacity: [0.4, 0.6, 0.4],
+      }}
+      transition={{
+        duration: 3,
+        repeat: Number.POSITIVE_INFINITY,
+        ease: "easeInOut",
+      }}
+      aria-hidden="true"
+    />
+    <TabsPrimitive.List
+      ref={ref}
+      className={cn(
+        "relative inline-flex h-12 items-center justify-center gap-1 rounded-xl p-1",
+        "bg-white/10 backdrop-blur-xl border border-white/20",
+        "shadow-[0_4px_16px_rgba(0,0,0,0.2)]",
+        className,
+      )}
+      aria-label="Tab navigation"
+      {...props}
+    />
+  </div>
+))
+GlassTabsList.displayName = TabsPrimitive.List.displayName
 
-interface GlassTabsContextValue {
-  value: string;
-  onValueChange: (value: string) => void;
-}
+const GlassTabsTrigger = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
+>(({ className, ...props }, ref) => (
+  <TabsPrimitive.Trigger
+    ref={ref}
+    className={cn(
+      "relative inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-2",
+      "text-sm font-medium text-white/60 transition-colors duration-200",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
+      "disabled:pointer-events-none disabled:opacity-50",
+      "hover:text-white/80 hover:bg-white/5",
+      "data-[state=active]:bg-white/20 data-[state=active]:text-white",
+      "data-[state=active]:shadow-[0_2px_8px_rgba(0,0,0,0.2)]",
+      "data-[state=active]:before:absolute data-[state=active]:before:inset-0",
+      "data-[state=active]:before:rounded-lg data-[state=active]:before:bg-gradient-to-b",
+      "data-[state=active]:before:from-white/20 data-[state=active]:before:to-transparent",
+      "data-[state=active]:before:pointer-events-none",
+      className,
+    )}
+    {...props}
+  />
+))
+GlassTabsTrigger.displayName = TabsPrimitive.Trigger.displayName
 
-interface GlassTabsProps {
-  value?: string;
-  defaultValue?: string;
-  onValueChange?: (value: string) => void;
-  children: ReactNode;
-  className?: string;
-}
+const GlassTabsContent = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
+>(({ className, children, ...props }, ref) => (
+  <TabsPrimitive.Content
+    ref={ref}
+    className={cn("mt-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50", className)}
+    {...props}
+  >
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={props.value}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{
+          opacity: 1,
+          y: 0,
+          transition: {
+            type: "spring",
+            visualDuration: 0.3,
+            bounce: 0.2,
+          },
+        }}
+        exit={{
+          opacity: 0,
+          y: -10,
+          transition: { duration: 0.15 },
+        }}
+      >
+        {children}
+      </motion.div>
+    </AnimatePresence>
+  </TabsPrimitive.Content>
+))
+GlassTabsContent.displayName = TabsPrimitive.Content.displayName
 
-interface GlassTabsListProps {
-  children: ReactNode;
-  className?: string;
-  expanded?: boolean;
-}
-
-interface GlassTabsTriggerProps {
-  value: string;
-  children?: ReactNode;
-  icon?: LucideIcon;
-  bgClass?: string;
-  expanded?: boolean;
-  className?: string;
-}
-
-interface GlassTabsContentProps {
-  value: string;
-  children: ReactNode;
-  className?: string;
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// CONTEXT
-// ═══════════════════════════════════════════════════════════════════════════════
-
-const GlassTabsContext = createContext<GlassTabsContextValue | null>(null);
-
-function useGlassTabs() {
-  const context = useContext(GlassTabsContext);
-  if (!context) {
-    throw new Error("GlassTabs components must be used within a GlassTabs provider");
-  }
-  return context;
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// COMPONENTS
-// ═══════════════════════════════════════════════════════════════════════════════
-
-export function GlassTabs({
-  value: controlledValue,
-  defaultValue,
-  onValueChange,
-  children,
-  className = "",
-}: GlassTabsProps) {
-  const [uncontrolledValue, setUncontrolledValue] = useState(defaultValue || "");
-
-  const value = controlledValue ?? uncontrolledValue;
-  const handleValueChange = (newValue: string) => {
-    setUncontrolledValue(newValue);
-    onValueChange?.(newValue);
-  };
-
-  return (
-    <GlassTabsContext.Provider value={{ value, onValueChange: handleValueChange }}>
-      <div className={className}>{children}</div>
-    </GlassTabsContext.Provider>
-  );
-}
-
-export function GlassTabsList({ children, className = "", expanded = true }: GlassTabsListProps) {
-  return (
-    <div
-      className={`flex items-center gap-2 p-2 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 ${className}`}
-    >
-      {children}
-    </div>
-  );
-}
-
-export function GlassTabsTrigger({
-  value,
-  children,
-  icon: Icon,
-  bgClass = "",
-  expanded = true,
-  className = "",
-}: GlassTabsTriggerProps) {
-  const { value: selectedValue, onValueChange } = useGlassTabs();
-  const isSelected = selectedValue === value;
-
-  const bgColors: Record<string, string> = {
-    "tab-bg-ocean": "from-cyan-500/20 to-blue-500/20",
-    "tab-bg-aurora": "from-purple-500/20 to-pink-500/20",
-    "tab-bg-forest": "from-green-500/20 to-emerald-500/20",
-    "tab-bg-sunset": "from-orange-500/20 to-red-500/20",
-    "tab-bg-midnight": "from-indigo-500/20 to-purple-500/20",
-  };
-
-  const gradientClass = isSelected ? bgColors[bgClass] || "from-white/10 to-white/5" : "";
-
-  return (
-    <button
-      onClick={() => onValueChange(value)}
-      className={`
-        flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl
-        transition-all duration-300
-        ${isSelected ? `bg-gradient-to-r ${gradientClass} text-white shadow-lg` : "text-white/60 hover:text-white hover:bg-white/5"}
-        ${className}
-      `}
-    >
-      {Icon && <Icon className="h-4 w-4" />}
-      {expanded && <span className="text-sm font-medium">{children}</span>}
-    </button>
-  );
-}
-
-export function GlassTabsContent({ value, children, className = "" }: GlassTabsContentProps) {
-  const { value: selectedValue } = useGlassTabs();
-
-  if (selectedValue !== value) return null;
-
-  return (
-    <div className={className} role="tabpanel">
-      {children}
-    </div>
-  );
-}
-
-export default GlassTabs;
+export { GlassTabs, GlassTabsList, GlassTabsTrigger, GlassTabsContent }
