@@ -73,6 +73,7 @@
     "*.{ts,tsx}": ["biome check --write", "biome format --write"]
   },
   "dependencies": {
+    "@radix-ui/react-tabs": "^1.1.13",
     "@tailwindcss/postcss": "^4.2.1",
     "blurhash": "^2.0.5",
     "clsx": "^2.1.1",
