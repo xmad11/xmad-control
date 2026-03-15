@@ -1,127 +1,151 @@
 /* ═══════════════════════════════════════════════════════════════════════════════
-   Base Widget Components
+   Base Widget Components - Pixel-perfect from ein-ui
+   With Framer Motion animations for breathing glow effect
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-"use client";
+"use client"
 
-import { ReactNode } from "react";
-import { LucideIcon, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { cn } from "@/lib/utils"
+import { type HTMLMotionProps, type Variants, motion } from "framer-motion"
+import { ArrowDownRight, ArrowUpRight, type LucideIcon } from "lucide-react"
+import * as React from "react"
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════════════════════════════════════════
 
-type GlowColor = "cyan" | "purple" | "green" | "amber" | "blue" | "pink" | "red";
-type WidgetSize = "sm" | "md" | "lg";
-type WidgetWidth = "sm" | "md" | "lg" | "full";
-type StatusType = "online" | "offline" | "warning" | "error";
+type GlowColor = "cyan" | "purple" | "green" | "amber" | "blue" | "pink" | "red"
+type WidgetSize = "sm" | "md" | "lg" | "xl"
+type WidgetWidth = "sm" | "md" | "lg" | "xl" | "full"
+type StatusType = "online" | "offline" | "warning" | "error"
 
-interface BaseWidgetProps {
-  children: ReactNode;
-  size?: WidgetSize;
-  width?: WidgetWidth;
-  glowColor?: GlowColor;
-  interactive?: boolean;
-  className?: string;
+interface GlassWidgetBaseProps extends Omit<HTMLMotionProps<"div">, "children"> {
+  children: React.ReactNode
+  size?: WidgetSize
+  width?: WidgetWidth
+  glowEffect?: boolean
+  glowColor?: GlowColor
+  hoverScale?: boolean
+  interactive?: boolean
 }
 
 interface MiniStatWidgetProps {
-  icon: LucideIcon;
-  label: string;
-  value: string | number;
-  glowColor?: GlowColor;
-  className?: string;
+  icon: LucideIcon
+  label: string
+  value: string | number
+  glowColor?: GlowColor
+  className?: string
 }
 
 interface ServerStatusCardProps {
-  icon: LucideIcon;
-  label: string;
-  status: StatusType;
-  detail: string;
-  glowColor?: GlowColor;
-  className?: string;
+  icon: LucideIcon
+  label: string
+  status: StatusType
+  detail: string
+  glowColor?: GlowColor
+  className?: string
 }
 
 interface TaskCardProps {
-  id: string;
-  name: string;
-  status: "running" | "pending" | "completed" | "paused";
-  progress: number;
-  className?: string;
+  id: string
+  name: string
+  status: "running" | "pending" | "completed" | "paused"
+  progress: number
+  className?: string
 }
 
 interface MemoryFileCardProps {
-  name: string;
-  size: string;
-  modified: string;
-  className?: string;
+  name: string
+  size: string
+  modified: string
+  className?: string
 }
 
 interface StatCardProps {
-  title: string;
-  value: string | number;
-  change?: string;
-  trend?: "up" | "down";
-  icon?: LucideIcon;
-  className?: string;
+  title: string
+  value: string | number
+  change?: string
+  trend?: "up" | "down"
+  icon?: LucideIcon
+  className?: string
 }
 
 interface StatusBadgeProps {
-  status: StatusType;
-  className?: string;
+  status: StatusType
+  className?: string
 }
 
 interface GaugeWidgetProps {
-  label: string;
-  value: number;
-  unit?: string;
-  color?: GlowColor;
-  size?: WidgetSize;
-  className?: string;
+  label: string
+  value: number
+  unit?: string
+  color?: GlowColor
+  size?: WidgetSize
+  className?: string
 }
 
 interface GaugeItem {
-  label: string;
-  value: number;
-  unit?: string;
-  color?: GlowColor;
+  label: string
+  value: number
+  unit?: string
+  color?: GlowColor
 }
 
 interface MultiGaugeWidgetProps {
-  title?: string;
-  gauges: GaugeItem[];
-  glowColor?: GlowColor;
-  className?: string;
+  title?: string
+  gauges: GaugeItem[]
+  glowColor?: GlowColor
+  className?: string
 }
 
 interface ProgressItem {
-  label: string;
-  value: number;
-  max?: number;
-  unit?: string;
-  color?: GlowColor;
+  label: string
+  value: number
+  max?: number
+  unit?: string
+  color?: GlowColor
 }
 
 interface MultiProgressWidgetProps {
-  title?: string;
-  items: ProgressItem[];
-  glowColor?: GlowColor;
-  className?: string;
+  title?: string
+  items: ProgressItem[]
+  glowColor?: GlowColor
+  className?: string
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// HELPERS
+// SIZE & WIDTH CLASSES (pixel-perfect from ein-ui)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const sizeClasses: Record<WidgetSize, string> = {
+  sm: "p-3",
+  md: "p-4",
+  lg: "p-5",
+  xl: "p-6",
+}
+
+// Standard widget widths for consistent carousel layouts (from ein-ui)
+const widthClasses: Record<WidgetWidth, string> = {
+  sm: "min-w-64", // 256px - compact widgets
+  md: "min-w-72", // 288px - standard widgets
+  lg: "min-w-80", // 320px - detailed widgets
+  xl: "min-w-96", // 384px - complex widgets
+  full: "w-full", // Full width
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// GLOW COLORS - Gradient based (from ein-ui)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const glowColors: Record<GlowColor, string> = {
-  cyan: "shadow-cyan-500/20 hover:shadow-cyan-500/40",
-  purple: "shadow-purple-500/20 hover:shadow-purple-500/40",
-  green: "shadow-green-500/20 hover:shadow-green-500/40",
-  amber: "shadow-amber-500/20 hover:shadow-amber-500/40",
-  blue: "shadow-blue-500/20 hover:shadow-blue-500/40",
-  pink: "shadow-pink-500/20 hover:shadow-pink-500/40",
-  red: "shadow-red-500/20 hover:shadow-red-500/40",
-};
+  cyan: "from-cyan-500/30 via-blue-500/30 to-purple-500/30",
+  purple: "from-purple-500/30 via-pink-500/30 to-purple-500/30",
+  green: "from-emerald-500/30 via-teal-500/30 to-emerald-500/30",
+  amber: "from-amber-500/30 via-orange-500/30 to-amber-500/30",
+  blue: "from-blue-500/30 via-indigo-500/30 to-blue-500/30",
+  pink: "from-pink-500/30 via-rose-500/30 to-pink-500/30",
+  red: "from-red-500/30 via-rose-500/30 to-red-500/30",
+}
 
 const gaugeColors: Record<GlowColor, string> = {
   cyan: "text-cyan-400",
@@ -131,7 +155,7 @@ const gaugeColors: Record<GlowColor, string> = {
   blue: "text-blue-400",
   pink: "text-pink-400",
   red: "text-red-400",
-};
+}
 
 const progressColors: Record<GlowColor, string> = {
   cyan: "from-cyan-500 to-cyan-400",
@@ -141,55 +165,139 @@ const progressColors: Record<GlowColor, string> = {
   blue: "from-blue-500 to-blue-400",
   pink: "from-pink-500 to-pink-400",
   red: "from-red-500 to-red-400",
-};
+}
 
 const statusColors: Record<StatusType, string> = {
   online: "bg-green-400",
   offline: "bg-red-400",
   warning: "bg-amber-400",
   error: "bg-red-500",
-};
-
-const sizeClasses: Record<WidgetSize, string> = {
-  sm: "p-3",
-  md: "p-4",
-  lg: "p-5",
-};
-
-const widthClasses: Record<WidgetWidth, string> = {
-  sm: "min-w-[140px]",
-  md: "min-w-[200px]",
-  lg: "min-w-[280px]",
-  full: "w-full",
-};
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// COMPONENTS
-// ═══════════════════════════════════════════════════════════════════════════════
-
-export function GlassWidgetBase({
-  children,
-  size = "md",
-  width = "md",
-  glowColor = "cyan",
-  interactive = false,
-  className = "",
-}: BaseWidgetProps) {
-  return (
-    <div
-      className={`
-        rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10
-        shadow-lg ${glowColors[glowColor]}
-        ${sizeClasses[size]}
-        ${widthClasses[width]}
-        ${interactive ? "cursor-pointer hover:bg-white/10 transition-all" : ""}
-        ${className}
-      `}
-    >
-      {children}
-    </div>
-  );
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FRAMER MOTION VARIANTS (from ein-ui)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// Widget container animation - fade in, slide up, scale
+const widgetVariants = {
+  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: "spring",
+      visualDuration: 0.4,
+      bounce: 0.2,
+    },
+  },
+  hover: {
+    y: -2,
+    transition: {
+      type: "spring",
+      visualDuration: 0.3,
+      bounce: 0.4,
+    },
+  },
+} as const
+
+// Glow effect animation - breathing pulse
+const glowVariants: Variants = {
+  initial: { opacity: 0.4, scale: 0.98 },
+  animate: {
+    opacity: [0.4, 0.6, 0.4] as number[],
+    scale: [0.98, 1, 0.98] as number[],
+    transition: {
+      duration: 4,
+      repeat: Number.POSITIVE_INFINITY,
+      ease: "easeInOut",
+    },
+  },
+  hover: {
+    opacity: 0.8,
+    scale: 1.02,
+    transition: {
+      type: "spring",
+      visualDuration: 0.3,
+      bounce: 0.3,
+    },
+  },
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MAIN WIDGET COMPONENT (with Framer Motion from ein-ui)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const GlassWidgetBase = React.forwardRef<HTMLDivElement, GlassWidgetBaseProps>(
+  (
+    {
+      className,
+      children,
+      size = "md",
+      width,
+      glowEffect = true,
+      glowColor = "cyan",
+      hoverScale = true,
+      interactive = true,
+      ...props
+    },
+    ref
+  ) => {
+    return (
+      <motion.div
+        className="relative h-full"
+        initial="hidden"
+        animate="visible"
+        whileHover={interactive && hoverScale ? "hover" : undefined}
+        variants={widgetVariants}
+      >
+        {/* Animated glow effect - breathing pulse */}
+        {glowEffect && (
+          <motion.div
+            className={cn(
+              "absolute -inset-0.5 rounded-2xl bg-gradient-to-r blur-xl",
+              glowColors[glowColor]
+            )}
+            variants={glowVariants}
+            initial="initial"
+            animate="animate"
+            whileHover={interactive ? "hover" : undefined}
+            aria-hidden="true"
+          />
+        )}
+
+        {/* Widget container */}
+        <motion.div
+          ref={ref}
+          className={cn(
+            "relative h-full rounded-2xl border border-white/20",
+            "bg-white/10 backdrop-blur-xl",
+            "shadow-[0_8px_32px_rgba(0,0,0,0.37)]",
+            // Inner highlight gradient
+            "before:absolute before:inset-0 before:rounded-2xl",
+            "before:bg-gradient-to-b before:from-white/20 before:to-transparent before:pointer-events-none",
+            // Inner shadow for depth
+            "after:absolute after:inset-px after:rounded-[calc(1rem-1px)]",
+            "after:shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] after:pointer-events-none",
+            sizeClasses[size],
+            width && width !== "full" && widthClasses[width],
+            width === "full" && "w-full",
+            className
+          )}
+          role="article"
+          {...props}
+        >
+          <div className="relative z-10 h-full">{children}</div>
+        </motion.div>
+      </motion.div>
+    )
+  }
+)
+GlassWidgetBase.displayName = "GlassWidgetBase"
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// DERIVED WIDGET COMPONENTS
+// ═══════════════════════════════════════════════════════════════════════════════
 
 export function MiniStatWidget({
   icon: Icon,
@@ -206,7 +314,7 @@ export function MiniStatWidget({
       </div>
       <div className="text-xl font-bold text-white">{value}</div>
     </GlassWidgetBase>
-  );
+  )
 }
 
 export function ServerStatusCard({
@@ -230,7 +338,7 @@ export function ServerStatusCard({
       </div>
       <StatusBadge status={status} />
     </GlassWidgetBase>
-  );
+  )
 }
 
 export function TaskCard({ name, status, progress, className = "" }: TaskCardProps) {
@@ -239,7 +347,7 @@ export function TaskCard({ name, status, progress, className = "" }: TaskCardPro
     pending: "text-amber-400",
     completed: "text-cyan-400",
     paused: "text-purple-400",
-  }[status];
+  }[status]
 
   return (
     <GlassWidgetBase size="md" width="full" glowColor="cyan" className={className}>
@@ -255,7 +363,7 @@ export function TaskCard({ name, status, progress, className = "" }: TaskCardPro
       </div>
       <div className="text-white/40 text-xs mt-1">{progress}%</div>
     </GlassWidgetBase>
-  );
+  )
 }
 
 export function MemoryFileCard({ name, size, modified, className = "" }: MemoryFileCardProps) {
@@ -268,7 +376,7 @@ export function MemoryFileCard({ name, size, modified, className = "" }: MemoryF
         <span className="text-white/40 text-xs">{modified}</span>
       </div>
     </GlassWidgetBase>
-  );
+  )
 }
 
 export function StatCard({
@@ -305,7 +413,7 @@ export function StatCard({
         )}
       </div>
     </GlassWidgetBase>
-  );
+  )
 }
 
 export function StatusBadge({ status, className = "" }: StatusBadgeProps) {
@@ -314,14 +422,16 @@ export function StatusBadge({ status, className = "" }: StatusBadgeProps) {
     offline: "Offline",
     warning: "Warning",
     error: "Error",
-  }[status];
+  }[status]
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <div className={`w-2 h-2 rounded-full ${statusColors[status]} ${status === "online" ? "animate-pulse" : ""}`} />
+      <div
+        className={`w-2 h-2 rounded-full ${statusColors[status]} ${status === "online" ? "animate-pulse" : ""}`}
+      />
       <span className="text-white/60 text-xs">{statusLabel}</span>
     </div>
-  );
+  )
 }
 
 export function GaugeWidget({
@@ -329,16 +439,16 @@ export function GaugeWidget({
   value,
   unit = "%",
   color = "cyan",
-  size = "md",
   className = "",
 }: GaugeWidgetProps) {
-  const circumference = 2 * Math.PI * 40;
-  const strokeDashoffset = circumference - (value / 100) * circumference;
+  const circumference = 2 * Math.PI * 40
+  const strokeDashoffset = circumference - (value / 100) * circumference
 
   return (
     <div className={`flex flex-col items-center ${className}`}>
       <div className="relative">
-        <svg className="w-24 h-24 transform -rotate-90">
+        <svg className="w-24 h-24 transform -rotate-90" role="img" aria-label={label}>
+          <title>{label}</title>
           <circle
             cx="48"
             cy="48"
@@ -361,12 +471,15 @@ export function GaugeWidget({
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-white font-bold">{value}{unit}</span>
+          <span className="text-white font-bold">
+            {value}
+            {unit}
+          </span>
         </div>
       </div>
       <span className="text-white/60 text-xs mt-2">{label}</span>
     </div>
-  );
+  )
 }
 
 export function MultiGaugeWidget({
@@ -379,12 +492,12 @@ export function MultiGaugeWidget({
     <GlassWidgetBase size="lg" width="md" glowColor={glowColor} className={className}>
       {title && <div className="text-sm text-white/60 mb-4 uppercase tracking-wider">{title}</div>}
       <div className="flex justify-around">
-        {gauges.map((gauge, i) => (
-          <GaugeWidget key={i} {...gauge} size="sm" />
+        {gauges.map((gauge) => (
+          <GaugeWidget key={gauge.label} {...gauge} />
         ))}
       </div>
     </GlassWidgetBase>
-  );
+  )
 }
 
 export function MultiProgressWidget({
@@ -397,14 +510,15 @@ export function MultiProgressWidget({
     <GlassWidgetBase size="lg" width="md" glowColor={glowColor} className={className}>
       {title && <div className="text-sm text-white/60 mb-4 uppercase tracking-wider">{title}</div>}
       <div className="space-y-4">
-        {items.map((item, i) => {
-          const percentage = item.max ? (item.value / item.max) * 100 : item.value;
+        {items.map((item) => {
+          const percentage = item.max ? (item.value / item.max) * 100 : item.value
           return (
-            <div key={i}>
+            <div key={item.label}>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-white/60 text-xs">{item.label}</span>
                 <span className="text-white text-xs">
-                  {item.value}{item.unit || ""}
+                  {item.value}
+                  {item.unit || ""}
                   {item.max && ` / ${item.max}${item.unit || ""}`}
                 </span>
               </div>
@@ -415,11 +529,13 @@ export function MultiProgressWidget({
                 />
               </div>
             </div>
-          );
+          )
         })}
       </div>
     </GlassWidgetBase>
-  );
+  )
 }
 
-export default GlassWidgetBase;
+export { GlassWidgetBase }
+export type { GlassWidgetBaseProps }
+export default GlassWidgetBase
