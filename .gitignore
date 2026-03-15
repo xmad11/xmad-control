@@ -73,11 +73,22 @@ openclaw/workspace/.git/
 openclaw/logs/*.log
 openclaw/memory/*.sqlite
 openclaw/memory/*.sqlite-*
+openclaw/workspace/*.mp3
+openclaw/workspace/temp/
 
 # Runtime shadow system (will be removed)
 runtime/
 
 # Temp files
 memory-log.txt
+migration-report.json
 *.tmp
 *.temp
+
+# Performance
+.next/
+tsconfig.tsbuildinfo
+
+# Secrets
+.env.local
+.env.production
