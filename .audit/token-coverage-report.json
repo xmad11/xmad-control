@@ -1,9 +1,15 @@
 {
-  "generatedAt": "2026-03-14T01:35:44.230Z",
+  "generatedAt": "2026-03-15T07:49:33.129Z",
   "summary": {
     "totalTokens": 60,
-    "usedTokens": 0
+    "usedTokens": 2
   },
   "tokenUsage": {},
-  "componentCoverage": []
+  "componentCoverage": [
+    {
+      "component": "components/dashboard/TabContentWrapper.tsx",
+      "coverage": 1,
+      "unusedTokens": []
+    }
+  ]
 }

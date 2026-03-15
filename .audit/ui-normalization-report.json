@@ -1,18 +1,18 @@
 {
   "meta": {
-    "timestamp": "2026-03-14T01:35:44.230Z",
+    "timestamp": "2026-03-15T07:49:33.129Z",
     "project": "starter-template-v1",
     "mode": "inspect",
     "mobileFirstScore": 0,
-    "duration": 4
+    "duration": 11
   },
   "summary": {
-    "componentsScanned": 0,
+    "componentsScanned": 1,
     "violations": 0,
     "warnings": 0,
     "exceptions": 0,
     "duplications": 0,
-    "tokenCoverage": 0
+    "tokenCoverage": 1
   },
   "violations": [],
   "warnings": [],
