@@ -157,24 +157,23 @@ export function HomeClient() {
   return (
     <>
       {/* ════════════════════════════════════════════════════════════════════════
-          BACKGROUND - Pixel-perfect from ein-ui (lines 433-436)
+          BACKGROUND - Pixel-perfect from ein-ui
           ════════════════════════════════════════════════════════════════════════ */}
-      {/* Full-screen gradient background - covers body bg */}
       <div className="fixed inset-0 z-0 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900" />
       <div className="fixed top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse z-0" />
       <div className="fixed bottom-1/3 right-1/4 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-pulse z-0" />
       <div className="fixed top-1/2 left-1/2 w-72 h-72 bg-cyan-500/15 rounded-full blur-3xl animate-pulse z-0" />
 
       {/* ════════════════════════════════════════════════════════════════════════
-          GLASS TABS CONTAINER (wraps entire page including floating tab bar)
+          GLASS TABS CONTAINER - exact from ein-ui
           ════════════════════════════════════════════════════════════════════════ */}
       <GlassTabs
         value={activeTab}
         onValueChange={handleTabChange}
-        className="relative z-10 min-h-screen flex flex-col transition-all duration-500"
+        className="relative z-10 h-screen overflow-hidden flex flex-col transition-all duration-500"
       >
-        {/* Content area */}
-        <div className="relative z-10 flex-1 px-3 py-4 md:px-4 lg:px-6 pb-24">
+        {/* Content area - scrollable vertically */}
+        <div className="relative z-10 flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 md:px-4 lg:px-6 pb-24">
 
           {/* ==================== OVERVIEW TAB ==================== */}
           <GlassTabsContent value="overview" className="m-0 mt-0">
