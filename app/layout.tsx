@@ -17,7 +17,10 @@ export const metadata: Metadata = {
   creator: "XMAD",
   publisher: "XMAD",
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
     apple: [
       { url: "/apple-touch-icon.png", sizes: "180x180" },
       { url: "/apple-touch-icon-180x180.png", sizes: "180x180" },
@@ -27,9 +30,15 @@ export const metadata: Metadata = {
     ],
   },
   manifest: "/manifest.json",
+  // PWA theme color matching dashboard (slate-900)
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
+  ],
+  // Apple Web App
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
     title: "XMAD Control",
   },
   openGraph: {
@@ -65,6 +74,13 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  // PWA viewport settings
+  viewportFit: "cover",
+  // Theme color for mobile browsers
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
+  ],
 }
 
 export default function RootLayout({
@@ -114,6 +130,43 @@ export default function RootLayout({
             `,
           }}
         />
+
+        {/* Service Worker Registration for PWA */}
+        <script
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: Static script with no user input - PWA registration
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                if ('serviceWorker' in navigator) {
+                  window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js')
+                      .then((registration) => {
+                        console.log('[SW] Service Worker registered:', registration.scope);
+
+                        // Listen for updates
+                        registration.addEventListener('updatefound', () => {
+                          const newWorker = registration.installing;
+                          if (newWorker) {
+                            newWorker.addEventListener('statechange', () => {
+                              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // New version available
+                                console.log('[SW] New version available');
+                                window.dispatchEvent(new CustomEvent('sw-update-available'));
+                              }
+                            });
+                          }
+                        });
+                      })
+                      .catch((error) => {
+                        console.error('[SW] Service Worker registration failed:', error);
+                      });
+                  });
+                }
+              })();
+            `,
+          }}
+        />
+
         <SkipLink />
 
         {/* Global Providers (Theme, Language) */}

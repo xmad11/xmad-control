@@ -145,6 +145,7 @@ const glowColors: Record<GlowColor, string> = {
   blue: "from-blue-500/30 via-indigo-500/30 to-blue-500/30",
   pink: "from-pink-500/30 via-rose-500/30 to-pink-500/30",
   red: "from-red-500/30 via-rose-500/30 to-red-500/30",
+  gray: "from-gray-500/30 via-slate-500/30 to-gray-500/30",
 }
 
 const gaugeColors: Record<GlowColor, string> = {
@@ -155,6 +156,7 @@ const gaugeColors: Record<GlowColor, string> = {
   blue: "text-blue-400",
   pink: "text-pink-400",
   red: "text-red-400",
+  gray: "text-gray-400",
 }
 
 const progressColors: Record<GlowColor, string> = {
@@ -165,6 +167,7 @@ const progressColors: Record<GlowColor, string> = {
   blue: "from-blue-500 to-blue-400",
   pink: "from-pink-500 to-pink-400",
   red: "from-red-500 to-red-400",
+  gray: "from-gray-500 to-gray-400",
 }
 
 const statusColors: Record<StatusType, string> = {
@@ -312,7 +315,7 @@ export function MiniStatWidget({
         <Icon className={`h-4 w-4 ${gaugeColors[glowColor]}`} />
         <span className="text-white/50 text-xs">{label}</span>
       </div>
-      <div className="text-xl font-bold text-white">{value}</div>
+      <div className="text-xl font-light text-white">{value}</div>
     </GlassWidgetBase>
   )
 }
@@ -548,7 +551,7 @@ export function MultiProgressWidget({
                   transition={{
                     delay: index * 0.15,
                     duration: 1,
-                    ease: [0.25, 0.46, 0.45, 0.94]
+                    ease: [0.25, 0.46, 0.45, 0.94],
                   }}
                 />
               </div>
@@ -556,6 +559,50 @@ export function MultiProgressWidget({
           )
         })}
       </div>
+    </GlassWidgetBase>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// QUICK ACTION CARD - Action button with icon and description
+// ═══════════════════════════════════════════════════════════════════════════════
+
+interface QuickActionCardProps {
+  icon: LucideIcon
+  label: string
+  description: string
+  glowColor?: GlowColor
+  onClick?: () => void
+  className?: string
+}
+
+export function QuickActionCard({
+  icon: Icon,
+  label,
+  description,
+  glowColor = "cyan",
+  onClick,
+  className = "",
+}: QuickActionCardProps) {
+  return (
+    <GlassWidgetBase
+      size="md"
+      width="sm"
+      glowColor={glowColor}
+      className={className}
+      interactive={!!onClick}
+    >
+      <button type="button" onClick={onClick} className="w-full text-left">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-2 rounded-lg bg-white/10">
+            <Icon className={`h-5 w-5 ${gaugeColors[glowColor]}`} />
+          </div>
+          <div>
+            <div className="text-white font-medium">{label}</div>
+            <div className="text-white/50 text-xs">{description}</div>
+          </div>
+        </div>
+      </button>
     </GlassWidgetBase>
   )
 }
