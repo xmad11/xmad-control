@@ -84,4 +84,5 @@ runtime/
 # Temp files
 memory-log.txt
 *.tmp
-*.temp
+*.temp# 
+# Cache refresh 
