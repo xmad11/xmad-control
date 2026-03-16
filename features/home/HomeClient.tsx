@@ -170,10 +170,10 @@ export function HomeClient() {
       <GlassTabs
         value={activeTab}
         onValueChange={handleTabChange}
-        className="relative z-10 h-screen overflow-hidden flex flex-col transition-all duration-500"
+        className="relative z-10 min-h-screen flex flex-col transition-all duration-500"
       >
-        {/* Content area - scrollable vertically */}
-        <div className="relative z-10 flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 md:px-4 lg:px-6 pb-24">
+        {/* Content area */}
+        <div className="relative z-10 flex-1 px-3 py-4 md:px-4 lg:px-6 pb-28">
 
           {/* ==================== OVERVIEW TAB ==================== */}
           <GlassTabsContent value="overview" className="m-0 mt-0">
