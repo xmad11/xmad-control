@@ -170,7 +170,7 @@ export function HomeClient() {
       <GlassTabs
         value={activeTab}
         onValueChange={handleTabChange}
-        className="relative z-10 min-h-screen flex flex-col transition-all duration-500"
+        className="relative z-10 flex flex-col"
       >
         {/* Content area */}
         <div className="relative z-10 flex-1 px-3 py-4 md:px-4 lg:px-6 pb-28">
