@@ -30,11 +30,6 @@ export const metadata: Metadata = {
     ],
   },
   manifest: "/manifest.json",
-  // PWA theme color matching dashboard (slate-900)
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
-    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
-  ],
   // Apple Web App
   appleWebApp: {
     capable: true,
