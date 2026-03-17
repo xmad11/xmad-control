@@ -18,7 +18,7 @@ export interface StoriesSectionsProps {
 const FoodGuides = memo(function FoodGuides() {
   return (
     <Section title="Food Guides" categorySlug="/blog?filter=latest">
-      <ScrollableCards itemCount={8} categorySlug="/blog?filter=latest" cardType="blog" />
+      <ScrollableCards itemCount={8} categorySlug="/blog?filter=latest" cardType="restaurant" />
     </Section>
   )
 })
@@ -29,7 +29,7 @@ const FoodGuides = memo(function FoodGuides() {
 const HiddenGemsStories = memo(function HiddenGemsStories() {
   return (
     <Section title="Hidden Gems Stories" categorySlug="/blog?filter=shadi-picks">
-      <ScrollableCards itemCount={8} categorySlug="/blog?filter=shadi-picks" cardType="blog" />
+      <ScrollableCards itemCount={8} categorySlug="/blog?filter=shadi-picks" cardType="restaurant" />
     </Section>
   )
 })
@@ -40,7 +40,7 @@ const HiddenGemsStories = memo(function HiddenGemsStories() {
 const ChefStories = memo(function ChefStories() {
   return (
     <Section title="Chef Stories" categorySlug="/blog?filter=owner-stories">
-      <ScrollableCards itemCount={8} categorySlug="/blog?filter=owner-stories" cardType="blog" />
+      <ScrollableCards itemCount={8} categorySlug="/blog?filter=owner-stories" cardType="restaurant" />
     </Section>
   )
 })
@@ -51,7 +51,7 @@ const ChefStories = memo(function ChefStories() {
 const NewOpenings = memo(function NewOpenings() {
   return (
     <Section title="New Openings" categorySlug="/blog?filter=latest">
-      <ScrollableCards itemCount={8} categorySlug="/blog?filter=latest" cardType="blog" />
+      <ScrollableCards itemCount={8} categorySlug="/blog?filter=latest" cardType="restaurant" />
     </Section>
   )
 })
