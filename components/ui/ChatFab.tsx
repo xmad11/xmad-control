@@ -5,9 +5,9 @@
 
 "use client"
 
-import { MessageSquare } from "lucide-react"
-import { motion } from "framer-motion"
 import { TIMING } from "@/config/dashboard"
+import { motion } from "framer-motion"
+import { MessageSquare } from "lucide-react"
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TYPES

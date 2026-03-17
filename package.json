@@ -70,7 +70,7 @@
     "typecheck": "tsc --noEmit --incremental false"
   },
   "lint-staged": {
-    "*.{ts,tsx}": ["biome check --write", "biome format --write"]
+    "*.{ts,tsx}": ["biome check --write --diagnostic-level=error", "biome format --write"]
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.15",
@@ -86,9 +86,11 @@
     "@tailwindcss/postcss": "^4.2.1",
     "blurhash": "^2.0.5",
     "clsx": "^2.1.1",
+    "dompurify": "^3.3.3",
     "embla-carousel-react": "^8.6.0",
     "eventsource-parser": "^3.0.6",
     "framer-motion": "^12.36.0",
+    "katex": "^0.16.38",
     "keen-slider": "^6.8.6",
     "lucide-react": "^0.562.0",
     "mapbox-gl": "^3.20.0",
@@ -96,6 +98,7 @@
     "postcss": "^8.5.8",
     "react": "19",
     "react-dom": "19",
+    "react-katex": "^3.1.0",
     "recharts": "^3.8.0",
     "sharp": "^0.34.5",
     "sonner": "^2.0.7",
@@ -105,6 +108,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@types/dompurify": "^3.2.0",
     "@types/mapbox-gl": "^3.5.0",
     "@types/node": "25.4.0",
     "@types/react": "^19.2.14",

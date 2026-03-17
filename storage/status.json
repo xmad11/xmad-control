@@ -1,17 +1,31 @@
 {
-  "ts": "2026-03-15T20:58:36Z",
+  "ts": "2026-03-16T13:20:24Z",
   "system": {
-    "free_kb": 3934424,
-    "load_avg": 2.50,
+    "free_kb": 4513996,
+    "load_avg": 2.95,
     "swap_delta": 0,
     "cooldown": 0,
-    "uptime_seconds": 16078
+    "uptime_seconds": 74986
   },
   "services": {
-    "openclaw": {"status": "online", "pid": "53465", "memory_mb": "1"},
-    "watchdog": {"status": "online"},
-    "bridge": {"status": "online"}
+    "openclaw": { "status": "offline", "pid": "", "memory_mb": "0" },
+    "watchdog": { "status": "offline" },
+    "bridge": { "status": "online" }
   },
   "ai_state": "RUNNING",
-  "top_processes": [{"name": "/Users/ahmadabdullah/.local/bin/claude", "mem": "827.352", "cpu": "0.0"},{"name": "/Users/ahmadabdullah/.local/bin/claude", "mem": "791.633", "cpu": "15.2"},{"name": "/Users/ahmadabdullah/.local/bin/claude", "mem": "722.242", "cpu": "0.0"},{"name": "/Users/ahmadabdullah/.bun/bin/bun", "mem": "547.004", "cpu": "1.0"},{"name": "/Users/ahmadabdullah/.local/bin/claude", "mem": "499.645", "cpu": "0.0"}]
+  "top_processes": [
+    {
+      "name": "/System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mds_stores",
+      "mem": "578.5",
+      "cpu": "0.4"
+    },
+    { "name": "/Users/ahmadabdullah/.local/bin/claude", "mem": "524.883", "cpu": "0.0" },
+    { "name": "/Users/ahmadabdullah/.local/bin/claude", "mem": "481.328", "cpu": "2.8" },
+    { "name": "/Users/ahmadabdullah/.local/bin/claude", "mem": "469.113", "cpu": "0.0" },
+    {
+      "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+      "mem": "67.4961",
+      "cpu": "0.7"
+    }
+  ]
 }

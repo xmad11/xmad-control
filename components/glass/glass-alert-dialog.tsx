@@ -1,8 +1,8 @@
 "use client"
 
-import * as React from "react"
-import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
 import { cn } from "@/lib/utils"
+import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
+import * as React from "react"
 import { glassButtonVariants } from "./glass-button"
 
 const GlassAlertDialog = AlertDialogPrimitive.Root
@@ -20,14 +20,13 @@ const GlassAlertDialogOverlay = React.forwardRef<
       "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm",
       "data-[state=open]:animate-in data-[state=closed]:animate-out",
       "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-      className,
+      className
     )}
     {...props}
     ref={ref}
   />
 ))
 GlassAlertDialogOverlay.displayName = AlertDialogPrimitive.Overlay.displayName
-
 
 const GlassAlertDialogContent = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Content>,
@@ -50,7 +49,7 @@ const GlassAlertDialogContent = React.forwardRef<
         // Glass highlight
         "before:absolute before:inset-0 before:rounded-2xl",
         "before:bg-gradient-to-b before:from-white/15 before:to-transparent before:pointer-events-none",
-        className,
+        className
       )}
       {...props}
     />
@@ -59,13 +58,19 @@ const GlassAlertDialogContent = React.forwardRef<
 GlassAlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName
 
 const GlassAlertDialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("relative z-10 flex flex-col gap-2 text-center sm:text-left", className)} {...props} />
+  <div
+    className={cn("relative z-10 flex flex-col gap-2 text-center sm:text-left", className)}
+    {...props}
+  />
 )
 GlassAlertDialogHeader.displayName = "GlassAlertDialogHeader"
 
 const GlassAlertDialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn("relative z-10 flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-6", className)}
+    className={cn(
+      "relative z-10 flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-6",
+      className
+    )}
     {...props}
   />
 )
@@ -75,7 +80,11 @@ const GlassAlertDialogTitle = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Title>
 >(({ className, ...props }, ref) => (
-  <AlertDialogPrimitive.Title ref={ref} className={cn("text-lg font-semibold text-white", className)} {...props} />
+  <AlertDialogPrimitive.Title
+    ref={ref}
+    className={cn("text-lg font-semibold text-white", className)}
+    {...props}
+  />
 ))
 GlassAlertDialogTitle.displayName = AlertDialogPrimitive.Title.displayName
 
@@ -83,7 +92,11 @@ const GlassAlertDialogDescription = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Description>
 >(({ className, ...props }, ref) => (
-  <AlertDialogPrimitive.Description ref={ref} className={cn("text-sm text-white/60", className)} {...props} />
+  <AlertDialogPrimitive.Description
+    ref={ref}
+    className={cn("text-sm text-white/60", className)}
+    {...props}
+  />
 ))
 GlassAlertDialogDescription.displayName = AlertDialogPrimitive.Description.displayName
 

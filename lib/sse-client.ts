@@ -1,11 +1,16 @@
 /* ═══════════════════════════════════════════════════════════════════════════════
-   SSE CLIENT — XMAD Dashboard Real-time Streaming
+   SSE CLIENT — XMAD Dashboard (Hardened)
    Server-Sent Events client hook for live system stats
+
+   Performance features:
+   - AbortController for proper cancellation
+   - Visibility pause when tab hidden
+   - Exponential backoff on retry
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -18,14 +23,20 @@ export interface SSEMessage<T = unknown> {
 }
 
 export interface SSEOptions {
-  /** Reconnection delay in ms (default: 3000) */
+  /** Initial reconnection delay in ms (default: 1000) */
   reconnectDelay?: number
 
-  /** Maximum reconnection attempts (default: Infinity) */
+  /** Maximum reconnection delay in ms (default: 30000) */
+  maxReconnectDelay?: number
+
+  /** Maximum reconnection attempts (default: 10) */
   maxReconnectAttempts?: number
 
   /** Enable auto-reconnect (default: true) */
   autoReconnect?: boolean
+
+  /** Pause when tab is hidden (default: true) */
+  pauseOnHidden?: boolean
 
   /** Callback when connection opens */
   onOpen?: () => void
@@ -42,6 +53,7 @@ export interface SSEState<T> {
   isConnected: boolean
   error: Error | null
   lastUpdate: number | null
+  isPaused: boolean
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -54,11 +66,15 @@ export function useSSE<T = unknown>(
 ): SSEState<T> & {
   reconnect: () => void
   disconnect: () => void
+  pause: () => void
+  resume: () => void
 } {
   const {
-    reconnectDelay = 3000,
-    maxReconnectAttempts = Infinity,
+    reconnectDelay = 1000,
+    maxReconnectDelay = 30000,
+    maxReconnectAttempts = 10,
     autoReconnect = true,
+    pauseOnHidden = true,
     onOpen,
     onClose,
     onError,
@@ -68,32 +84,69 @@ export function useSSE<T = unknown>(
   const [isConnected, setIsConnected] = useState(false)
   const [error, setError] = useState<Error | null>(null)
   const [lastUpdate, setLastUpdate] = useState<number | null>(null)
+  const [isPaused, setIsPaused] = useState(false)
 
+  // Refs for cleanup and state tracking
   const eventSourceRef = useRef<EventSource | null>(null)
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const reconnectAttemptsRef = useRef(0)
+  const abortControllerRef = useRef<AbortController | null>(null)
+  const currentDelayRef = useRef(reconnectDelay)
 
-  // Cleanup function
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // EXPONENTIAL BACKOFF
+  // ═══════════════════════════════════════════════════════════════════════════════
+
+  const getNextDelay = useCallback(() => {
+    const delay = Math.min(
+      currentDelayRef.current * 2 ** reconnectAttemptsRef.current,
+      maxReconnectDelay
+    )
+    return delay
+  }, [maxReconnectDelay])
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // CLEANUP
+  // ═══════════════════════════════════════════════════════════════════════════════
+
   const cleanup = useCallback(() => {
+    // Abort any pending requests
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+      abortControllerRef.current = null
+    }
+
+    // Close EventSource
     if (eventSourceRef.current) {
       eventSourceRef.current.close()
       eventSourceRef.current = null
     }
+
+    // Clear reconnect timeout
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current)
       reconnectTimeoutRef.current = null
     }
+
     setIsConnected(false)
   }, [])
 
-  // Connect function
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // CONNECT
+  // ═══════════════════════════════════════════════════════════════════════════════
+
   const connect = useCallback(() => {
+    // Don't connect if paused
+    if (isPaused) return
+
     // Clean up existing connection
     cleanup()
 
+    // Create new AbortController for this connection
+    abortControllerRef.current = new AbortController()
+
     try {
       const eventSource = new EventSource(endpoint)
-
       eventSourceRef.current = eventSource
 
       // Connection opened
@@ -101,6 +154,7 @@ export function useSSE<T = unknown>(
         setIsConnected(true)
         setError(null)
         reconnectAttemptsRef.current = 0
+        currentDelayRef.current = reconnectDelay
         onOpen?.()
       }
 
@@ -118,22 +172,23 @@ export function useSSE<T = unknown>(
       }
 
       // Error occurred
-      eventSource.onerror = (eventError) => {
-        const err = new Error(eventError instanceof Event ? eventError.type : "SSE error")
+      eventSource.onerror = () => {
+        const err = new Error("SSE connection error")
         setError(err)
         setIsConnected(false)
 
         onError?.(err)
 
-        // Auto-reconnect if enabled
-        if (
-          autoReconnect &&
-          reconnectAttemptsRef.current < maxReconnectAttempts
-        ) {
+        // Auto-reconnect with exponential backoff
+        if (autoReconnect && reconnectAttemptsRef.current < maxReconnectAttempts) {
           reconnectAttemptsRef.current++
+          const delay = getNextDelay()
+
           reconnectTimeoutRef.current = setTimeout(() => {
-            connect()
-          }, reconnectDelay)
+            if (!abortControllerRef.current?.signal.aborted) {
+              connect()
+            }
+          }, delay)
         }
       }
     } catch (err) {
@@ -142,21 +197,48 @@ export function useSSE<T = unknown>(
       setIsConnected(false)
       onError?.(error)
     }
-  }, [endpoint, autoReconnect, maxReconnectAttempts, reconnectDelay, onOpen, onError, cleanup])
+  }, [
+    endpoint,
+    autoReconnect,
+    maxReconnectAttempts,
+    reconnectDelay,
+    onOpen,
+    onError,
+    cleanup,
+    isPaused,
+    getNextDelay,
+  ])
 
-  // Manual reconnect
-  const reconnect = useCallback(() => {
-    reconnectAttemptsRef.current = 0
-    connect()
-  }, [connect])
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // VISIBILITY HANDLING
+  // ═══════════════════════════════════════════════════════════════════════════════
 
-  // Manual disconnect
-  const disconnect = useCallback(() => {
-    cleanup()
-    onClose?.()
-  }, [cleanup, onClose])
+  useEffect(() => {
+    if (!pauseOnHidden) return
 
-  // Initial connection
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Pause when tab is hidden
+        cleanup()
+        setIsPaused(true)
+      } else {
+        // Resume when tab becomes visible
+        setIsPaused(false)
+        connect()
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+    }
+  }, [pauseOnHidden, cleanup, connect])
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // INITIAL CONNECTION & CLEANUP
+  // ═══════════════════════════════════════════════════════════════════════════════
+
   useEffect(() => {
     connect()
 
@@ -165,13 +247,42 @@ export function useSSE<T = unknown>(
     }
   }, [connect, cleanup])
 
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // MANUAL CONTROLS
+  // ═══════════════════════════════════════════════════════════════════════════════
+
+  const reconnect = useCallback(() => {
+    reconnectAttemptsRef.current = 0
+    currentDelayRef.current = reconnectDelay
+    setIsPaused(false)
+    connect()
+  }, [connect, reconnectDelay])
+
+  const disconnect = useCallback(() => {
+    cleanup()
+    onClose?.()
+  }, [cleanup, onClose])
+
+  const pause = useCallback(() => {
+    cleanup()
+    setIsPaused(true)
+  }, [cleanup])
+
+  const resume = useCallback(() => {
+    setIsPaused(false)
+    connect()
+  }, [connect])
+
   return {
     data,
     isConnected,
     error,
     lastUpdate,
+    isPaused,
     reconnect,
     disconnect,
+    pause,
+    resume,
   }
 }
 
@@ -188,8 +299,10 @@ export interface SystemStats {
 
 export function useSystemStats() {
   return useSSE<SystemStats>("/api/xmad/events", {
-    reconnectDelay: 5000,
-    maxReconnectAttempts: Infinity,
+    reconnectDelay: 1000,
+    maxReconnectDelay: 30000,
+    maxReconnectAttempts: 10,
     autoReconnect: true,
+    pauseOnHidden: true,
   })
 }

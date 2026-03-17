@@ -1,8 +1,8 @@
 "use client"
 
-import * as React from "react"
-import { Check } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Check } from "lucide-react"
+import * as React from "react"
 
 interface TimelineItem {
   id: string
@@ -35,7 +35,9 @@ const GlassTimeline = React.forwardRef<HTMLDivElement, GlassTimelineProps>(
                     <div
                       className={cn(
                         "w-24 h-0.5 mx-2",
-                        item.status === "completed" ? "bg-linear-to-r from-cyan-500 to-blue-500" : "bg-white/20",
+                        item.status === "completed"
+                          ? "bg-linear-to-r from-cyan-500 to-blue-500"
+                          : "bg-white/20"
                       )}
                     />
                   )}
@@ -45,7 +47,9 @@ const GlassTimeline = React.forwardRef<HTMLDivElement, GlassTimelineProps>(
                 <div className="mt-4 text-center max-w-37.5">
                   <h4 className="font-medium text-white text-sm">{item.title}</h4>
                   {item.date && <p className="text-xs text-white/40 mt-1">{item.date}</p>}
-                  {item.description && <p className="text-xs text-white/60 mt-2">{item.description}</p>}
+                  {item.description && (
+                    <p className="text-xs text-white/60 mt-2">{item.description}</p>
+                  )}
                 </div>
               </div>
             ))}
@@ -65,7 +69,9 @@ const GlassTimeline = React.forwardRef<HTMLDivElement, GlassTimelineProps>(
                 <div
                   className={cn(
                     "w-0.5 flex-1 mt-2",
-                    item.status === "completed" ? "bg-linear-to-b from-cyan-500 to-blue-500" : "bg-white/20",
+                    item.status === "completed"
+                      ? "bg-linear-to-b from-cyan-500 to-blue-500"
+                      : "bg-white/20"
                   )}
                 />
               )}
@@ -79,11 +85,14 @@ const GlassTimeline = React.forwardRef<HTMLDivElement, GlassTimelineProps>(
         ))}
       </div>
     )
-  },
+  }
 )
 GlassTimeline.displayName = "GlassTimeline"
 
-function GlassTimelineNode({ status, icon }: { status?: TimelineItem["status"]; icon?: React.ReactNode }) {
+function GlassTimelineNode({
+  status,
+  icon,
+}: { status?: TimelineItem["status"]; icon?: React.ReactNode }) {
   return (
     <div className="relative">
       {/* Glow for current */}
@@ -98,15 +107,22 @@ function GlassTimelineNode({ status, icon }: { status?: TimelineItem["status"]; 
           status === "completed" && "bg-linear-to-br from-cyan-500 to-blue-500 border-cyan-400/50",
           status === "current" && "bg-white/20 backdrop-blur-xl border-cyan-400/50",
           status === "upcoming" && "bg-white/5 backdrop-blur-xl border-white/20",
-          !status && "bg-white/10 backdrop-blur-xl border-white/20",
+          !status && "bg-white/10 backdrop-blur-xl border-white/20"
         )}
       >
         {status === "completed" ? (
           <Check className="w-5 h-5 text-white" />
         ) : icon ? (
-          <span className={cn("text-white/80", status === "current" && "text-cyan-400")}>{icon}</span>
+          <span className={cn("text-white/80", status === "current" && "text-cyan-400")}>
+            {icon}
+          </span>
         ) : (
-          <div className={cn("w-3 h-3 rounded-full", status === "current" ? "bg-cyan-400" : "bg-white/40")} />
+          <div
+            className={cn(
+              "w-3 h-3 rounded-full",
+              status === "current" ? "bg-cyan-400" : "bg-white/40"
+            )}
+          />
         )}
       </div>
     </div>
@@ -126,7 +142,7 @@ function GlassTimelineCard({ item }: { item: TimelineItem }) {
         className={cn(
           "relative rounded-xl border p-4",
           "backdrop-blur-xl transition-all duration-300",
-          isCurrent ? "bg-white/15 border-white/30" : "bg-white/5 border-white/10 hover:bg-white/10",
+          isCurrent ? "bg-white/15 border-white/30" : "bg-white/5 border-white/10 hover:bg-white/10"
         )}
       >
         <div className="flex items-start justify-between gap-2">

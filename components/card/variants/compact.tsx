@@ -8,13 +8,15 @@ import { OptimizedImage } from "@/components/images"
 import type { PriceTier } from "@/types/restaurant"
 import { memo } from "react"
 
+type PriceProp = PriceTier | string
+
 export interface CompactVariantProps {
   images: string[]
   alt: string
   title: string
   cuisine?: string
   rating?: number
-  price?: PriceTier
+  price?: PriceProp
   href?: string
   blurHash?: string
 }

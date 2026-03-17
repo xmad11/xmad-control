@@ -1,26 +1,54 @@
 /* ═══════════════════════════════════════════════════════════════════════════════
-   Chat Interface Component
+   Chat Interface Component (Hardened)
+   Security: HTML escaping, XSS prevention
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-"use client";
+"use client"
 
-import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Mic, MicOff, Volume2, VolumeX, Loader2 } from "lucide-react";
+import { Loader2, Mic, MicOff, Send, Volume2, VolumeX } from "lucide-react"
+import { useCallback, useEffect, useRef, useState } from "react"
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SECURITY: HTML ESCAPING
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Escape HTML entities to prevent XSS attacks
+ * Also strips potentially dangerous markdown HTML injections
+ */
+function sanitizeContent(content: string): string {
+  return (
+    content
+      // Escape HTML entities
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;")
+      // Remove markdown raw HTML blocks (common injection vector)
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "")
+      .replace(/javascript:/gi, "")
+      .replace(/on\w+\s*=/gi, "")
+      // Limit length to prevent DoS
+      .slice(0, 10000)
+  )
+}
 
 interface ChatMessage {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: Date;
+  id: string
+  role: "user" | "assistant"
+  content: string
+  timestamp: Date
 }
 
 interface ChatInterfaceProps {
-  placeholder?: string;
-  enableVoice?: boolean;
-  enableTTS?: boolean;
-  maxHeight?: string;
-  onSend: (message: string) => Promise<string>;
-  initialMessages?: ChatMessage[];
+  placeholder?: string
+  enableVoice?: boolean
+  enableTTS?: boolean
+  maxHeight?: string
+  onSend: (message: string) => Promise<string>
+  initialMessages?: ChatMessage[]
 }
 
 export function ChatInterface({
@@ -31,87 +59,84 @@ export function ChatInterface({
   onSend,
   initialMessages = [],
 }: ChatInterfaceProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const [ttsEnabled, setTtsEnabled] = useState(enableTTS);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
+  const [input, setInput] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [isRecording, setIsRecording] = useState(false)
+  const [ttsEnabled, setTtsEnabled] = useState(enableTTS)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages])
 
   // Handle sending message
   const handleSend = useCallback(async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading) return
 
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       role: "user",
       content: input.trim(),
       timestamp: new Date(),
-    };
+    }
 
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
-    setIsLoading(true);
+    setMessages((prev) => [...prev, userMessage])
+    setInput("")
+    setIsLoading(true)
 
     try {
-      const response = await onSend(userMessage.content);
+      const response = await onSend(userMessage.content)
 
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: response,
         timestamp: new Date(),
-      };
+      }
 
-      setMessages((prev) => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage])
 
       // TTS for response if enabled
       if (ttsEnabled && typeof window !== "undefined" && "speechSynthesis" in window) {
-        const utterance = new SpeechSynthesisUtterance(response);
-        window.speechSynthesis.speak(utterance);
+        const utterance = new SpeechSynthesisUtterance(response)
+        window.speechSynthesis.speak(utterance)
       }
-    } catch (error) {
+    } catch (_error) {
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: "Sorry, there was an error processing your request.",
         timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMessage]);
+      }
+      setMessages((prev) => [...prev, errorMessage])
     } finally {
-      setIsLoading(false);
-      inputRef.current?.focus();
+      setIsLoading(false)
+      inputRef.current?.focus()
     }
-  }, [input, isLoading, onSend, ttsEnabled]);
+  }, [input, isLoading, onSend, ttsEnabled])
 
   // Handle key press
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+      e.preventDefault()
+      handleSend()
     }
-  };
+  }
 
   // Voice recording toggle (placeholder - actual implementation would use Web Speech API)
   const toggleRecording = useCallback(() => {
-    if (!enableVoice) return;
-    setIsRecording((prev) => !prev);
+    if (!enableVoice) return
+    setIsRecording((prev) => !prev)
     // TODO: Implement actual voice recognition
-  }, [enableVoice]);
+  }, [enableVoice])
 
   return (
     <div className="flex flex-col h-full">
       {/* Messages Area */}
-      <div
-        className="flex-1 overflow-y-auto p-4 space-y-4"
-        style={{ maxHeight }}
-      >
+      <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ maxHeight }}>
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-white/40">
             <p>Start a conversation...</p>
@@ -120,9 +145,7 @@ export function ChatInterface({
           messages.map((message) => (
             <div
               key={message.id}
-              className={`flex ${
-                message.role === "user" ? "justify-end" : "justify-start"
-              }`}
+              className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
                 className={`max-w-[80%] rounded-2xl px-4 py-2 ${
@@ -131,7 +154,7 @@ export function ChatInterface({
                     : "bg-white/10 text-white/90"
                 }`}
               >
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                <p className="text-sm whitespace-pre-wrap">{sanitizeContent(message.content)}</p>
                 <p className="text-xs text-white/40 mt-1">
                   {message.timestamp.toLocaleTimeString()}
                 </p>
@@ -175,11 +198,7 @@ export function ChatInterface({
                   : "bg-white/5 text-white/60 hover:bg-white/10"
               }`}
             >
-              {isRecording ? (
-                <MicOff className="h-5 w-5" />
-              ) : (
-                <Mic className="h-5 w-5" />
-              )}
+              {isRecording ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
             </button>
           )}
 
@@ -193,11 +212,7 @@ export function ChatInterface({
                   : "bg-white/5 text-white/60 hover:bg-white/10"
               }`}
             >
-              {ttsEnabled ? (
-                <Volume2 className="h-5 w-5" />
-              ) : (
-                <VolumeX className="h-5 w-5" />
-              )}
+              {ttsEnabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
             </button>
           )}
 
@@ -212,7 +227,7 @@ export function ChatInterface({
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default ChatInterface;
+export default ChatInterface

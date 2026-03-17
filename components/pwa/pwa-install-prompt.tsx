@@ -3,54 +3,54 @@
    Glass morphism theme consistent with dashboard
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-'use client';
+"use client"
 
-import { Download, RefreshCw, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { GlassCard } from '@/components/glass/glass-card';
-import { usePWAInstall } from '@/lib/pwa';
+import { GlassCard } from "@/components/glass/glass-card"
+import { usePWAInstall } from "@/lib/pwa"
+import { Download, RefreshCw, X } from "lucide-react"
+import { useEffect, useState } from "react"
 
 export function PWAInstallPrompt() {
-  const { isInstallable, isInstalled, promptInstall } = usePWAInstall();
-  const [showPrompt, setShowPrompt] = useState(false);
-  const [hasDismissed, setHasDismissed] = useState(false);
+  const { isInstallable, isInstalled, promptInstall } = usePWAInstall()
+  const [showPrompt, setShowPrompt] = useState(false)
+  const [hasDismissed, setHasDismissed] = useState(false)
 
   useEffect(() => {
     // Show prompt after 5 seconds if installable and not dismissed
     if (isInstallable && !isInstalled && !hasDismissed) {
-      const timer = setTimeout(() => setShowPrompt(true), 5000);
-      return () => clearTimeout(timer);
+      const timer = setTimeout(() => setShowPrompt(true), 5000)
+      return () => clearTimeout(timer)
     }
-  }, [isInstallable, isInstalled, hasDismissed]);
+  }, [isInstallable, isInstalled, hasDismissed])
 
   const handleInstall = async () => {
-    await promptInstall();
-    setShowPrompt(false);
-  };
+    await promptInstall()
+    setShowPrompt(false)
+  }
 
   const handleDismiss = () => {
-    setShowPrompt(false);
-    setHasDismissed(true);
+    setShowPrompt(false)
+    setHasDismissed(true)
     // Remember dismissal for 7 days
-    localStorage.setItem('pwa-install-dismissed', Date.now().toString());
-  };
+    localStorage.setItem("pwa-install-dismissed", Date.now().toString())
+  }
 
   // Check if previously dismissed within 7 days
   useEffect(() => {
-    const dismissed = localStorage.getItem('pwa-install-dismissed');
+    const dismissed = localStorage.getItem("pwa-install-dismissed")
     if (dismissed) {
-      const daysSinceDismissal = (Date.now() - parseInt(dismissed)) / (1000 * 60 * 60 * 24);
+      const daysSinceDismissal = (Date.now() - Number.parseInt(dismissed)) / (1000 * 60 * 60 * 24)
       if (daysSinceDismissal < 7) {
-        setHasDismissed(true);
+        setHasDismissed(true)
       } else {
         // Reset after 7 days
-        localStorage.removeItem('pwa-install-dismissed');
+        localStorage.removeItem("pwa-install-dismissed")
       }
     }
-  }, []);
+  }, [])
 
   if (!showPrompt || isInstalled) {
-    return null;
+    return null
   }
 
   return (
@@ -79,9 +79,7 @@ export function PWAInstallPrompt() {
 
           {/* Text */}
           <div className="flex-1 min-w-0">
-            <h3 className="text-white font-semibold mb-1">
-              Install XMAD Control
-            </h3>
+            <h3 className="text-white font-semibold mb-1">Install XMAD Control</h3>
             <p className="text-sm text-slate-400 mb-3">
               Add to home screen for quick access and offline support
             </p>
@@ -98,5 +96,5 @@ export function PWAInstallPrompt() {
         </div>
       </GlassCard>
     </div>
-  );
+  )
 }

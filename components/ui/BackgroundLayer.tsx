@@ -13,9 +13,7 @@ export function BackgroundLayer() {
   return (
     <>
       {/* Base gradient */}
-      <div
-        className={`fixed inset-0 z-0 bg-gradient-to-br ${BACKGROUND.GRADIENT}`}
-      />
+      <div className={`fixed inset-0 z-0 bg-gradient-to-br ${BACKGROUND.GRADIENT}`} />
 
       {/* Animated blobs */}
       {BACKGROUND.BLOBS.map((blob, index) => (

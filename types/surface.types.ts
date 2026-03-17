@@ -18,18 +18,13 @@ export type SurfaceId =
   | "settings"
   | "chat"
   | "terminal"
+  | "showcase"
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SURFACE DIRECTIONS (for positioning)
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export type SurfaceDirection =
-  | "center"
-  | "up"
-  | "down"
-  | "left"
-  | "right"
-  | "fullscreen"
+export type SurfaceDirection = "center" | "up" | "down" | "left" | "right" | "fullscreen"
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SURFACE DEFINITION
@@ -128,4 +123,32 @@ export interface SurfaceConfig {
 export interface ActiveSurface {
   id: SurfaceId
   timestamp: number
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// DASHBOARD DATA TYPES (for overview surface)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export interface SystemStats {
+  cpu: number
+  memory: { used: number; total: number; percentage: number }
+  disk: { used: number; total: number; percentage: number }
+  uptime: number
+}
+
+export interface ServiceStatus {
+  openclaw: { running: boolean; pid?: number; memoryUsage?: number }
+  tailscale: { connected: boolean; ip?: string }
+}
+
+export interface ProcessInfo {
+  pid: number
+  name: string
+  cpu: number
+  memory: number // MB
+  command: string
+}
+
+export interface ProcessesResponse {
+  processes: ProcessInfo[]
 }

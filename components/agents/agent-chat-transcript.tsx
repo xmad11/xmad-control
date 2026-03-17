@@ -1,23 +1,23 @@
-"use client";
+"use client"
 
-import React, { useRef, useEffect, useState } from "react";
-import { ArrowDown, Bot, User } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { type AgentState } from "./hooks/use-audio-visualizer";
+import { cn } from "@/lib/utils"
+import { AnimatePresence, motion } from "framer-motion"
+import { ArrowDown, Bot, User } from "lucide-react"
+import React, { useRef, useEffect, useState } from "react"
+import type { AgentState } from "./hooks/use-audio-visualizer"
 
 export interface ChatMessage {
-  id: string;
-  content: string;
-  timestamp: Date;
-  sender: "user" | "agent";
+  id: string
+  content: string
+  timestamp: Date
+  sender: "user" | "agent"
 }
 
 export interface AgentChatTranscriptProps {
-  messages?: ChatMessage[];
-  agentState?: AgentState;
-  agentName?: string;
-  className?: string;
+  messages?: ChatMessage[]
+  agentState?: AgentState
+  agentName?: string
+  className?: string
 }
 
 export function AgentChatTranscript({
@@ -26,33 +26,33 @@ export function AgentChatTranscript({
   agentName = "AI Assistant",
   className,
 }: AgentChatTranscriptProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isAtBottom, setIsAtBottom] = useState(true);
-  const [showScrollButton, setShowScrollButton] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [isAtBottom, setIsAtBottom] = useState(true)
+  const [showScrollButton, setShowScrollButton] = useState(false)
 
-  const scrollToBottom = () => {
+  const scrollToBottom = React.useCallback(() => {
     if (containerRef.current) {
       containerRef.current.scrollTo({
         top: containerRef.current.scrollHeight,
         behavior: "smooth",
-      });
+      })
     }
-  };
+  }, [])
 
   useEffect(() => {
     if (isAtBottom) {
-      scrollToBottom();
+      scrollToBottom()
     }
-  }, [messages, isAtBottom]);
+  }, [isAtBottom, scrollToBottom])
 
   const handleScroll = () => {
     if (containerRef.current) {
-      const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
-      const isBottom = scrollHeight - scrollTop - clientHeight < 50;
-      setIsAtBottom(isBottom);
-      setShowScrollButton(!isBottom);
+      const { scrollTop, scrollHeight, clientHeight } = containerRef.current
+      const isBottom = scrollHeight - scrollTop - clientHeight < 50
+      setIsAtBottom(isBottom)
+      setShowScrollButton(!isBottom)
     }
-  };
+  }
 
   return (
     <div className={cn("relative flex flex-col h-full", className)}>
@@ -109,20 +109,20 @@ export function AgentChatTranscript({
         )}
       </AnimatePresence>
     </div>
-  );
+  )
 }
 
 interface ChatBubbleProps {
-  message: ChatMessage;
-  agentName: string;
+  message: ChatMessage
+  agentName: string
 }
 
 function ChatBubble({ message, agentName }: ChatBubbleProps) {
-  const isUser = message.sender === "user";
+  const isUser = message.sender === "user"
   const formattedTime = message.timestamp.toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
-  });
+  })
 
   return (
     <motion.div
@@ -139,19 +139,13 @@ function ChatBubble({ message, agentName }: ChatBubbleProps) {
             : "bg-gradient-to-br from-cyan-500 to-blue-500"
         )}
       >
-        {isUser ? (
-          <User className="w-4 h-4 text-white" />
-        ) : (
-          <Bot className="w-4 h-4 text-white" />
-        )}
+        {isUser ? <User className="w-4 h-4 text-white" /> : <Bot className="w-4 h-4 text-white" />}
       </div>
 
       {/* Message Content */}
       <div className={cn("flex flex-col gap-1 max-w-[75%]", isUser && "items-end")}>
         <div className="flex items-center gap-2">
-          {!isUser && (
-            <span className="text-xs font-medium text-cyan-400">{agentName}</span>
-          )}
+          {!isUser && <span className="text-xs font-medium text-cyan-400">{agentName}</span>}
           <span className="text-xs text-white/40">{formattedTime}</span>
         </div>
         <div
@@ -166,7 +160,7 @@ function ChatBubble({ message, agentName }: ChatBubbleProps) {
         </div>
       </div>
     </motion.div>
-  );
+  )
 }
 
 function ThinkingIndicator() {
@@ -182,20 +176,20 @@ function ThinkingIndicator() {
           }}
           transition={{
             duration: 1,
-            repeat: Infinity,
+            repeat: Number.POSITIVE_INFINITY,
             delay: i * 0.2,
             ease: "easeInOut",
           }}
         />
       ))}
     </div>
-  );
+  )
 }
 
 // Standalone thinking indicator component
 export interface AgentChatIndicatorProps {
-  size?: "sm" | "md" | "lg";
-  className?: string;
+  size?: "sm" | "md" | "lg"
+  className?: string
 }
 
 export function AgentChatIndicator({ size = "md", className }: AgentChatIndicatorProps) {
@@ -203,7 +197,7 @@ export function AgentChatIndicator({ size = "md", className }: AgentChatIndicato
     sm: "w-2 h-2",
     md: "w-3 h-3",
     lg: "w-4 h-4",
-  };
+  }
 
   return (
     <div className={cn("flex items-center gap-1.5", className)}>
@@ -217,12 +211,12 @@ export function AgentChatIndicator({ size = "md", className }: AgentChatIndicato
           }}
           transition={{
             duration: 1,
-            repeat: Infinity,
+            repeat: Number.POSITIVE_INFINITY,
             delay: i * 0.2,
             ease: "easeInOut",
           }}
         />
       ))}
     </div>
-  );
+  )
 }

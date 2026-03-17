@@ -1,8 +1,8 @@
 "use client"
 
-import * as React from "react"
-import { X, ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { ChevronLeft, ChevronRight, X } from "lucide-react"
+import * as React from "react"
 
 interface SpotlightStep {
   target: string // CSS selector
@@ -122,7 +122,14 @@ function GlassSpotlight({ steps, open = false, onOpenChange, onComplete }: Glass
             />
           </mask>
         </defs>
-        <rect x="0" y="0" width="100%" height="100%" fill="rgba(0,0,0,0.75)" mask="url(#spotlight-mask)" />
+        <rect
+          x="0"
+          y="0"
+          width="100%"
+          height="100%"
+          fill="rgba(0,0,0,0.75)"
+          mask="url(#spotlight-mask)"
+        />
       </svg>
 
       {/* Spotlight border */}
@@ -182,7 +189,7 @@ function GlassSpotlight({ steps, open = false, onOpenChange, onComplete }: Glass
                     "transition-colors",
                     currentStep === 0
                       ? "text-white/20 cursor-not-allowed"
-                      : "text-white/60 hover:text-white hover:bg-white/10",
+                      : "text-white/60 hover:text-white hover:bg-white/10"
                   )}
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -194,7 +201,7 @@ function GlassSpotlight({ steps, open = false, onOpenChange, onComplete }: Glass
                   className={cn(
                     "flex items-center gap-1 px-4 py-1.5 rounded-lg text-sm font-medium",
                     "bg-linear-to-r from-cyan-500 to-blue-500 text-white",
-                    "hover:from-cyan-400 hover:to-blue-400 transition-all",
+                    "hover:from-cyan-400 hover:to-blue-400 transition-all"
                   )}
                 >
                   {currentStep === steps.length - 1 ? "Finish" : "Next"}

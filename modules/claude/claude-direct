@@ -1,10 +1,19 @@
 #!/bin/bash
 
 # Direct Claude Code using npm with Z AI proxy
+# SECURITY: Load API key from macOS Keychain (SSOT)
+
 export ANTHROPIC_BASE_URL="https://api.z.ai/api/anthropic"
-export ANTHROPIC_AUTH_TOKEN="c6645e09e4bc4fb99120a0461bd7647e.isY3GgE277vVy9YA"
+export ANTHROPIC_AUTH_TOKEN=$(security find-generic-password -s "z.ai" -a "openclaw" -w 2>/dev/null || echo "")
 export ANTHROPIC_DEFAULT_SONNET_MODEL="glm-4.6"
 export ANTHROPIC_DEFAULT_OPUS_MODEL="glm-4.6"
+
+# Verify key was loaded
+if [ -z "$ANTHROPIC_AUTH_TOKEN" ]; then
+    echo "❌ Error: Z AI API key not found in Keychain"
+    echo "   Add it with: security add-generic-password -a 'openclaw' -s 'z.ai' -w 'YOUR_KEY'"
+    exit 1
+fi
 
 echo "🚀 Claude Code CLI with Z AI (GLM-4.6)"
 echo "========================================="

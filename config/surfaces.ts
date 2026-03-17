@@ -3,17 +3,28 @@
    Surface registry and configuration for the dashboard runtime
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-import type { SurfaceDefinition, SurfaceConfig } from "@/types/surface.types"
+import type { SurfaceConfig, SurfaceDefinition, SurfaceId } from "@/types/surface.types"
+import {
+  Brain,
+  HardDrive,
+  LayoutDashboard,
+  MessageSquare,
+  Monitor,
+  Settings,
+  Sparkles,
+  Terminal,
+  Zap,
+} from "lucide-react"
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SURFACE REGISTRY
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export const SURFACE_REGISTRY: Record<string, SurfaceDefinition> = {
+export const SURFACE_REGISTRY: Record<SurfaceId, SurfaceDefinition> = {
   overview: {
     id: "overview",
     direction: "center",
-    icon: /* @__PURE__ */ () => require("lucide-react").LayoutDashboard,
+    icon: LayoutDashboard,
     label: "Overview",
     lazy: () => import("@/surfaces/overview.surface"),
     zIndex: 10,
@@ -22,7 +33,7 @@ export const SURFACE_REGISTRY: Record<string, SurfaceDefinition> = {
   memory: {
     id: "memory",
     direction: "center",
-    icon: /* @__PURE__ */ () => require("lucide-react").Brain,
+    icon: Brain,
     label: "Memory",
     lazy: () => import("@/surfaces/memory.surface"),
     zIndex: 10,
@@ -31,7 +42,7 @@ export const SURFACE_REGISTRY: Record<string, SurfaceDefinition> = {
   automation: {
     id: "automation",
     direction: "center",
-    icon: /* @__PURE__ */ () => require("lucide-react").Zap,
+    icon: Zap,
     label: "Automation",
     lazy: () => import("@/surfaces/automation.surface"),
     zIndex: 10,
@@ -40,7 +51,7 @@ export const SURFACE_REGISTRY: Record<string, SurfaceDefinition> = {
   settings: {
     id: "settings",
     direction: "center",
-    icon: /* @__PURE__ */ () => require("lucide-react").Settings,
+    icon: Settings,
     label: "Settings",
     lazy: () => import("@/surfaces/settings.surface"),
     zIndex: 10,
@@ -49,7 +60,7 @@ export const SURFACE_REGISTRY: Record<string, SurfaceDefinition> = {
   screen: {
     id: "screen",
     direction: "fullscreen",
-    icon: /* @__PURE__ */ () => require("lucide-react").Monitor,
+    icon: Monitor,
     label: "Screen",
     lazy: () => import("@/surfaces/screen.surface"),
     zIndex: 50,
@@ -58,7 +69,7 @@ export const SURFACE_REGISTRY: Record<string, SurfaceDefinition> = {
   backups: {
     id: "backups",
     direction: "center",
-    icon: /* @__PURE__ */ () => require("lucide-react").HardDrive,
+    icon: HardDrive,
     label: "Backups",
     lazy: () => import("@/surfaces/backups.surface"),
     zIndex: 10,
@@ -67,7 +78,7 @@ export const SURFACE_REGISTRY: Record<string, SurfaceDefinition> = {
   chat: {
     id: "chat",
     direction: "right",
-    icon: /* @__PURE__ */ () => require("lucide-react").MessageSquare,
+    icon: MessageSquare,
     label: "Chat",
     lazy: () => import("@/surfaces/chat.surface"),
     zIndex: 100,
@@ -76,11 +87,20 @@ export const SURFACE_REGISTRY: Record<string, SurfaceDefinition> = {
   terminal: {
     id: "terminal",
     direction: "fullscreen",
-    icon: /* @__PURE__ */ () => require("lucide-react").Terminal,
+    icon: Terminal,
     label: "Terminal",
     lazy: () => import("@/surfaces/terminal.surface"),
     zIndex: 50,
     path: "/dashboard/terminal",
+  },
+  showcase: {
+    id: "showcase",
+    direction: "center",
+    icon: Sparkles,
+    label: "Showcase",
+    lazy: () => import("@/surfaces/showcase.surface"),
+    zIndex: 10,
+    path: "/dashboard/showcase",
   },
 }
 
@@ -89,12 +109,11 @@ export const SURFACE_REGISTRY: Record<string, SurfaceDefinition> = {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const TAB_CONFIG: SurfaceConfig[] = [
-  { value: "overview", icon: "LayoutDashboard", label: "Overview" },
   { value: "memory", icon: "Brain", label: "Memory" },
   { value: "automation", icon: "Zap", label: "Automation" },
+  { value: "overview", icon: "LayoutDashboard", label: "Overview" },
   { value: "screen", icon: "Monitor", label: "Screen" },
   { value: "backups", icon: "HardDrive", label: "Backups" },
-  { value: "settings", icon: "Settings", label: "Settings" },
 ]
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -123,7 +142,7 @@ export const SURFACE_Z_INDEX = {
 /**
  * Get surface definition by ID
  */
-export function getSurface(id: string): SurfaceDefinition | undefined {
+export function getSurface(id: SurfaceId): SurfaceDefinition | undefined {
   return SURFACE_REGISTRY[id]
 }
 

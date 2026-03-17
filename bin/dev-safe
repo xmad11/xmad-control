@@ -1,0 +1,265 @@
+#!/usr/bin/env bash
+
+# =========================================
+# xmad Dev Safe v4
+# Corrected for macOS + Bun
+# =========================================
+
+set -euo pipefail
+
+PROJECT_DIR="$HOME/xmad-control"
+PORT=3333
+RUNTIME_LIMIT=600
+LOCKFILE="/tmp/xmad-dev.lock"
+SUDO_CODE="5020"
+
+MAX_HEAP_MB=700
+MAX_FILES=4096          # Raised — 256 breaks Turbopack
+WORKER_LIMIT=2
+
+# ulimit -v and ulimit -u REMOVED — they break Bun and affect
+# the entire login session on macOS. Heap cap via NODE_OPTIONS
+# is the correct and only reliable memory control on macOS.
+
+RED='\033[0;31m'; GREEN='\033[0;32m'
+YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
+
+log()         { printf "${BLUE}[%s]${NC} %s\n" "$(date '+%H:%M:%S')" "$1"; }
+log_success() { printf "${GREEN}[%s]${NC} ✓ %s\n" "$(date '+%H:%M:%S')" "$1"; }
+log_warn()    { printf "${YELLOW}[%s]${NC} ⚠ %s\n" "$(date '+%H:%M:%S')" "$1"; }
+log_error()   { printf "${RED}[%s]${NC} ✗ %s\n" "$(date '+%H:%M:%S')" "$1"; }
+fail()        { log_error "$1"; exit 1; }
+
+verify_sudo_code() {
+  if [ "${SUDO_USER:-}" = "" ] && [ "$(id -u)" != "0" ]; then
+    read -rsp "Enter dev access code: " entered_code
+    echo ""
+    if [ "$entered_code" != "$SUDO_CODE" ]; then
+      log_error "Wrong code. Local dev is locked."
+      show_blocked_message
+      exit 1
+    fi
+  fi
+  log_success "Access code verified"
+}
+
+acquire_lock() {
+  exec 9>"$LOCKFILE"
+  if ! flock -n 9; then
+    fail "Another dev session is already running on port $PORT. Only one allowed at a time.
+To kill it: lsof -ti tcp:$PORT | xargs kill -9 && rm $LOCKFILE"
+  fi
+  log_success "Lock acquired"
+}
+
+release_lock() { flock -u 9 2>/dev/null || true; }
+
+release_port() {
+  local pid
+  pid="$(lsof -ti tcp:$PORT 2>/dev/null || true)"
+  if [ -n "$pid" ]; then
+    log_warn "Port $PORT occupied (PID $pid) — freeing"
+    kill -15 "$pid" 2>/dev/null || true
+    sleep 2
+    kill -0 "$pid" 2>/dev/null && kill -9 "$pid" 2>/dev/null || true
+    log_success "Port $PORT cleared"
+  else
+    log_success "Port $PORT is free"
+  fi
+}
+
+check_memory() {
+  local free_pages used_pct
+  free_pages=$(vm_stat | awk '/Pages free/ {gsub(/\./,"",$3); print $3}')
+  local free_mb=$(( free_pages * 4096 / 1024 / 1024 ))
+
+  if [ "$free_mb" -lt 800 ]; then
+    log_error "Only ${free_mb}MB RAM free. Need at least 800MB to run safely."
+    log_error "Current top processes:"
+    ps aux -m | awk 'NR<=6 {printf "  %-40s %s MB\n", $11, $6/1024}' 2>/dev/null || true
+    fail "Not enough free memory. Free RAM first."
+  fi
+  log_success "Memory OK — ${free_mb}MB free"
+}
+
+apply_limits() {
+  # Only safe ulimits on macOS:
+  ulimit -n "$MAX_FILES"   # File descriptors — raised to support Turbopack
+
+  # Memory controlled via NODE_OPTIONS env var (reliable on macOS + Bun)
+  export NODE_OPTIONS="--max-old-space-size=$MAX_HEAP_MB"
+  export NEXT_PRIVATE_MAX_WORKER_THREADS="$WORKER_LIMIT"
+  export NEXT_TELEMETRY_DISABLED=1
+  export PORT="$PORT"
+
+  log_success "Limits applied: heap=${MAX_HEAP_MB}MB, workers=${WORKER_LIMIT}, fds=${MAX_FILES}"
+}
+
+build_project() {
+  log "Building (no server)..."
+  cd "$PROJECT_DIR" || fail "Not found: $PROJECT_DIR"
+
+  # Do NOT rm -rf .next — incremental cache is valuable on HDD
+  if bun run build; then
+    log_success "Build passed"
+  else
+    fail "Build failed — check output above"
+  fi
+}
+
+monitor_memory() {
+  # Background monitor — kills app if it exceeds 1.01GB
+  local target_pid=$1
+  local limit_kb=$(( 1010 * 1024 ))
+
+  while kill -0 "$target_pid" 2>/dev/null; do
+    local mem_kb
+    mem_kb=$(ps -o rss= -p "$target_pid" 2>/dev/null || echo 0)
+    if [ "$mem_kb" -gt "$limit_kb" ]; then
+      log_error "Memory limit exceeded: ${mem_kb}KB > ${limit_kb}KB"
+      log_error "Killing app to protect system..."
+      kill -9 "$target_pid" 2>/dev/null || true
+      echo ""
+      echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      echo "⛔ APP KILLED — MEMORY LIMIT EXCEEDED"
+      echo "   Process used over 1.01GB RAM"
+      echo "   This is a bug in your code causing a memory leak."
+      echo "   Fix the leak, then run: dev-safe preview"
+      echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      return
+    fi
+    sleep 5
+  done
+}
+
+run_preview() {
+  log "Starting preview (10 min limit, 700MB heap, port $PORT only)..."
+
+  cat << 'EOF'
+
+╔══════════════════════════════════════════════════╗
+║         PREVIEW — RESTRICTED MODE               ║
+║  http://localhost:3333  •  10 min limit         ║
+╚══════════════════════════════════════════════════╝
+
+EOF
+
+  # Start the app with timeout + low CPU priority
+  # Port is hardcoded via env var — Next.js respects PORT
+  (
+    apply_limits
+    nice -n 15 timeout "$RUNTIME_LIMIT" bun run start
+  ) &
+
+  local app_pid=$!
+
+  # Start memory monitor in background
+  monitor_memory "$app_pid" &
+  local monitor_pid=$!
+
+  # Wait for app to finish
+  wait "$app_pid" 2>/dev/null
+  local exit_code=$?
+
+  kill "$monitor_pid" 2>/dev/null || true
+
+  case $exit_code in
+    124) log_warn "10 minute limit reached — preview stopped automatically" ;;
+    137) log_error "App was killed (OOM or signal)" ;;
+    0)   log_success "Preview stopped cleanly" ;;
+    *)   log_error "Preview exited with code $exit_code" ;;
+  esac
+}
+
+show_blocked_message() {
+  cat << 'EOF'
+
+╔══════════════════════════════════════════════════════════════╗
+║  ⛔  LOCAL DEV IS LOCKED ON THIS MACHINE                    ║
+╚══════════════════════════════════════════════════════════════╝
+
+This Mac Mini has 8GB RAM. Unrestricted local dev causes:
+  → Memory spike to 1.2GB+
+  → System swap thrash
+  → SSH/Tailscale becomes unreachable
+  → No recovery path without physical access
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ CORRECT TESTING WORKFLOW:
+
+  STEP 1 — Type check (instant, zero memory):
+    $ cd ~/xmad-control/platform-monorepo
+    $ bun run typecheck
+
+  STEP 2 — Lint (fast, zero memory):
+    $ bun run lint
+
+  STEP 3 — Build check only (no server):
+    $ dev-safe build
+
+  STEP 4 — Deploy and test online:
+    $ git push
+    → Vercel auto-deploys
+    → Test at your Vercel URL
+    → Zero local memory cost
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔐 EMERGENCY LOCAL PREVIEW (humans only):
+
+    $ sudo dev-safe preview
+    → Requires access code
+    → Port 3333 only
+    → 10 minute hard limit
+    → Auto-kills if >1.01GB RAM used
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️  DO NOT attempt to bypass this with:
+    bun dev / next dev / npm run dev / npx next / bun start
+
+All of the above will consume memory uncontrolled and may
+make this machine permanently unreachable.
+
+EOF
+}
+
+show_instructions() {
+  cat << 'EOF'
+
+  dev-safe build      → Compile only, no server (agents: use this)
+  dev-safe preview    → Requires code 5020, port 3333, 10 min limit
+
+EOF
+}
+
+main() {
+  local command="${1:-}"
+
+  case "$command" in
+    build)
+      acquire_lock
+      trap release_lock EXIT
+      check_memory
+      apply_limits
+      build_project
+      ;;
+    preview)
+      verify_sudo_code
+      acquire_lock
+      trap release_lock EXIT
+      check_memory
+      release_port
+      apply_limits
+      build_project
+      run_preview
+      ;;
+    *)
+      show_instructions
+      exit 0
+      ;;
+  esac
+}
+
+main "$@"

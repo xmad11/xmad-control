@@ -1,9 +1,9 @@
 "use client"
 
-import * as React from "react"
-import * as TabsPrimitive from "@radix-ui/react-tabs"
-import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
+import * as TabsPrimitive from "@radix-ui/react-tabs"
+import { AnimatePresence, motion } from "framer-motion"
+import * as React from "react"
 
 const GlassTabs = TabsPrimitive.Root
 
@@ -30,7 +30,7 @@ const GlassTabsList = React.forwardRef<
         "relative inline-flex h-12 items-center justify-center gap-1 rounded-xl p-1",
         "bg-white/10 backdrop-blur-xl border border-white/20",
         "shadow-[0_4px_16px_rgba(0,0,0,0.2)]",
-        className,
+        className
       )}
       aria-label="Tab navigation"
       {...props}
@@ -57,7 +57,7 @@ const GlassTabsTrigger = React.forwardRef<
       "data-[state=active]:before:rounded-lg data-[state=active]:before:bg-gradient-to-b",
       "data-[state=active]:before:from-white/20 data-[state=active]:before:to-transparent",
       "data-[state=active]:before:pointer-events-none",
-      className,
+      className
     )}
     {...props}
   />
@@ -70,7 +70,10 @@ const GlassTabsContent = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <TabsPrimitive.Content
     ref={ref}
-    className={cn("mt-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50", className)}
+    className={cn(
+      "mt-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50",
+      className
+    )}
     {...props}
   >
     <AnimatePresence mode="wait">

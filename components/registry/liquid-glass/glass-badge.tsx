@@ -1,19 +1,22 @@
 "use client"
 
-import type * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
+import { type VariantProps, cva } from "class-variance-authority"
+import type * as React from "react"
 
 const glassBadgeVariants = cva(
   cn(
     "inline-flex items-center rounded-full px-3 py-1 text-xs font-medium",
-    "backdrop-blur-xl border transition-all duration-300",
+    "backdrop-blur-xl border transition-all duration-300"
   ),
   {
     variants: {
       variant: {
         default: "bg-white/15 border-white/25 text-white",
-        primary: cn("bg-linear-to-r from-cyan-500/30 to-blue-500/30", "border-cyan-400/30 text-cyan-100"),
+        primary: cn(
+          "bg-linear-to-r from-cyan-500/30 to-blue-500/30",
+          "border-cyan-400/30 text-cyan-100"
+        ),
         success: cn("bg-emerald-500/20 border-emerald-400/30 text-emerald-100"),
         warning: cn("bg-amber-500/20 border-amber-400/30 text-amber-100"),
         destructive: cn("bg-red-500/20 border-red-400/30 text-red-100"),
@@ -29,7 +32,7 @@ const glassBadgeVariants = cva(
       variant: "default",
       size: "md",
     },
-  },
+  }
 )
 
 export interface GlassBadgeProps

@@ -7,6 +7,9 @@
 import { HeartIcon, StarIcon } from "@/components/icons"
 import { OptimizedImage } from "@/components/images"
 import type { PriceTier } from "@/types/restaurant"
+
+// Allow both PriceTier and string for flexibility
+type PriceProp = PriceTier | string
 import { memo } from "react"
 
 export interface ImageVariantProps {
@@ -21,7 +24,7 @@ export interface ImageVariantProps {
   isFavorite?: boolean
   rating?: number
   title?: string
-  price?: PriceTier
+  price?: PriceProp
   // Optional callbacks
   onFavoriteToggle?: () => void
   blurHash?: string

@@ -1,7 +1,7 @@
 "use client"
 
-import * as React from "react"
 import { cn } from "@/lib/utils"
+import * as React from "react"
 
 interface DockItem {
   id: string
@@ -59,7 +59,7 @@ const GlassDock = React.forwardRef<HTMLDivElement, GlassDockProps>(
       glassIntensity = "high",
       ...props
     },
-    ref,
+    ref
   ) => {
     const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null)
     const [mousePos, setMousePos] = React.useState<number | null>(null)
@@ -73,7 +73,7 @@ const GlassDock = React.forwardRef<HTMLDivElement, GlassDockProps>(
         const rect = dockRef.current.getBoundingClientRect()
         setMousePos(isVertical ? e.clientY - rect.top : e.clientX - rect.left)
       },
-      [isVertical],
+      [isVertical]
     )
 
     const handleMouseLeave = React.useCallback(() => {
@@ -95,7 +95,7 @@ const GlassDock = React.forwardRef<HTMLDivElement, GlassDockProps>(
         const scale = 1 + (magnification - 1) * (1 - distance / maxDistance)
         return Math.min(scale, magnification)
       },
-      [mousePos, baseSize, magnification],
+      [mousePos, baseSize, magnification]
     )
 
     return (
@@ -104,14 +104,14 @@ const GlassDock = React.forwardRef<HTMLDivElement, GlassDockProps>(
           className={cn(
             "absolute rounded-3xl opacity-60 blur-2xl",
             "bg-linear-to-r from-cyan-500/30 via-blue-500/25 to-purple-500/30",
-            isVertical ? "-inset-y-4 -inset-x-6" : "-inset-x-4 -inset-y-6",
+            isVertical ? "-inset-y-4 -inset-x-6" : "-inset-x-4 -inset-y-6"
           )}
         />
         <div
           className={cn(
             "absolute rounded-3xl opacity-40 blur-xl",
             "bg-linear-to-r from-white/20 to-white/10",
-            isVertical ? "-inset-y-2 -inset-x-3" : "-inset-x-2 -inset-y-3",
+            isVertical ? "-inset-y-2 -inset-x-3" : "-inset-x-2 -inset-y-3"
           )}
         />
 
@@ -128,7 +128,7 @@ const GlassDock = React.forwardRef<HTMLDivElement, GlassDockProps>(
             glass.border,
             "border",
             "shadow-[0_8px_32px_rgba(0,0,0,0.3),inset_0_1px_1px_rgba(255,255,255,0.2),inset_0_-1px_1px_rgba(0,0,0,0.1)]",
-            isVertical ? "flex flex-col items-center" : "flex items-end",
+            isVertical ? "flex flex-col items-center" : "flex items-end"
           )}
         >
           <div className="absolute inset-0 rounded-2xl bg-linear-to-b from-white/20 via-white/5 to-transparent pointer-events-none" />
@@ -163,10 +163,15 @@ const GlassDock = React.forwardRef<HTMLDivElement, GlassDockProps>(
                     isVertical
                       ? cn(
                           "-right-2 translate-x-full",
-                          isHovered ? "opacity-100 translate-x-full" : "opacity-0 translate-x-[calc(100%-8px)]",
+                          isHovered
+                            ? "opacity-100 translate-x-full"
+                            : "opacity-0 translate-x-[calc(100%-8px)]"
                         )
-                      : cn("-top-12", isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"),
-                    !isHovered && "pointer-events-none",
+                      : cn(
+                          "-top-12",
+                          isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+                        ),
+                    !isHovered && "pointer-events-none"
                   )}
                 >
                   {/* Tooltip glass highlight */}
@@ -178,7 +183,7 @@ const GlassDock = React.forwardRef<HTMLDivElement, GlassDockProps>(
                       "transform rotate-45",
                       isVertical
                         ? "left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 border-t-0 border-r-0"
-                        : "left-1/2 -bottom-1.5 -translate-x-1/2 border-t-0 border-l-0",
+                        : "left-1/2 -bottom-1.5 -translate-x-1/2 border-t-0 border-l-0"
                     )}
                   />
                 </div>
@@ -194,7 +199,7 @@ const GlassDock = React.forwardRef<HTMLDivElement, GlassDockProps>(
                     glass.itemHover,
                     "shadow-[0_2px_8px_rgba(0,0,0,0.15),inset_0_1px_1px_rgba(255,255,255,0.15)]",
                     item.active &&
-                      "bg-white/25 border-white/40 shadow-[0_4px_16px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,0.3)]",
+                      "bg-white/25 border-white/40 shadow-[0_4px_16px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,0.3)]"
                   )}
                   style={{
                     width: size,
@@ -230,7 +235,7 @@ const GlassDock = React.forwardRef<HTMLDivElement, GlassDockProps>(
                       "absolute w-1.5 h-1.5 rounded-full",
                       "bg-linear-to-r from-cyan-400 to-blue-400",
                       "shadow-[0_0_8px_rgba(6,182,212,0.8),0_0_16px_rgba(6,182,212,0.4)]",
-                      isVertical ? "-left-1" : "-bottom-1",
+                      isVertical ? "-left-1" : "-bottom-1"
                     )}
                   />
                 )}
@@ -250,7 +255,7 @@ const GlassDock = React.forwardRef<HTMLDivElement, GlassDockProps>(
         </div>
       </div>
     )
-  },
+  }
 )
 GlassDock.displayName = "GlassDock"
 

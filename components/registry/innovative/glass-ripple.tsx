@@ -1,7 +1,7 @@
 "use client"
 
-import * as React from "react"
 import { cn } from "@/lib/utils"
+import * as React from "react"
 
 interface Ripple {
   id: number
@@ -33,7 +33,8 @@ const GlassRipple = React.forwardRef<HTMLDivElement, GlassRippleProps>(
         if (disabled || !containerRef.current) return
 
         const rect = containerRef.current.getBoundingClientRect()
-        let x: number, y: number
+        let x: number
+        let y: number
 
         if ("touches" in e) {
           x = e.touches[0].clientX - rect.left
@@ -58,19 +59,28 @@ const GlassRipple = React.forwardRef<HTMLDivElement, GlassRippleProps>(
           setRipples((prev) => prev.filter((r) => r.id !== newRipple.id))
         }, duration)
       },
-      [disabled, duration],
+      [disabled, duration]
     )
 
     return (
-      <div ref={ref} className={cn("relative overflow-hidden cursor-pointer", className)} {...props}>
-        <div ref={containerRef} className="absolute inset-0" onMouseDown={createRipple} onTouchStart={createRipple}>
+      <div
+        ref={ref}
+        className={cn("relative overflow-hidden cursor-pointer", className)}
+        {...props}
+      >
+        <div
+          ref={containerRef}
+          className="absolute inset-0"
+          onMouseDown={createRipple}
+          onTouchStart={createRipple}
+        >
           {ripples.map((ripple) => (
             <span
               key={ripple.id}
               className={cn(
                 "absolute rounded-full pointer-events-none",
                 "animate-[ripple_0.6s_ease-out_forwards]",
-                rippleColors[color],
+                rippleColors[color]
               )}
               style={{
                 left: ripple.x - ripple.size / 2,
@@ -84,7 +94,7 @@ const GlassRipple = React.forwardRef<HTMLDivElement, GlassRippleProps>(
         <div className="relative z-10 pointer-events-none">{children}</div>
       </div>
     )
-  },
+  }
 )
 GlassRipple.displayName = "GlassRipple"
 
@@ -121,7 +131,8 @@ const GlassRippleButton = React.forwardRef<HTMLButtonElement, GlassRippleButtonP
       default: "bg-white/20 backdrop-blur-xl border border-white/30 text-white hover:bg-white/30",
       primary:
         "bg-linear-to-r from-cyan-500/80 via-blue-500/80 to-purple-500/80 backdrop-blur-xl border border-white/30 text-white",
-      outline: "bg-transparent backdrop-blur-sm border-2 border-white/40 text-white hover:bg-white/10",
+      outline:
+        "bg-transparent backdrop-blur-sm border-2 border-white/40 text-white hover:bg-white/10",
     }
 
     return (
@@ -132,7 +143,7 @@ const GlassRippleButton = React.forwardRef<HTMLButtonElement, GlassRippleButtonP
           "transition-all duration-300 ease-out",
           "hover:scale-105 active:scale-95",
           variants[variant],
-          className,
+          className
         )}
         onMouseDown={createRipple}
         {...props}
@@ -143,7 +154,7 @@ const GlassRippleButton = React.forwardRef<HTMLButtonElement, GlassRippleButtonP
             className={cn(
               "absolute rounded-full pointer-events-none",
               "animate-[ripple_0.6s_ease-out_forwards]",
-              rippleColors[rippleColor],
+              rippleColors[rippleColor]
             )}
             style={{
               left: ripple.x - ripple.size / 2,
@@ -156,7 +167,7 @@ const GlassRippleButton = React.forwardRef<HTMLButtonElement, GlassRippleButtonP
         <span className="relative z-10">{children}</span>
       </button>
     )
-  },
+  }
 )
 GlassRippleButton.displayName = "GlassRippleButton"
 

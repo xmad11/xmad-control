@@ -2,30 +2,34 @@
    Memory Editor Component
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-"use client";
+"use client"
 
-import { useState, useEffect, useCallback } from "react";
-import { FileText, Save, RefreshCw, ChevronDown, Check, Loader2 } from "lucide-react";
+import { Check, ChevronDown, FileText, Loader2, RefreshCw, Save } from "lucide-react"
+import { useCallback, useEffect, useState } from "react"
 
 interface MemoryFile {
-  name: string;
-  path: string;
-  content: string;
+  name: string
+  path: string
+  content: string
 }
 
 interface MemoryEditorProps {
-  initialFile?: string;
-  height?: string;
-  onSave?: (filename: string, content: string) => void;
-  files?: MemoryFile[];
+  initialFile?: string
+  height?: string
+  onSave?: (filename: string, content: string) => void
+  files?: MemoryFile[]
 }
 
 // Default memory files
 const DEFAULT_FILES: MemoryFile[] = [
   { name: "MEMORY.md", path: "/memory/MEMORY.md", content: "# Memory\n\nAgent memory content..." },
   { name: "SOUL.md", path: "/memory/SOUL.md", content: "# Soul\n\nAgent soul configuration..." },
-  { name: "IDENTITY.md", path: "/memory/IDENTITY.md", content: "# Identity\n\nAgent identity settings..." },
-];
+  {
+    name: "IDENTITY.md",
+    path: "/memory/IDENTITY.md",
+    content: "# Identity\n\nAgent identity settings...",
+  },
+]
 
 export function MemoryEditor({
   initialFile = "MEMORY.md",
@@ -33,60 +37,60 @@ export function MemoryEditor({
   onSave,
   files = DEFAULT_FILES,
 }: MemoryEditorProps) {
-  const [selectedFile, setSelectedFile] = useState<string>(initialFile);
-  const [content, setContent] = useState<string>("");
-  const [isSaving, setIsSaving] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const [selectedFile, setSelectedFile] = useState<string>(initialFile)
+  const [content, setContent] = useState<string>("")
+  const [isSaving, setIsSaving] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle")
 
   // Load file content
   useEffect(() => {
-    const file = files.find((f) => f.name === selectedFile);
+    const file = files.find((f) => f.name === selectedFile)
     if (file) {
-      setIsLoading(true);
+      setIsLoading(true)
       // Simulate loading delay for better UX
       setTimeout(() => {
-        setContent(file.content);
-        setIsLoading(false);
-      }, 100);
+        setContent(file.content)
+        setIsLoading(false)
+      }, 100)
     }
-  }, [selectedFile, files]);
+  }, [selectedFile, files])
 
   // Handle save
   const handleSave = useCallback(async () => {
-    if (!content.trim() || isSaving) return;
+    if (!content.trim() || isSaving) return
 
-    setIsSaving(true);
-    setSaveStatus("saving");
+    setIsSaving(true)
+    setSaveStatus("saving")
 
     try {
       if (onSave) {
-        onSave(selectedFile, content);
+        onSave(selectedFile, content)
       }
-      setSaveStatus("saved");
-      setTimeout(() => setSaveStatus("idle"), 2000);
+      setSaveStatus("saved")
+      setTimeout(() => setSaveStatus("idle"), 2000)
     } catch (error) {
-      console.error("Failed to save:", error);
-      setSaveStatus("idle");
+      console.error("Failed to save:", error)
+      setSaveStatus("idle")
     } finally {
-      setIsSaving(false);
+      setIsSaving(false)
     }
-  }, [content, isSaving, onSave, selectedFile]);
+  }, [content, isSaving, onSave, selectedFile])
 
   // Handle keyboard shortcut
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if ((e.metaKey || e.ctrlKey) && e.key === "s") {
-      e.preventDefault();
-      handleSave();
+      e.preventDefault()
+      handleSave()
     }
-  };
+  }
 
   // Handle file selection
   const handleFileSelect = (fileName: string) => {
-    setSelectedFile(fileName);
-    setIsDropdownOpen(false);
-  };
+    setSelectedFile(fileName)
+    setIsDropdownOpen(false)
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -104,7 +108,9 @@ export function MemoryEditor({
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm hover:bg-white/10 transition-colors"
           >
             <span>{selectedFile}</span>
-            <ChevronDown className={`h-4 w-4 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} />
+            <ChevronDown
+              className={`h-4 w-4 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`}
+            />
           </button>
 
           {isDropdownOpen && (
@@ -164,17 +170,13 @@ export function MemoryEditor({
             disabled={isSaving || !content.trim()}
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-500 text-white text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-cyan-600 transition-colors"
           >
-            {isSaving ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
+            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             <span>Save</span>
           </button>
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default MemoryEditor;
+export default MemoryEditor

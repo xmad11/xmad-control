@@ -1,15 +1,15 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { cn } from "@/lib/utils";
-import { Sun, Moon, Play, Pause, RotateCcw } from "lucide-react";
-import { GlassWidgetBase } from "./base-widget";
+import { cn } from "@/lib/utils"
+import { Moon, Pause, Play, RotateCcw, Sun } from "lucide-react"
+import * as React from "react"
+import { GlassWidgetBase } from "./base-widget"
 
 interface AnalogClockWidgetProps {
-  time?: Date;
-  showNumbers?: boolean;
-  size?: "sm" | "md" | "lg";
-  className?: string;
+  time?: Date
+  showNumbers?: boolean
+  size?: "sm" | "md" | "lg"
+  className?: string
 }
 
 function AnalogClockWidget({
@@ -18,47 +18,52 @@ function AnalogClockWidget({
   size = "md",
   className,
 }: AnalogClockWidgetProps) {
-  const [currentTime, setCurrentTime] = React.useState<Date | undefined>(time);
+  const [currentTime, setCurrentTime] = React.useState<Date | undefined>(time)
 
   React.useEffect(() => {
     if (time) {
-      setCurrentTime(time);
-      return;
+      setCurrentTime(time)
+      return
     }
-    setCurrentTime(new Date());
-    const interval = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(interval);
-  }, [time]);
+    setCurrentTime(new Date())
+    const interval = setInterval(() => setCurrentTime(new Date()), 1000)
+    return () => clearInterval(interval)
+  }, [time])
 
-  if (!currentTime) return null;
+  if (!currentTime) return null
 
-  const seconds = currentTime.getSeconds();
-  const minutes = currentTime.getMinutes();
-  const hours = currentTime.getHours() % 12;
+  const seconds = currentTime.getSeconds()
+  const minutes = currentTime.getMinutes()
+  const hours = currentTime.getHours() % 12
 
-  const secondDegrees = seconds * 6;
-  const minuteDegrees = minutes * 6 + seconds * 0.1;
-  const hourDegrees = hours * 30 + minutes * 0.5;
+  const secondDegrees = seconds * 6
+  const minuteDegrees = minutes * 6 + seconds * 0.1
+  const hourDegrees = hours * 30 + minutes * 0.5
 
   const sizeConfig = {
     sm: { container: "size-24", numbers: "text-[10px]", radius: 36 },
     md: { container: "size-32", numbers: "text-xs", radius: 42 },
     lg: { container: "size-36", numbers: "text-sm", radius: 42 },
-  };
+  }
 
-  const config = sizeConfig[size];
-  const numbers = showNumbers ? [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] : [];
+  const config = sizeConfig[size]
+  const numbers = showNumbers ? [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] : []
 
   return (
-    <GlassWidgetBase className={cn("w-full h-full flex items-center justify-center", className)} size="sm" width="sm" glowColor="blue">
+    <GlassWidgetBase
+      className={cn("w-full h-full flex items-center justify-center", className)}
+      size="sm"
+      width="sm"
+      glowColor="blue"
+    >
       <div className={cn("relative", config.container)}>
         {/* Clock face with glass effect */}
         <div className="absolute inset-0 rounded-full border border-white/20  bg-white/5 backdrop-blur-sm shadow-inner" />
 
         {numbers.map((num, i) => {
-          const angle = (i * 30 - 90) * (Math.PI / 180);
-          const x = 50 + config.radius * Math.cos(angle);
-          const y = 50 + config.radius * Math.sin(angle);
+          const angle = (i * 30 - 90) * (Math.PI / 180)
+          const x = 50 + config.radius * Math.cos(angle)
+          const y = 50 + config.radius * Math.sin(angle)
           return (
             <span
               key={num}
@@ -71,12 +76,12 @@ function AnalogClockWidget({
             >
               {num}
             </span>
-          );
+          )
         })}
 
         {!showNumbers &&
           Array.from({ length: 12 }).map((_, i) => {
-            const angle = (i * 30 - 90) * (Math.PI / 180);
+            const angle = (i * 30 - 90) * (Math.PI / 180)
             return (
               <div
                 key={i}
@@ -87,7 +92,7 @@ function AnalogClockWidget({
                   transform: "translate(-50%, -50%)",
                 }}
               />
-            );
+            )
           })}
 
         {/* Center dot */}
@@ -121,14 +126,14 @@ function AnalogClockWidget({
         />
       </div>
     </GlassWidgetBase>
-  );
+  )
 }
 
 interface DigitalClockWidgetProps {
-  time?: Date;
-  showSeconds?: boolean;
-  format?: "12h" | "24h";
-  className?: string;
+  time?: Date
+  showSeconds?: boolean
+  format?: "12h" | "24h"
+  className?: string
 }
 
 function DigitalClockWidget({
@@ -137,34 +142,29 @@ function DigitalClockWidget({
   format = "12h",
   className,
 }: DigitalClockWidgetProps) {
-  const [currentTime, setCurrentTime] = React.useState<Date | undefined>(time);
+  const [currentTime, setCurrentTime] = React.useState<Date | undefined>(time)
 
   React.useEffect(() => {
     if (time) {
-      setCurrentTime(time);
-      return;
+      setCurrentTime(time)
+      return
     }
-    setCurrentTime(new Date());
-    const interval = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(interval);
-  }, [time]);
+    setCurrentTime(new Date())
+    const interval = setInterval(() => setCurrentTime(new Date()), 1000)
+    return () => clearInterval(interval)
+  }, [time])
 
-  if (!currentTime) return null;
+  if (!currentTime) return null
 
-  const hours = currentTime.getHours();
-  const minutes = currentTime.getMinutes();
-  const seconds = currentTime.getSeconds();
+  const hours = currentTime.getHours()
+  const minutes = currentTime.getMinutes()
+  const seconds = currentTime.getSeconds()
 
-  const displayHours = format === "12h" ? hours % 12 || 12 : hours;
-  const period = hours >= 12 ? "PM" : "AM";
+  const displayHours = format === "12h" ? hours % 12 || 12 : hours
+  const period = hours >= 12 ? "PM" : "AM"
 
   return (
-    <GlassWidgetBase
-      className={className}
-      size="md"
-      width="sm"
-      glowColor="cyan"
-    >
+    <GlassWidgetBase className={className} size="md" width="sm" glowColor="cyan">
       <div className="flex flex-col items-center justify-center h-full">
         <div className="flex items-baseline gap-1">
           <span className="text-4xl font-light text-white tabular-nums">
@@ -179,20 +179,20 @@ function DigitalClockWidget({
         </div>
       </div>
     </GlassWidgetBase>
-  );
+  )
 }
 
 interface WorldClockWidgetProps {
   clocks: Array<{
-    city: string;
-    timezone: string;
-    isDay?: boolean;
-  }>;
-  className?: string;
+    city: string
+    timezone: string
+    isDay?: boolean
+  }>
+  className?: string
 }
 
 function WorldClockWidget({ clocks, className }: WorldClockWidgetProps) {
-  const [times, setTimes] = React.useState<string[]>([]);
+  const [times, setTimes] = React.useState<string[]>([])
 
   React.useEffect(() => {
     const updateTimes = () => {
@@ -203,17 +203,17 @@ function WorldClockWidget({ clocks, className }: WorldClockWidgetProps) {
             hour: "numeric",
             minute: "2-digit",
             hour12: true,
-          });
+          })
         } catch {
-          return "--:--";
+          return "--:--"
         }
-      });
-      setTimes(newTimes);
-    };
-    updateTimes();
-    const interval = setInterval(updateTimes, 1000);
-    return () => clearInterval(interval);
-  }, [clocks]);
+      })
+      setTimes(newTimes)
+    }
+    updateTimes()
+    const interval = setInterval(updateTimes, 1000)
+    return () => clearInterval(interval)
+  }, [clocks])
 
   return (
     <GlassWidgetBase className={className} size="md" width="sm" glowColor="blue">
@@ -234,38 +234,38 @@ function WorldClockWidget({ clocks, className }: WorldClockWidgetProps) {
         ))}
       </div>
     </GlassWidgetBase>
-  );
+  )
 }
 
 interface StopwatchWidgetProps {
-  className?: string;
+  className?: string
 }
 
 function StopwatchWidget({ className }: StopwatchWidgetProps) {
-  const [time, setTime] = React.useState(0);
-  const [isRunning, setIsRunning] = React.useState(false);
+  const [time, setTime] = React.useState(0)
+  const [isRunning, setIsRunning] = React.useState(false)
 
   React.useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: NodeJS.Timeout
     if (isRunning) {
-      interval = setInterval(() => setTime((t) => t + 10), 10);
+      interval = setInterval(() => setTime((t) => t + 10), 10)
     }
-    return () => clearInterval(interval);
-  }, [isRunning]);
+    return () => clearInterval(interval)
+  }, [isRunning])
 
   const formatTime = (ms: number) => {
-    const minutes = Math.floor(ms / 60000);
-    const seconds = Math.floor((ms % 60000) / 1000);
-    const centiseconds = Math.floor((ms % 1000) / 10);
+    const minutes = Math.floor(ms / 60000)
+    const seconds = Math.floor((ms % 60000) / 1000)
+    const centiseconds = Math.floor((ms % 1000) / 10)
     return `${minutes.toString().padStart(2, "0")}:${seconds
       .toString()
-      .padStart(2, "0")}.${centiseconds.toString().padStart(2, "0")}`;
-  };
+      .padStart(2, "0")}.${centiseconds.toString().padStart(2, "0")}`
+  }
 
   const reset = () => {
-    setIsRunning(false);
-    setTime(0);
-  };
+    setIsRunning(false)
+    setTime(0)
+  }
 
   return (
     <GlassWidgetBase className={className} size="md" width="sm" glowColor="cyan">
@@ -294,39 +294,39 @@ function StopwatchWidget({ className }: StopwatchWidgetProps) {
         </button>
       </div>
     </GlassWidgetBase>
-  );
+  )
 }
 
 interface TimerWidgetProps {
-  initialMinutes?: number;
-  className?: string;
+  initialMinutes?: number
+  className?: string
 }
 
 function TimerWidget({ initialMinutes = 5, className }: TimerWidgetProps) {
-  const [timeLeft, setTimeLeft] = React.useState(initialMinutes * 60 * 1000);
-  const [isRunning, setIsRunning] = React.useState(false);
-  const [initialTime] = React.useState(initialMinutes * 60 * 1000);
+  const [timeLeft, setTimeLeft] = React.useState(initialMinutes * 60 * 1000)
+  const [isRunning, setIsRunning] = React.useState(false)
+  const [initialTime] = React.useState(initialMinutes * 60 * 1000)
 
   React.useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: NodeJS.Timeout
     if (isRunning && timeLeft > 0) {
-      interval = setInterval(() => setTimeLeft((t) => Math.max(0, t - 1000)), 1000);
+      interval = setInterval(() => setTimeLeft((t) => Math.max(0, t - 1000)), 1000)
     }
-    return () => clearInterval(interval);
-  }, [isRunning, timeLeft]);
+    return () => clearInterval(interval)
+  }, [isRunning, timeLeft])
 
   const formatTime = (ms: number) => {
-    const minutes = Math.floor(ms / 60000);
-    const seconds = Math.floor((ms % 60000) / 1000);
-    return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-  };
+    const minutes = Math.floor(ms / 60000)
+    const seconds = Math.floor((ms % 60000) / 1000)
+    return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+  }
 
   const reset = () => {
-    setIsRunning(false);
-    setTimeLeft(initialTime);
-  };
+    setIsRunning(false)
+    setTimeLeft(initialTime)
+  }
 
-  const progress = (timeLeft / initialTime) * 100;
+  const progress = (timeLeft / initialTime) * 100
 
   return (
     <GlassWidgetBase
@@ -384,7 +384,7 @@ function TimerWidget({ initialMinutes = 5, className }: TimerWidgetProps) {
         </button>
       </div>
     </GlassWidgetBase>
-  );
+  )
 }
 
-export { AnalogClockWidget, DigitalClockWidget, WorldClockWidget, StopwatchWidget, TimerWidget };
+export { AnalogClockWidget, DigitalClockWidget, WorldClockWidget, StopwatchWidget, TimerWidget }

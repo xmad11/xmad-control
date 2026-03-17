@@ -1,8 +1,19 @@
 "use client"
 
-import * as React from "react"
-import { Command, Search, File, Settings, User, Home, Layers, Moon, Sun, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
+import {
+  ArrowRight,
+  Command,
+  File,
+  Home,
+  Layers,
+  Moon,
+  Search,
+  Settings,
+  Sun,
+  User,
+} from "lucide-react"
+import * as React from "react"
 
 interface CommandItem {
   id: string
@@ -34,7 +45,13 @@ const defaultGroups: CommandGroup[] = [
     label: "Navigation",
     items: [
       { id: "home", label: "Home", icon: <Home className="w-4 h-4" />, shortcut: "G H", href: "/" },
-      { id: "docs", label: "Documentation", icon: <File className="w-4 h-4" />, shortcut: "G D", href: "/docs" },
+      {
+        id: "docs",
+        label: "Documentation",
+        icon: <File className="w-4 h-4" />,
+        shortcut: "G D",
+        href: "/docs",
+      },
       {
         id: "components",
         label: "Components",
@@ -47,7 +64,12 @@ const defaultGroups: CommandGroup[] = [
   {
     label: "Actions",
     items: [
-      { id: "settings", label: "Settings", icon: <Settings className="w-4 h-4" />, shortcut: "G S" },
+      {
+        id: "settings",
+        label: "Settings",
+        icon: <Settings className="w-4 h-4" />,
+        shortcut: "G S",
+      },
       { id: "profile", label: "Profile", icon: <User className="w-4 h-4" />, shortcut: "G P" },
     ],
   },
@@ -60,7 +82,10 @@ const defaultGroups: CommandGroup[] = [
   },
 ]
 
-const positionStyles: Record<CommandPalettePosition, { container: string; animation: string; wrapper: string }> = {
+const positionStyles: Record<
+  CommandPalettePosition,
+  { container: string; animation: string; wrapper: string }
+> = {
   center: {
     container: "items-start justify-center pt-[20vh]",
     animation: "animate-in fade-in slide-in-from-top-4 duration-200",
@@ -97,7 +122,7 @@ const GlassCommandPalette = React.forwardRef<HTMLDivElement, GlassCommandPalette
       placeholder = "Type a command or search...",
       position = "center",
     },
-    ref,
+    ref
   ) => {
     const [isOpen, setIsOpen] = React.useState(open)
     const [search, setSearch] = React.useState("")
@@ -115,13 +140,16 @@ const GlassCommandPalette = React.forwardRef<HTMLDivElement, GlassCommandPalette
           items: group.items.filter(
             (item) =>
               item.label.toLowerCase().includes(search.toLowerCase()) ||
-              item.description?.toLowerCase().includes(search.toLowerCase()),
+              item.description?.toLowerCase().includes(search.toLowerCase())
           ),
         }))
         .filter((group) => group.items.length > 0)
     }, [groups, search])
 
-    const allItems = React.useMemo(() => filteredGroups.flatMap((group) => group.items), [filteredGroups])
+    const allItems = React.useMemo(
+      () => filteredGroups.flatMap((group) => group.items),
+      [filteredGroups]
+    )
 
     React.useEffect(() => {
       setIsOpen(open)
@@ -200,7 +228,7 @@ const GlassCommandPalette = React.forwardRef<HTMLDivElement, GlassCommandPalette
               "bg-white/10 backdrop-blur-3xl",
               "shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.2)]",
               "overflow-hidden",
-              isVertical && "h-full flex flex-col",
+              isVertical && "h-full flex flex-col"
             )}
           >
             {/* Glass highlight layers */}
@@ -223,7 +251,7 @@ const GlassCommandPalette = React.forwardRef<HTMLDivElement, GlassCommandPalette
                 className={cn(
                   "flex-1 bg-transparent border-none outline-none",
                   "px-3 py-4 text-white placeholder:text-white/40",
-                  "text-base",
+                  "text-base"
                 )}
               />
               <kbd className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-lg bg-white/10 text-white/60 text-xs border border-white/10">
@@ -234,7 +262,9 @@ const GlassCommandPalette = React.forwardRef<HTMLDivElement, GlassCommandPalette
             {/* Results - scrollable area */}
             <div className={cn("overflow-y-auto py-2", isVertical ? "flex-1" : "max-h-80")}>
               {filteredGroups.length === 0 ? (
-                <div className="px-4 py-8 text-center text-white/40">No results found for &quot;{search}&quot;</div>
+                <div className="px-4 py-8 text-center text-white/40">
+                  No results found for &quot;{search}&quot;
+                </div>
               ) : (
                 filteredGroups.map((group) => (
                   <div key={group.label} className="mb-2" role="group" aria-label={group.label}>
@@ -265,7 +295,7 @@ const GlassCommandPalette = React.forwardRef<HTMLDivElement, GlassCommandPalette
                             "text-left transition-all duration-150",
                             isSelected
                               ? "bg-white/15 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]"
-                              : "text-white/70 hover:bg-white/10",
+                              : "text-white/70 hover:bg-white/10"
                           )}
                         >
                           <span
@@ -274,7 +304,7 @@ const GlassCommandPalette = React.forwardRef<HTMLDivElement, GlassCommandPalette
                               "border border-white/10 transition-all duration-150",
                               isSelected
                                 ? "bg-linear-to-br from-cyan-500/40 to-blue-500/40 border-cyan-400/30"
-                                : "bg-white/5",
+                                : "bg-white/5"
                             )}
                           >
                             {item.icon}
@@ -282,7 +312,9 @@ const GlassCommandPalette = React.forwardRef<HTMLDivElement, GlassCommandPalette
                           <div className="flex-1 min-w-0">
                             <div className="font-medium truncate">{item.label}</div>
                             {item.description && (
-                              <div className="text-sm text-white/40 truncate">{item.description}</div>
+                              <div className="text-sm text-white/40 truncate">
+                                {item.description}
+                              </div>
                             )}
                           </div>
                           {item.shortcut && (
@@ -310,47 +342,57 @@ const GlassCommandPalette = React.forwardRef<HTMLDivElement, GlassCommandPalette
             <div className="border-t border-white/15 px-4 py-2.5 flex items-center justify-between text-xs text-white/50 bg-white/5">
               <div className="flex items-center gap-4">
                 <span className="flex items-center gap-1">
-                  <kbd className="px-1.5 py-0.5 rounded-md bg-white/10 border border-white/10">↑↓</kbd> Navigate
+                  <kbd className="px-1.5 py-0.5 rounded-md bg-white/10 border border-white/10">
+                    ↑↓
+                  </kbd>{" "}
+                  Navigate
                 </span>
                 <span className="flex items-center gap-1">
-                  <kbd className="px-1.5 py-0.5 rounded-md bg-white/10 border border-white/10">↵</kbd> Select
+                  <kbd className="px-1.5 py-0.5 rounded-md bg-white/10 border border-white/10">
+                    ↵
+                  </kbd>{" "}
+                  Select
                 </span>
               </div>
               <span className="flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 rounded-md bg-white/10 border border-white/10">Esc</kbd> Close
+                <kbd className="px-1.5 py-0.5 rounded-md bg-white/10 border border-white/10">
+                  Esc
+                </kbd>{" "}
+                Close
               </span>
             </div>
           </div>
         </div>
       </div>
     )
-  },
+  }
 )
 GlassCommandPalette.displayName = "GlassCommandPalette"
 
 // Trigger button component
-const GlassCommandTrigger = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement>>(
-  ({ className, ...props }, ref) => (
-    <button
-      ref={ref}
-      className={cn(
-        "flex items-center gap-2 px-3 py-2 rounded-xl",
-        "bg-white/10 backdrop-blur-xl border border-white/20",
-        "text-white/60 text-sm",
-        "hover:bg-white/15 hover:text-white/80 transition-all",
-        "focus:outline-none focus:ring-2 focus:ring-white/20",
-        className,
-      )}
-      {...props}
-    >
-      <Search className="w-4 h-4" />
-      <span className="hidden sm:inline">Search...</span>
-      <kbd className="hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-white/10 text-xs">
-        <Command className="w-3 h-3" />K
-      </kbd>
-    </button>
-  ),
-)
+const GlassCommandTrigger = React.forwardRef<
+  HTMLButtonElement,
+  React.ButtonHTMLAttributes<HTMLButtonElement>
+>(({ className, ...props }, ref) => (
+  <button
+    ref={ref}
+    className={cn(
+      "flex items-center gap-2 px-3 py-2 rounded-xl",
+      "bg-white/10 backdrop-blur-xl border border-white/20",
+      "text-white/60 text-sm",
+      "hover:bg-white/15 hover:text-white/80 transition-all",
+      "focus:outline-none focus:ring-2 focus:ring-white/20",
+      className
+    )}
+    {...props}
+  >
+    <Search className="w-4 h-4" />
+    <span className="hidden sm:inline">Search...</span>
+    <kbd className="hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-white/10 text-xs">
+      <Command className="w-3 h-3" />K
+    </kbd>
+  </button>
+))
 GlassCommandTrigger.displayName = "GlassCommandTrigger"
 
 export { GlassCommandPalette, GlassCommandTrigger }

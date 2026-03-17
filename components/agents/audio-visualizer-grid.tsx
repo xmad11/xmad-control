@@ -1,9 +1,13 @@
-"use client";
+"use client"
 
-import React, { memo, useMemo, type ComponentProps, type CSSProperties } from "react";
-import { cva } from "class-variance-authority";
-import { cn } from "@/lib/utils";
-import { useAudioVisualizerGridAnimator, type AgentState, type Coordinate } from "./hooks/use-audio-visualizer";
+import { cn } from "@/lib/utils"
+import { cva } from "class-variance-authority"
+import React, { memo, useMemo, type ComponentProps, type CSSProperties } from "react"
+import {
+  type AgentState,
+  type Coordinate,
+  useAudioVisualizerGridAnimator,
+} from "./hooks/use-audio-visualizer"
 
 export const AudioVisualizerGridCellVariants = cva(
   [
@@ -23,7 +27,7 @@ export const AudioVisualizerGridCellVariants = cva(
     },
     defaultVariants: { size: "md" },
   }
-);
+)
 
 export const AudioVisualizerGridVariants = cva(
   "grid place-items-center rounded-xl bg-white/5 backdrop-blur-xl border border-white/10 p-3",
@@ -39,14 +43,14 @@ export const AudioVisualizerGridVariants = cva(
     },
     defaultVariants: { size: "md" },
   }
-);
+)
 
 export interface GridOptions {
-  radius?: number;
-  interval?: number;
-  rowCount?: number;
-  columnCount?: number;
-  className?: string;
+  radius?: number
+  interval?: number
+  rowCount?: number
+  columnCount?: number
+  className?: string
 }
 
 const sizeDefaults = {
@@ -55,15 +59,15 @@ const sizeDefaults = {
   md: 7,
   lg: 9,
   xl: 11,
-};
+}
 
 interface GridCellProps {
-  index: number;
-  state: AgentState;
-  rowCount: number;
-  columnCount: number;
-  highlightedCoordinate: Coordinate;
-  size: "icon" | "sm" | "md" | "lg" | "xl";
+  index: number
+  state: AgentState
+  rowCount: number
+  columnCount: number
+  highlightedCoordinate: Coordinate
+  size: "icon" | "sm" | "md" | "lg" | "xl"
 }
 
 const GridCell = memo(function GridCell({
@@ -74,7 +78,7 @@ const GridCell = memo(function GridCell({
 }: GridCellProps) {
   const isHighlighted =
     highlightedCoordinate.x === index % columnCount &&
-    highlightedCoordinate.y === Math.floor(index / columnCount);
+    highlightedCoordinate.y === Math.floor(index / columnCount)
 
   return (
     <div
@@ -82,15 +86,15 @@ const GridCell = memo(function GridCell({
       data-highlighted={isHighlighted}
       className={cn(AudioVisualizerGridCellVariants({ size }))}
     />
-  );
-});
+  )
+})
 
 export type AudioVisualizerGridProps = GridOptions & {
-  size?: "icon" | "sm" | "md" | "lg" | "xl";
-  state?: AgentState;
-  color?: string;
-  className?: string;
-};
+  size?: "icon" | "sm" | "md" | "lg" | "xl"
+  state?: AgentState
+  color?: string
+  className?: string
+}
 
 export function AudioVisualizerGrid({
   size = "md",
@@ -104,14 +108,14 @@ export function AudioVisualizerGrid({
   style,
   ...props
 }: AudioVisualizerGridProps & ComponentProps<"div">) {
-  const defaultCount = sizeDefaults[size];
-  const columnCount = _columnCount ?? defaultCount;
-  const rowCount = _rowCount ?? defaultCount;
+  const defaultCount = sizeDefaults[size]
+  const columnCount = _columnCount ?? defaultCount
+  const rowCount = _rowCount ?? defaultCount
 
   const items = useMemo(
     () => new Array(columnCount * rowCount).fill(0).map((_, idx) => idx),
     [columnCount, rowCount]
-  );
+  )
 
   const highlightedCoordinate = useAudioVisualizerGridAnimator(
     state,
@@ -119,7 +123,7 @@ export function AudioVisualizerGrid({
     columnCount,
     interval,
     radius
-  );
+  )
 
   return (
     <div
@@ -146,5 +150,5 @@ export function AudioVisualizerGrid({
         />
       ))}
     </div>
-  );
+  )
 }

@@ -1,9 +1,12 @@
-import { NextRequest, NextResponse } from "next/server"
+import { exec } from "node:child_process"
+import { promisify } from "node:util"
+import { type NextRequest, NextResponse } from "next/server"
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { serviceId: string } }
-) {
+const execAsync = promisify(exec)
+
+const EXEC_TIMEOUT = 30000 // 30 seconds
+
+export async function POST(_request: NextRequest, { params }: { params: { serviceId: string } }) {
   const serviceId = params.serviceId
 
   // Validate service ID
@@ -27,13 +30,14 @@ export async function POST(
         break
     }
 
-    // Execute command (in production, use proper process management)
-    const { exec } = require("child_process")
-    exec(command, (error: any, stdout: string, stderr: string) => {
-      if (error) {
-        console.error(`Restart failed for ${serviceId}:`, error)
-      }
-    })
+    // Execute command with timeout
+    execAsync(command, { timeout: EXEC_TIMEOUT })
+      .then(() => {
+        console.log(`Service ${serviceId} restarted`)
+      })
+      .catch((error: Error) => {
+        console.error(`Restart failed for ${serviceId}:`, error.message)
+      })
 
     return NextResponse.json({
       success: true,
@@ -43,7 +47,10 @@ export async function POST(
   } catch (error) {
     console.error(`Error restarting ${serviceId}:`, error)
     return NextResponse.json(
-      { error: "Failed to restart service", details: String(error) },
+      {
+        error: "Failed to restart service",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     )
   }

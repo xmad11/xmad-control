@@ -5,12 +5,13 @@
 
 "use client"
 
-import { useState, useCallback, useRef, useEffect, useMemo } from "react"
+import { GlassTabs, GlassTabsList, GlassTabsTrigger } from "@/components/glass/glass-tabs"
+import { TABS } from "@/config/dashboard"
+import { aiDockTokens } from "@/design/tokens/ai-dock.tokens"
 import { AnimatePresence, motion } from "framer-motion"
 import { MessageSquare } from "lucide-react"
-import { GlassTabs, GlassTabsList, GlassTabsTrigger } from "@/components/glass/glass-tabs"
-import { TABS, TIMING } from "@/config/dashboard"
 import type { LucideIcon } from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // ICON MAPPING
@@ -62,14 +63,14 @@ export function FloatingTabs({ value, onValueChange, onChatClick }: FloatingTabs
     setTabsExpanded(true)
     collapseTimerRef.current = setTimeout(() => {
       setTabsExpanded(false)
-    }, TIMING.TAB_COLLAPSE)
+    }, aiDockTokens.motion.tabCollapseDelay)
   }, [])
 
   // Auto-collapse on mount
   useEffect(() => {
     collapseTimerRef.current = setTimeout(() => {
       setTabsExpanded(false)
-    }, TIMING.TAB_COLLAPSE)
+    }, aiDockTokens.motion.tabCollapseDelay)
 
     return () => {
       if (collapseTimerRef.current) {
@@ -102,9 +103,10 @@ export function FloatingTabs({ value, onValueChange, onChatClick }: FloatingTabs
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              transition={{ duration: TIMING.CHAT_ANIMATION / 1000 }}
+              transition={{ duration: aiDockTokens.motion.chatAnimation / 1000, ease: [0.2, 0.8, 0.2, 1] as const }}
               onClick={onChatClick}
               className="mb-2 p-2 rounded-lg bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/15 transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.2)]"
+              style={{ willChange: "transform, opacity" }}
               aria-label="Open chat"
             >
               <MessageSquare className="h-4 w-4 text-white" />
@@ -117,7 +119,7 @@ export function FloatingTabs({ value, onValueChange, onChatClick }: FloatingTabs
           type="button"
           onClick={resetCollapseTimer}
           className={`
-            transition-all duration-300 ease-out select-none
+            select-none
             ${tabsExpanded ? "opacity-0 scale-75 pointer-events-none absolute" : "opacity-100 scale-100"}
             relative p-3 rounded-xl
             bg-white/10 backdrop-blur-xl border border-white/20
@@ -126,6 +128,12 @@ export function FloatingTabs({ value, onValueChange, onChatClick }: FloatingTabs
             before:absolute before:inset-0 before:rounded-xl
             before:bg-gradient-to-b before:from-white/20 before:to-transparent before:pointer-events-none
           `}
+          style={{
+            transitionDuration: `${aiDockTokens.motion.tabExpand}ms`,
+            transitionTimingFunction: aiDockTokens.motion.easeStandard,
+            transitionProperty: "opacity, transform",
+            willChange: "transform, opacity",
+          }}
           aria-label="Expand navigation"
         >
           <div className="relative z-10 flex items-center justify-center">
@@ -137,9 +145,15 @@ export function FloatingTabs({ value, onValueChange, onChatClick }: FloatingTabs
         {/* Expanded state - tabs */}
         <div
           className={`
-            transition-all duration-300 ease-out origin-bottom
+            origin-bottom
             ${tabsExpanded ? "opacity-100 scale-100" : "opacity-0 scale-75 pointer-events-none absolute"}
           `}
+          style={{
+            transitionDuration: `${aiDockTokens.motion.tabExpand}ms`,
+            transitionTimingFunction: aiDockTokens.motion.easeStandard,
+            transitionProperty: "opacity, transform",
+            willChange: "transform, opacity",
+          }}
         >
           <GlassTabsList className="flex items-center justify-center gap-0.5 px-1.5 py-1 h-auto">
             {tabs.map((tab) => (

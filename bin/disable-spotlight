@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Disable Spotlight indexing to save I/O on HDD Mac Mini
+# Run with: sudo bash ~/xmad-control/bin/disable-spotlight
+
+echo "Disabling Spotlight indexing on all volumes..."
+mdutil -a -i off
+
+echo "Clearing Spotlight index..."
+mdutil -X / 2>/dev/null || true
+
+echo ""
+echo "✓ Spotlight disabled."
+echo "  This saves 15-25% CPU on HDD systems."
+echo ""
+echo "To re-enable later (not recommended):"
+echo "  sudo mdutil -a -i on"

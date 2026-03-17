@@ -3,7 +3,7 @@
    Handles AI chat messages through OpenClaw gateway
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-import { NextRequest, NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CONFIG
@@ -39,10 +39,7 @@ export async function POST(request: NextRequest) {
 
     // Validate input
     if (!message || typeof message !== "string" || message.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, error: "Invalid message" },
-        { status: 400 }
-      )
+      return NextResponse.json({ success: false, error: "Invalid message" }, { status: 400 })
     }
 
     // Forward to OpenClaw Gateway
@@ -119,11 +116,25 @@ export async function POST(request: NextRequest) {
 // OPTIONS HANDLER (for CORS)
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export async function OPTIONS() {
+const ALLOWED_ORIGINS = [
+  "http://localhost:3333",
+  "http://127.0.0.1:3333",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+  // Add production URL when deployed
+  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "",
+].filter(Boolean)
+
+function getAllowedOrigin(request: NextRequest): string {
+  const origin = request.headers.get("origin") || ""
+  return ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0] || ""
+}
+
+export async function OPTIONS(request: NextRequest) {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Origin": getAllowedOrigin(request),
       "Access-Control-Allow-Methods": "POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     },

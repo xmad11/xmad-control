@@ -6,7 +6,7 @@
 
 "use client"
 
-import { useVisibilityPause } from "@/hooks/useVisibilityPause"
+import { useVisibilityPause } from "@/hooks/usePageVisibility"
 import { cloneElement, memo, useEffect, useMemo, useState } from "react"
 
 export type MarqueeDirection = "left" | "right"

@@ -1,36 +1,41 @@
 /* ═══════════════════════════════════════════════════════════════════════════════
    DASHBOARD CONFIGURATION - Central tokens and constants
    All configurable values in one place - no magic numbers
+
+   ⚠️ TIMING: All motion/animation timing is sourced from aiDockTokens.motion
+   See: design/tokens/ai-dock.tokens.ts for SSOT
    ═══════════════════════════════════════════════════════════════════════════════ */
 
+import { aiDockMotion } from "@/design/tokens/ai-dock.tokens"
+
 // ═══════════════════════════════════════════════════════════════════════════════
-// TIMING CONSTANTS
+// TIMING CONSTANTS - Re-exported from SSOT (aiDockMotion)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const TIMING = {
-  /** Delay before tabs collapse after interaction (ms) */
-  TAB_COLLAPSE: 2000,
+  /** Delay before tabs collapse after interaction (ms) - from SSOT */
+  TAB_COLLAPSE: aiDockMotion.tabCollapseDelay,
 
   /** Polling interval for live stats (ms) */
   STATS_POLL_INTERVAL: 5000,
 
-  /** Animation duration for tab transitions (ms) */
-  TAB_TRANSITION: 300,
+  /** Animation duration for tab transitions (ms) - from SSOT */
+  TAB_TRANSITION: aiDockMotion.tabTransition,
 
-  /** Animation duration for widget appearance (ms) */
-  WIDGET_APPEAR: 400,
+  /** Animation duration for widget appearance (ms) - from SSOT */
+  WIDGET_APPEAR: aiDockMotion.widgetAppear,
 
-  /** Duration for gauge animation (ms) */
-  GAUGE_ANIMATION: 1200,
+  /** Duration for gauge animation (ms) - from SSOT */
+  GAUGE_ANIMATION: aiDockMotion.gaugeAnimation,
 
-  /** Stagger delay for multiple widgets (ms) */
-  WIDGET_STAGGER: 100,
+  /** Stagger delay for multiple widgets (ms) - from SSOT */
+  WIDGET_STAGGER: aiDockMotion.widgetStagger,
 
-  /** Chat animation duration (ms) */
-  CHAT_ANIMATION: 200,
+  /** Chat animation duration (ms) - from SSOT */
+  CHAT_ANIMATION: aiDockMotion.chatAnimation,
 
-  /** Sheet animation duration (ms) */
-  SHEET_ANIMATION: 300,
+  /** Sheet animation duration (ms) - from SSOT */
+  SHEET_ANIMATION: aiDockMotion.sheetEnter,
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -349,16 +354,16 @@ export const STOCK_DATA = [
   {
     symbol: "RAM",
     name: "Memory Usage",
-    price: 48.20,
-    change: -1.50,
+    price: 48.2,
+    change: -1.5,
     changePercent: -3.02,
     trend: "down" as const,
   },
   {
     symbol: "DISK",
     name: "Storage Used",
-    price: 46.80,
-    change: 0.30,
+    price: 46.8,
+    change: 0.3,
     changePercent: 0.64,
     trend: "up" as const,
   },

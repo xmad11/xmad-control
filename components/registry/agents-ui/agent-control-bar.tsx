@@ -1,35 +1,36 @@
-"use client";
+"use client"
 
-import React, { useState, useRef, useEffect } from "react";
+import { cn } from "@/lib/utils"
+import { AnimatePresence, motion } from "framer-motion"
 import {
+  Loader2,
+  MessageSquare,
   Mic,
   MicOff,
-  Video,
-  VideoOff,
+  Phone,
   ScreenShare,
   ScreenShareOff,
-  Phone,
-  MessageSquare,
   Send,
-  Loader2,
-} from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
+  Video,
+  VideoOff,
+} from "lucide-react"
+import type React from "react"
+import { useEffect, useRef, useState } from "react"
 
 export interface AgentControlBarProps {
-  isMicEnabled?: boolean;
-  isCameraEnabled?: boolean;
-  isScreenShareEnabled?: boolean;
-  isChatOpen?: boolean;
-  isConnected?: boolean;
-  onMicToggle?: () => void;
-  onCameraToggle?: () => void;
-  onScreenShareToggle?: () => void;
-  onChatToggle?: () => void;
-  onDisconnect?: () => void;
-  onSendMessage?: (message: string) => void;
-  showChat?: boolean;
-  className?: string;
+  isMicEnabled?: boolean
+  isCameraEnabled?: boolean
+  isScreenShareEnabled?: boolean
+  isChatOpen?: boolean
+  isConnected?: boolean
+  onMicToggle?: () => void
+  onCameraToggle?: () => void
+  onScreenShareToggle?: () => void
+  onChatToggle?: () => void
+  onDisconnect?: () => void
+  onSendMessage?: (message: string) => void
+  showChat?: boolean
+  className?: string
 }
 
 export function AgentControlBar({
@@ -47,33 +48,33 @@ export function AgentControlBar({
   showChat = true,
   className,
 }: AgentControlBarProps) {
-  const [chatMessage, setChatMessage] = useState("");
-  const [isSending, setIsSending] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [chatMessage, setChatMessage] = useState("")
+  const [isSending, setIsSending] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (isChatOpen && inputRef.current) {
-      inputRef.current.focus();
+      inputRef.current.focus()
     }
-  }, [isChatOpen]);
+  }, [isChatOpen])
 
   const handleSend = async () => {
-    if (!chatMessage.trim() || isSending) return;
-    setIsSending(true);
+    if (!chatMessage.trim() || isSending) return
+    setIsSending(true)
     try {
-      await onSendMessage?.(chatMessage.trim());
-      setChatMessage("");
+      await onSendMessage?.(chatMessage.trim())
+      setChatMessage("")
     } finally {
-      setIsSending(false);
+      setIsSending(false)
     }
-  };
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+      e.preventDefault()
+      handleSend()
     }
-  };
+  }
 
   return (
     <div className={cn("flex flex-col items-center gap-3", className)}>
@@ -185,17 +186,17 @@ export function AgentControlBar({
         </button>
       </div>
     </div>
-  );
+  )
 }
 
 interface ControlButtonProps {
-  onClick?: () => void;
-  isEnabled: boolean;
-  enabledIcon: React.ComponentType<{ className?: string }>;
-  disabledIcon: React.ComponentType<{ className?: string }>;
-  label: string;
-  disabled?: boolean;
-  activeColor?: "cyan" | "blue" | "purple";
+  onClick?: () => void
+  isEnabled: boolean
+  enabledIcon: React.ComponentType<{ className?: string }>
+  disabledIcon: React.ComponentType<{ className?: string }>
+  label: string
+  disabled?: boolean
+  activeColor?: "cyan" | "blue" | "purple"
 }
 
 function ControlButton({
@@ -220,9 +221,9 @@ function ControlButton({
       enabled: "bg-purple-500/20 border-purple-500/30 text-purple-400 hover:bg-purple-500/30",
       glow: "shadow-[0_0_12px_rgba(168,85,247,0.4)]",
     },
-  };
+  }
 
-  const Icon = isEnabled ? EnabledIcon : DisabledIcon;
+  const Icon = isEnabled ? EnabledIcon : DisabledIcon
 
   return (
     <button
@@ -240,5 +241,5 @@ function ControlButton({
     >
       <Icon className="w-5 h-5" />
     </button>
-  );
+  )
 }

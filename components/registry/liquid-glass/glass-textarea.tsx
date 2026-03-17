@@ -1,8 +1,8 @@
 "use client"
 
-import * as React from "react"
-import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
+import { motion } from "framer-motion"
+import * as React from "react"
 
 export interface GlassTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   glowOnFocus?: boolean
@@ -52,7 +52,7 @@ const GlassTextarea = React.forwardRef<HTMLTextAreaElement, GlassTextareaProps>(
               "focus:ring-2 focus:ring-cyan-400/30 focus:ring-offset-0",
               "disabled:cursor-not-allowed disabled:opacity-50",
               error && "border-red-400/50 focus:border-red-400/70 focus:ring-red-400/30",
-              className,
+              className
             )}
             ref={ref}
             aria-invalid={error ? "true" : undefined}
@@ -74,7 +74,7 @@ const GlassTextarea = React.forwardRef<HTMLTextAreaElement, GlassTextareaProps>(
         )}
       </div>
     )
-  },
+  }
 )
 GlassTextarea.displayName = "GlassTextarea"
 

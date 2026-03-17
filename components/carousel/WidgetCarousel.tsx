@@ -1,8 +1,8 @@
 "use client"
 
-import useEmblaCarousel from "embla-carousel-react"
-import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
+import useEmblaCarousel from "embla-carousel-react"
+import React, { useEffect, useState } from "react"
 
 export interface WidgetCarouselProps {
   children: React.ReactNode[]
@@ -23,7 +23,7 @@ export function WidgetCarousel({
   children,
   className = "",
   gap = "sm",
-  itemsPerView = { base: 1, sm: 2, lg: 3, xl: 4 }
+  itemsPerView = { base: 1, sm: 2, lg: 3, xl: 4 },
 }: WidgetCarouselProps) {
   const [currentItemsPerView, setCurrentItemsPerView] = useState(itemsPerView.base ?? 1)
 
@@ -49,9 +49,18 @@ export function WidgetCarousel({
     const updateItemsPerView = () => {
       const width = window.innerWidth
       if (width >= 1280) {
-        setCurrentItemsPerView(itemsPerView.xl ?? itemsPerView.lg ?? itemsPerView.md ?? itemsPerView.sm ?? itemsPerView.base ?? 1)
+        setCurrentItemsPerView(
+          itemsPerView.xl ??
+            itemsPerView.lg ??
+            itemsPerView.md ??
+            itemsPerView.sm ??
+            itemsPerView.base ??
+            1
+        )
       } else if (width >= 1024) {
-        setCurrentItemsPerView(itemsPerView.lg ?? itemsPerView.md ?? itemsPerView.sm ?? itemsPerView.base ?? 1)
+        setCurrentItemsPerView(
+          itemsPerView.lg ?? itemsPerView.md ?? itemsPerView.sm ?? itemsPerView.base ?? 1
+        )
       } else if (width >= 768) {
         setCurrentItemsPerView(itemsPerView.md ?? itemsPerView.sm ?? itemsPerView.base ?? 1)
       } else if (width >= 640) {
@@ -82,14 +91,11 @@ export function WidgetCarousel({
 
   return (
     <div className={cn("w-full select-none overflow-hidden", className)}>
-      <div
-        className="overflow-hidden"
-        ref={emblaRef}
-      >
+      <div className="overflow-hidden" ref={emblaRef}>
         <div className={cn("flex", gapClass)}>
-          {children.map((child, index) => (
+          {React.Children.map(children, (child, index) => (
             <div
-              key={index}
+              key={`carousel-item-${index}`}
               className="flex-shrink-0 flex-grow-0 min-w-0"
               style={{
                 width: `calc((100% - ${totalGapPx}px) / ${currentItemsPerView})`,

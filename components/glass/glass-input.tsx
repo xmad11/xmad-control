@@ -1,7 +1,7 @@
 "use client"
 
-import * as React from "react"
 import { cn } from "@/lib/utils"
+import * as React from "react"
 
 export interface GlassInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   glowOnFocus?: boolean
@@ -25,14 +25,14 @@ const GlassInput = React.forwardRef<HTMLInputElement, GlassInputProps>(
             "focus:outline-none focus:border-white/40 focus:bg-white/15",
             "disabled:cursor-not-allowed disabled:opacity-50",
             "file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-white",
-            className,
+            className
           )}
           ref={ref}
           {...props}
         />
       </div>
     )
-  },
+  }
 )
 GlassInput.displayName = "GlassInput"
 
