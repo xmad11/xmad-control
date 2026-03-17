@@ -1,11 +1,24 @@
 /**
  * System Stats API Route
  * Returns real-time system statistics: CPU, memory, disk, uptime, load average
+ * Falls back to mock data on Vercel (serverless)
  */
 
 import { execSync } from "node:child_process"
 import os from "node:os"
 import { NextResponse } from "next/server"
+
+// Check if running on Vercel (production)
+const isVercel = process.env.VERCEL === "1"
+
+// Mock data for Vercel environment
+const MOCK_STATS = {
+  cpu: 45,
+  memory: { used: 4.2, free: 3.8, total: 8, percentage: 52 },
+  disk: { used: 180, free: 320, total: 500, percentage: 36 },
+  uptime: 86400,
+  loadAvg: [1.5, 1.2, 1.0],
+}
 
 interface SystemStats {
   cpu: number
@@ -66,6 +79,15 @@ function getCpuUsage(): number {
 }
 
 export async function GET(): Promise<NextResponse<SystemStats>> {
+  // Return mock data on Vercel, real data locally
+  if (isVercel) {
+    return NextResponse.json(MOCK_STATS, {
+      headers: {
+        "Cache-Control": "no-store, max-age=1",
+      },
+    })
+  }
+
   const totalMemory = os.totalmem()
   const freeMemory = os.freemem()
   const usedMemory = totalMemory - freeMemory
@@ -85,7 +107,7 @@ export async function GET(): Promise<NextResponse<SystemStats>> {
 
   return NextResponse.json(stats, {
     headers: {
-      "Cache-Control": "no-store, max-age=0",
+      "Cache-Control": "no-store, max-age=1",
     },
   })
 }

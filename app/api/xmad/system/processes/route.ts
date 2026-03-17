@@ -1,10 +1,23 @@
 /**
  * System Processes API Route
  * Returns top 10 processes by memory usage
+ * Falls back to mock data on Vercel (serverless)
  */
 
 import { execSync } from "node:child_process"
 import { NextResponse } from "next/server"
+
+// Check if running on Vercel (production)
+const isVercel = process.env.VERCEL === "1"
+
+// Mock data for Vercel environment
+const MOCK_PROCESSES = [
+  { pid: 1234, name: "node", cpu: 15.2, memory: 245, command: "node server.js" },
+  { pid: 2345, name: "bun", cpu: 8.5, memory: 189, command: "bun run dev" },
+  { pid: 3456, name: "next-server", cpu: 5.1, memory: 156, command: "next start" },
+  { pid: 4567, name: "react", cpu: 2.3, memory: 98, command: "react render" },
+  { pid: 5678, name: "api-handler", cpu: 1.8, memory: 82, command: "api route" },
+]
 
 interface ProcessInfo {
   pid: number
@@ -67,13 +80,14 @@ function getTopProcesses(): ProcessInfo[] {
 }
 
 export async function GET(): Promise<NextResponse<ProcessesResponse>> {
-  const processes = getTopProcesses()
+  // Return mock data on Vercel (serverless), real data locally
+  const processes = isVercel ? MOCK_PROCESSES : getTopProcesses()
 
   return NextResponse.json(
     { processes },
     {
       headers: {
-        "Cache-Control": "no-store, max-age=0",
+        "Cache-Control": "no-store, max-age=1",
       },
     }
   )
