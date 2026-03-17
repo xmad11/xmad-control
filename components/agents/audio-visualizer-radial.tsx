@@ -109,9 +109,8 @@ export function AudioVisualizerRadial({
         const isHighlighted = highlightedIndices.includes(idx)
 
         return (
-          // biome-ignore lint/suspicious/noArrayIndexKey: Audio dots have no natural ID, position is identity
           <div
-            key={`${_barCount}-${idx}`}
+            key={`dot-${idx}-${band.toFixed(2)}`}
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
             style={{
               transformOrigin: "center",
