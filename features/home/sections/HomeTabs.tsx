@@ -7,7 +7,11 @@
 
 import { type MouseEvent, useState } from "react"
 
-const TABS = [{ id: "restaurants", label: "Restaurants" }] as const
+const TABS = [
+  { id: "for-you", label: "For You" },
+  { id: "restaurants", label: "Restaurants" },
+  { id: "stories", label: "Stories" },
+] as const
 
 export type TabId = (typeof TABS)[number]["id"]
 
