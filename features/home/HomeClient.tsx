@@ -30,6 +30,7 @@ export function HomeClient() {
     tabs,
     stats,
     services,
+    processes,
     DashboardDataContext: DataContext,
   } = useSurfaceController()
 
@@ -44,7 +45,6 @@ export function HomeClient() {
     resetCollapseTimer,
     holdHandlers,
     keyboardHandlers,
-    ariaProps,
   } = useAiDockController()
 
   // Lock body scroll when sheet is open
@@ -63,7 +63,7 @@ export function HomeClient() {
   }, [isSheetOpen])
 
   return (
-    <DataContext.Provider value={{ stats, services }}>
+    <DataContext.Provider value={{ stats, services, processes }}>
       {/* ════════════════════════════════════════════════════════════════════════
           BACKGROUND - Pixel-perfect from ein-ui
           ════════════════════════════════════════════════════════════════════════ */}
@@ -121,7 +121,9 @@ export function HomeClient() {
                 before:absolute before:inset-0 before:rounded-xl
                 before:bg-gradient-to-b before:from-white/20 before:to-transparent before:pointer-events-none
               `}
-              aria-label={isHolding ? "Voice input active, release to send" : "Hold to speak or press Enter"}
+              aria-label={
+                isHolding ? "Voice input active, release to send" : "Hold to speak or press Enter"
+              }
               aria-expanded={tabsExpanded}
               aria-controls="dashboard-tab-list"
               aria-pressed={isHolding}

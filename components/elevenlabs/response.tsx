@@ -7,6 +7,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
+import DOMPurify from "dompurify"
 import React, { useMemo, useState, useEffect, useRef, useCallback, type ReactNode } from "react"
 import { BlockMath, InlineMath } from "react-katex"
 import "katex/dist/katex.min.css"
@@ -14,6 +15,17 @@ import "katex/dist/katex.min.css"
 // ═══════════════════════════════════════════════════════════════════════════════
 // MATH RENDERING HELPERS
 // ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Sanitize HTML content to prevent XSS attacks
+ * Allows only safe inline markdown tags
+ */
+function sanitizeHtml(html: string): string {
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ["strong", "em", "code", "a", "span"],
+    ALLOWED_ATTR: ["href", "target", "rel", "class"],
+  })
+}
 
 interface ParsedSegment {
   type: "text" | "math-inline" | "math-block"
@@ -73,7 +85,8 @@ function renderMathSegments(segments: ParsedSegment[], keyPrefix: string): React
       if (seg.type === "math-block") {
         return <BlockMath key={key} math={seg.content} />
       }
-      return <span key={key} dangerouslySetInnerHTML={{ __html: seg.content }} />
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: content is sanitized with DOMPurify
+      return <span key={key} dangerouslySetInnerHTML={{ __html: sanitizeHtml(seg.content) }} />
     } catch {
       // Fallback for invalid LaTeX
       return (
@@ -143,7 +156,10 @@ function processInline(line: string, keyPrefix: string): ReactNode {
     '<a href="$2" class="text-cyan-400 underline" target="_blank" rel="noopener noreferrer">$1</a>'
   )
 
-  return <span key={`${keyPrefix}-text`} dangerouslySetInnerHTML={{ __html: processed }} />
+  // biome-ignore lint/security/noDangerouslySetInnerHtml: content is sanitized with DOMPurify
+  return (
+    <span key={`${keyPrefix}-text`} dangerouslySetInnerHTML={{ __html: sanitizeHtml(processed) }} />
+  )
 }
 
 function parseMarkdown(text: string, keyPrefix = "md"): ReactNode[] {
@@ -157,13 +173,17 @@ function parseMarkdown(text: string, keyPrefix = "md"): ReactNode[] {
 
   const flushTable = () => {
     if (tableRows.length > 0) {
+      const tableIndex = elements.length
+      const headerRow = tableRows[0]
+      const bodyRows = tableRows.slice(1)
+
       elements.push(
-        <table key={`${keyPrefix}-tbl-${elements.length}`} className="my-4 w-full border-collapse">
+        <table key={`${keyPrefix}-tbl-${tableIndex}`} className="my-4 w-full border-collapse">
           <thead>
             <tr>
-              {tableRows[0].map((cell, i) => (
+              {headerRow.map((cell) => (
                 <th
-                  key={i}
+                  key={`${keyPrefix}-th-${tableIndex}-${cell.slice(0, 20)}`}
                   className="border border-white/10 bg-white/5 px-4 py-2 text-left text-white"
                 >
                   {cell}
@@ -172,10 +192,13 @@ function parseMarkdown(text: string, keyPrefix = "md"): ReactNode[] {
             </tr>
           </thead>
           <tbody>
-            {tableRows.slice(1).map((row, i) => (
-              <tr key={i}>
-                {row.map((cell, j) => (
-                  <td key={j} className="border border-white/10 px-4 py-2 text-white/80">
+            {bodyRows.map((row) => (
+              <tr key={`${keyPrefix}-tr-${tableIndex}-${row[0]?.slice(0, 20) ?? ""}`}>
+                {row.map((cell) => (
+                  <td
+                    key={`${keyPrefix}-td-${tableIndex}-${cell.slice(0, 20)}`}
+                    className="border border-white/10 px-4 py-2 text-white/80"
+                  >
                     {cell}
                   </td>
                 ))}

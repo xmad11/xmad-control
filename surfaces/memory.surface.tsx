@@ -15,15 +15,10 @@ import { aiDockTokens } from "@/design/tokens/ai-dock.tokens"
 import { useDashboardData } from "@/runtime/useSurfaceController"
 import { HardDrive, MemoryStick } from "lucide-react"
 
-// TODO: wire to real API route when available — currently mocked
-const mockTopProcesses = [
-  { name: "bun", memory: 454, pid: 1234 },
-  { name: "claude", memory: 391, pid: 2345 },
-  { name: "node", memory: 55, pid: 3456 },
-]
+// DONE: wired to /api/xmad/system/processes
 
 export function MemorySurface() {
-  const { stats } = useDashboardData()
+  const { stats, processes } = useDashboardData()
 
   // Calculate memory values with fallbacks
   const ramUsed = stats?.memory.used ?? 4.2
@@ -129,14 +124,17 @@ export function MemorySurface() {
       {/* Row 3 - Top Processes by Memory */}
       <div className="mb-4">
         <GlassWidgetBase size="lg" width="md" glowColor="cyan">
-            <div
-              className="text-sm text-white/60 mb-4 uppercase tracking-wider"
-              style={{ transition: `opacity ${aiDockTokens.motion.widgetAppear}ms ease` }}
-            >
-              Top Processes by Memory
-            </div>
-            <div className="space-y-3">
-              {mockTopProcesses.map((process, index) => (
+          <div
+            className="text-sm text-white/60 mb-4 uppercase tracking-wider"
+            style={{ transition: `opacity ${aiDockTokens.motion.widgetAppear}ms ease` }}
+          >
+            Top Processes by Memory
+          </div>
+          <div className="space-y-3">
+            {processes.length === 0 ? (
+              <div className="text-white/40 text-sm text-center py-4">Loading processes...</div>
+            ) : (
+              processes.slice(0, 5).map((process, index) => (
                 <div
                   key={process.pid}
                   className="flex items-center justify-between p-3 rounded-lg bg-white/5"
@@ -168,9 +166,10 @@ export function MemorySurface() {
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </GlassWidgetBase>
+              ))
+            )}
+          </div>
+        </GlassWidgetBase>
       </div>
     </>
   )

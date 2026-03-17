@@ -87,7 +87,10 @@ function DefaultErrorFallback({ error, retry }: DefaultErrorFallbackProps) {
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
+              role="img"
+              aria-label="Warning icon"
             >
+              <title>Warning</title>
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"

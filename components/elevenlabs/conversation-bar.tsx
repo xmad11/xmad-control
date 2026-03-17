@@ -187,6 +187,7 @@ export function ConversationBar({
             className="flex-1 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-white placeholder-white/40 focus:border-white/20 focus:outline-none"
           />
           <button
+            type="button"
             onClick={handleSendText}
             disabled={!textInput.trim()}
             className="rounded-lg bg-cyan-500/20 px-4 py-2 text-cyan-400 transition-colors hover:bg-cyan-500/30 disabled:opacity-50"
@@ -201,6 +202,7 @@ export function ConversationBar({
         {/* Connect/Disconnect Button */}
         {!isConnected ? (
           <button
+            type="button"
             onClick={handleConnect}
             disabled={isConnecting}
             className={cn(
@@ -218,6 +220,7 @@ export function ConversationBar({
           </button>
         ) : (
           <button
+            type="button"
             onClick={handleDisconnect}
             className="flex h-14 w-14 items-center justify-center rounded-full bg-red-500/20 text-red-400 transition-all hover:bg-red-500/30"
           >
@@ -228,6 +231,7 @@ export function ConversationBar({
         {/* Mute Button (only when connected) */}
         {isConnected && (
           <button
+            type="button"
             onClick={handleToggleMute}
             className={cn(
               "flex h-12 w-12 items-center justify-center rounded-full transition-all",
@@ -241,6 +245,7 @@ export function ConversationBar({
         {/* Text Input Toggle (only when connected) */}
         {isConnected && (
           <button
+            type="button"
             onClick={handleToggleTextInput}
             className={cn(
               "flex h-12 w-12 items-center justify-center rounded-full transition-all",

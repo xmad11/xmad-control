@@ -70,6 +70,7 @@ export function Conversation({
   }, [checkIsAtBottom])
 
   // Auto-scroll when content changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: children is intentionally tracked to detect content changes
   useEffect(() => {
     if (isAtBottom) {
       scrollToBottom(resize === "smooth" ? "smooth" : "auto")
@@ -170,6 +171,7 @@ export interface ConversationScrollButtonProps {
 export function ConversationScrollButton({ className, onClick }: ConversationScrollButtonProps) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className={cn(
         "absolute bottom-4 left-1/2 -translate-x-1/2",

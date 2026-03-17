@@ -140,3 +140,15 @@ export interface ServiceStatus {
   openclaw: { running: boolean; pid?: number; memoryUsage?: number }
   tailscale: { connected: boolean; ip?: string }
 }
+
+export interface ProcessInfo {
+  pid: number
+  name: string
+  cpu: number
+  memory: number // MB
+  command: string
+}
+
+export interface ProcessesResponse {
+  processes: ProcessInfo[]
+}
