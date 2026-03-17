@@ -61,6 +61,10 @@ export {
   ListOrdered as NumberedListIcon,
   // UI Elements
   MoreHorizontal as EllipsisHorizontalIcon,
+  // Heroicons compatibility
+  BadgeCheck as CheckBadgeIcon,
+  Beaker as BeakerIcon,
+  Scale as ScaleIcon,
 } from "lucide-react"
 
 // Custom icons (keep existing)
