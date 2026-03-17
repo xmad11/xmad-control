@@ -14,7 +14,7 @@ import {
 import { CompactCalendarWidget } from "@/components/widgets/calendar-widget"
 import { StatCard } from "@/components/widgets/stats-widget"
 import { useDashboardData } from "@/runtime/useSurfaceController"
-import { Database, HardDrive, Clock, Shield } from "lucide-react"
+import { Clock, Database, HardDrive, Shield } from "lucide-react"
 
 // TODO: wire to real API route when available — currently mocked
 // When /api/xmad/backups exists, replace this with actual API call
@@ -38,7 +38,7 @@ const mockBackupStats: BackupStats = {
 }
 
 export function BackupsSurface() {
-  const { services } = useDashboardData()
+  useDashboardData() // Context provider required for surface
 
   // Use mock data - when API route exists, replace with:
   // const { data: backupStats } = useSWR('/api/xmad/backups/stats', fetcher)
@@ -83,22 +83,33 @@ export function BackupsSurface() {
               </div>
               <div>
                 <div className="text-white font-medium">Last Backup</div>
-                <div className="text-white/50 text-xs">{formatTimeAgo(backupStats.lastBackupTime)}</div>
+                <div className="text-white/50 text-xs">
+                  {formatTimeAgo(backupStats.lastBackupTime)}
+                </div>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <div className="text-white/50 text-xs mb-1">Size</div>
-                <div className="text-white text-lg font-medium">{backupStats.lastBackupSize} GB</div>
+                <div className="text-white text-lg font-medium">
+                  {backupStats.lastBackupSize} GB
+                </div>
               </div>
               <div>
                 <div className="text-white/50 text-xs mb-1">Status</div>
                 <div className="flex items-center gap-1.5">
-                  <div className={`w-2 h-2 rounded-full ${
-                    backupStats.backupHealth === "healthy" ? "bg-emerald-400" :
-                    backupStats.backupHealth === "warning" ? "bg-amber-400" : "bg-red-400"
-                  }`} />
-                  <span className="text-white/80 text-sm capitalize">{backupStats.backupHealth}</span>
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      backupStats.backupHealth === "healthy"
+                        ? "bg-emerald-400"
+                        : backupStats.backupHealth === "warning"
+                          ? "bg-amber-400"
+                          : "bg-red-400"
+                    }`}
+                  />
+                  <span className="text-white/80 text-sm capitalize">
+                    {backupStats.backupHealth}
+                  </span>
                 </div>
               </div>
             </div>
