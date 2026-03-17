@@ -86,3 +86,17 @@ memory-log.txt
 *.tmp
 *.temp# 
 # Cache refresh 
+tsconfig.tsbuildinfo
+
+# API Keys and Auth (SSOT from Keychain)
+openclaw/agents/main/agent/auth-profiles.json
+openclaw/agents/**/auth.json
+**/credentials/*.json
+
+# OpenClaw runtime files - DO NOT TRACK
+openclaw/credentials/
+openclaw/agents/**/sessions/
+*.jsonl
+openclaw/logs/
+openclaw/memory/*.sqlite
+openclaw/delivery-queue/
