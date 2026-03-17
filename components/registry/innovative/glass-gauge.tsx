@@ -1,7 +1,7 @@
 "use client"
 
-import * as React from "react"
 import { cn } from "@/lib/utils"
+import * as React from "react"
 
 interface GlassGaugeProps extends React.HTMLAttributes<HTMLDivElement> {
   value: number
@@ -40,7 +40,7 @@ const GlassGauge = React.forwardRef<HTMLDivElement, GlassGaugeProps>(
       animated = true,
       ...props
     },
-    ref,
+    ref
   ) => {
     const [displayValue, setDisplayValue] = React.useState(0)
     const config = sizes[size]
@@ -80,7 +80,11 @@ const GlassGauge = React.forwardRef<HTMLDivElement, GlassGaugeProps>(
     const gradientId = React.useId()
 
     return (
-      <div ref={ref} className={cn("relative inline-flex flex-col items-center", className)} {...props}>
+      <div
+        ref={ref}
+        className={cn("relative inline-flex flex-col items-center", className)}
+        {...props}
+      >
         {/* Glow effect */}
         <div
           className={cn("absolute rounded-full bg-linear-to-r blur-xl opacity-60", colors.glow)}
@@ -139,7 +143,10 @@ const GlassGauge = React.forwardRef<HTMLDivElement, GlassGaugeProps>(
               strokeLinecap="round"
               strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}
-              className={cn("transition-all duration-1000 ease-out", colorScheme !== "gradient" && colors.stroke)}
+              className={cn(
+                "transition-all duration-1000 ease-out",
+                colorScheme !== "gradient" && colors.stroke
+              )}
             />
           </svg>
 
@@ -156,7 +163,7 @@ const GlassGauge = React.forwardRef<HTMLDivElement, GlassGaugeProps>(
         </div>
       </div>
     )
-  },
+  }
 )
 GlassGauge.displayName = "GlassGauge"
 

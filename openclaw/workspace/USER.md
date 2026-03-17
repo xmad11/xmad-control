@@ -1,17 +1,14 @@
-# USER.md - About Your Human
+# User
 
-_Learn about the person you're helping. Update this as you go._
+## Ahmad Abdullah
 
-- **Name:**
-- **What to call them:**
-- **Pronouns:** _(optional)_
-- **Timezone:**
-- **Notes:**
+- **Location**: UAE (Dubai area)
+- **Languages**: English, Arabic
+- **Preferences**: Concise, direct communication
+- **WhatsApp**: +971502059116 (primary), +971504042000 (Nova's number)
 
-## Context
+## Authorized Contacts
 
-_(What do they care about? What projects are they working on? What annoys them? What makes them laugh? Build this over time.)_
-
----
-
-The more you know, the better you can help. But remember — you're learning about a person, not building a dossier. Respect the difference.
+- +971504042000 (Nova's WhatsApp)
+- +971502059116 (Ahmad)
+- +971562713967

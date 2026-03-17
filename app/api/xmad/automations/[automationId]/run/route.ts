@@ -1,7 +1,13 @@
-import { NextRequest, NextResponse } from "next/server"
+import { exec } from "node:child_process"
+import { promisify } from "node:util"
+import { type NextRequest, NextResponse } from "next/server"
+
+const execAsync = promisify(exec)
+
+const EXEC_TIMEOUT = 60000 // 60 seconds
 
 export async function POST(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { automationId: string } }
 ) {
   const automationId = params.automationId
@@ -34,21 +40,17 @@ export async function POST(
     const command = automationCommands[automationId]
 
     if (!command) {
-      return NextResponse.json(
-        { error: "Automation command not found" },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: "Automation command not found" }, { status: 404 })
     }
 
-    // Execute command asynchronously
-    const { exec } = require("child_process")
-    exec(command, (error: any, stdout: string, stderr: string) => {
-      if (error) {
-        console.error(`Automation ${automationId} failed:`, error)
-      } else {
-        console.log(`Automation ${automationId} completed:`, stdout)
-      }
-    })
+    // Execute command with timeout (fire and forget, but with proper error handling)
+    execAsync(command, { timeout: EXEC_TIMEOUT })
+      .then(({ stdout }) => {
+        console.log(`Automation ${automationId} completed:`, stdout.slice(0, 500))
+      })
+      .catch((error: Error) => {
+        console.error(`Automation ${automationId} failed:`, error.message)
+      })
 
     return NextResponse.json({
       success: true,
@@ -58,7 +60,10 @@ export async function POST(
   } catch (error) {
     console.error(`Error running automation ${automationId}:`, error)
     return NextResponse.json(
-      { error: "Failed to run automation", details: String(error) },
+      {
+        error: "Failed to run automation",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     )
   }

@@ -4,7 +4,7 @@
     "zai": {
       "type": "api_key",
       "provider": "zai",
-      "apiKey": "4ee8f8d1f6214b5690ae0bab05ef0333.I15u7DOEDtcBTkmn"
+      "apiKey": "${ZAI_API_KEY}"
     }
   }
 }

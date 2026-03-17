@@ -41,8 +41,13 @@ const BADGE_CONFIG: Record<string, BadgeConfig> = {
   Outdoor: { short: "Outdoor", icon: SunIcon },
 }
 
-function getBadgeConfig(badge: string): BadgeConfig {
-  return BADGE_CONFIG[badge] || { short: badge }
+function getBadgeConfig(badge: string | ShadiBadge): BadgeConfig {
+  const badgeKey = typeof badge === "string" ? badge : badge.label
+  return BADGE_CONFIG[badgeKey] || { short: badgeKey }
+}
+
+function getBadgeKey(badge: string | ShadiBadge): string {
+  return typeof badge === "string" ? badge : badge.id || badge.label
 }
 
 export interface DetailedVariantProps {
@@ -51,9 +56,9 @@ export interface DetailedVariantProps {
   title: string
   category?: string
   rating?: number
-  price?: PriceTier
+  price?: PriceTier | string
   location?: RestaurantLocation
-  badges?: ShadiBadge[]
+  badges?: (string | ShadiBadge)[]
   features?: string[]
   showCarousel?: boolean
   isFavorite?: boolean
@@ -163,7 +168,7 @@ export const DetailedVariant = memo(function DetailedVariant({
               const config = getBadgeConfig(badge)
               return (
                 <span
-                  key={badge}
+                  key={getBadgeKey(badge)}
                   className="inline-flex items-center bg-[var(--badge-bg)] backdrop-blur-[var(--badge-blur)] rounded-[var(--badge-radius)] px-[var(--badge-padding-x)] py-[var(--badge-padding-y)] text-xs font-medium text-[var(--badge-color)]"
                 >
                   {config.short}

@@ -1,8 +1,8 @@
 "use client"
 
-import * as React from "react"
-import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
+import { motion } from "framer-motion"
+import * as React from "react"
 
 interface GlassSkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: "default" | "circular" | "text" | "card"
@@ -18,7 +18,7 @@ const GlassSkeleton = React.forwardRef<HTMLDivElement, GlassSkeletonProps>(
       "bg-white/5 backdrop-blur-sm",
       "before:absolute before:inset-0",
       "before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent",
-      "before:animate-[shimmer_2s_infinite]",
+      "before:animate-[shimmer_2s_infinite]"
     )
 
     const variantClasses = {
@@ -34,7 +34,12 @@ const GlassSkeleton = React.forwardRef<HTMLDivElement, GlassSkeletonProps>(
           {Array.from({ length: lines }).map((_, index) => (
             <motion.div
               key={index}
-              className={cn(baseClasses, variantClasses.text, index === lines - 1 && "w-3/4", className)}
+              className={cn(
+                baseClasses,
+                variantClasses.text,
+                index === lines - 1 && "w-3/4",
+                className
+              )}
               style={{
                 width: index === lines - 1 ? "75%" : width,
                 height,
@@ -84,7 +89,7 @@ const GlassSkeleton = React.forwardRef<HTMLDivElement, GlassSkeletonProps>(
         {...props}
       />
     )
-  },
+  }
 )
 GlassSkeleton.displayName = "GlassSkeleton"
 

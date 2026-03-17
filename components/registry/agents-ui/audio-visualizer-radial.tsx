@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import React, { useMemo, type ComponentProps, type CSSProperties } from "react";
-import { type VariantProps, cva } from "class-variance-authority";
-import { cn } from "@/lib/utils";
-import { useAudioVisualizerRadialAnimator, type AgentState } from "./hooks/use-audio-visualizer";
+import { cn } from "@/lib/utils"
+import { type VariantProps, cva } from "class-variance-authority"
+import React, { useMemo, type ComponentProps, type CSSProperties } from "react"
+import { type AgentState, useAudioVisualizerRadialAnimator } from "./hooks/use-audio-visualizer"
 
 export const AudioVisualizerRadialVariants = cva(
   [
@@ -25,15 +25,15 @@ export const AudioVisualizerRadialVariants = cva(
     },
     defaultVariants: { size: "md" },
   }
-);
+)
 
 export interface AudioVisualizerRadialProps {
-  size?: "icon" | "sm" | "md" | "lg" | "xl";
-  state?: AgentState;
-  color?: string;
-  radius?: number;
-  barCount?: number;
-  className?: string;
+  size?: "icon" | "sm" | "md" | "lg" | "xl"
+  state?: AgentState
+  color?: string
+  radius?: number
+  barCount?: number
+  className?: string
 }
 
 export function AudioVisualizerRadial({
@@ -49,45 +49,53 @@ export function AudioVisualizerRadial({
   ComponentProps<"div"> &
   VariantProps<typeof AudioVisualizerRadialVariants>) {
   const _barCount = useMemo(() => {
-    if (barCount) return barCount;
-    return size === "icon" || size === "sm" ? 12 : 24;
-  }, [barCount, size]);
+    if (barCount) return barCount
+    return size === "icon" || size === "sm" ? 12 : 24
+  }, [barCount, size])
 
   const sequencerInterval = useMemo(() => {
     switch (state) {
       case "connecting":
-      case "listening": return 500;
-      case "initializing": return 250;
-      case "thinking": return Infinity;
-      default: return 1000;
+      case "listening":
+        return 500
+      case "initializing":
+        return 250
+      case "thinking":
+        return Number.POSITIVE_INFINITY
+      default:
+        return 1000
     }
-  }, [state]);
+  }, [state])
 
   const distanceFromCenter = useMemo(() => {
-    if (radius) return radius;
+    if (radius) return radius
     switch (size) {
-      case "icon": return 10;
-      case "xl": return 110;
-      case "lg": return 70;
-      case "sm": return 18;
-      case "md":
-      default: return 40;
+      case "icon":
+        return 10
+      case "xl":
+        return 110
+      case "lg":
+        return 70
+      case "sm":
+        return 18
+      default:
+        return 40
     }
-  }, [size, radius]);
+  }, [size, radius])
 
-  const highlightedIndices = useAudioVisualizerRadialAnimator(state, _barCount, sequencerInterval);
+  const highlightedIndices = useAudioVisualizerRadialAnimator(state, _barCount, sequencerInterval)
 
   // Simulate volume bands for speaking state
   const bands = useMemo(() => {
     if (state === "speaking") {
-      return Array.from({ length: _barCount }, () => Math.random() * 0.6 + 0.1);
+      return Array.from({ length: _barCount }, () => Math.random() * 0.6 + 0.1)
     }
-    return new Array(_barCount).fill(0);
-  }, [state, _barCount]);
+    return new Array(_barCount).fill(0)
+  }, [state, _barCount])
 
   const dotSize = useMemo(() => {
-    return Math.max(4, (distanceFromCenter * Math.PI) / _barCount);
-  }, [distanceFromCenter, _barCount]);
+    return Math.max(4, (distanceFromCenter * Math.PI) / _barCount)
+  }, [distanceFromCenter, _barCount])
 
   return (
     <div
@@ -97,8 +105,8 @@ export function AudioVisualizerRadial({
       {...props}
     >
       {bands.map((band, idx) => {
-        const angle = (idx / _barCount) * Math.PI * 2;
-        const isHighlighted = highlightedIndices.includes(idx);
+        const angle = (idx / _barCount) * Math.PI * 2
+        const isHighlighted = highlightedIndices.includes(idx)
 
         return (
           <div
@@ -120,8 +128,8 @@ export function AudioVisualizerRadial({
               }}
             />
           </div>
-        );
+        )
       })}
     </div>
-  );
+  )
 }

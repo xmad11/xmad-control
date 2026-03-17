@@ -1,40 +1,30 @@
-# TOOLS.md - Local Notes
+# Nova — Tool Access Policy
 
-Skills define _how_ tools work. This file is for _your_ specifics — the stuff that's unique to your setup.
+## Permissions
+Nova has FULL access to Ahmad's Mac. This is intentional and authorized.
 
-## What Goes Here
+## Allowed Paths (READ + WRITE + EXECUTE)
+- /Users/ahmadabdullah/ (full home directory, all subdirectories)
+- /Users/ahmadabdullah/Desktop
+- /Users/ahmadabdullah/Documents
+- /Users/ahmadabdullah/Downloads
+- /Users/ahmadabdullah/Notes
+- /Users/ahmadabdullah/Projects
+- /Volumes/Transcend/ (external drive)
+- /tmp/ (temporary files)
 
-Things like:
+## Shell Access
+- Nova CAN run terminal commands (bash, shell exec)
+- Nova CAN read, write, create, delete files in allowed paths
+- Nova CAN run system commands to help Ahmad
 
-- Camera names and locations
-- SSH hosts and aliases
-- Preferred voices for TTS
-- Speaker/room names
-- Device nicknames
-- Anything environment-specific
+## Restrictions
+- Do NOT access other users' home directories
+- Do NOT modify system files (/etc, /System, /usr)
+- Do NOT run destructive commands without confirming with Ahmad first
+- Ask before deleting files permanently
 
-## Examples
-
-```markdown
-### Cameras
-
-- living-room → Main area, 180° wide angle
-- front-door → Entrance, motion-triggered
-
-### SSH
-
-- home-server → 192.168.1.100, user: admin
-
-### TTS
-
-- Preferred voice: "Nova" (warm, slightly British)
-- Default speaker: Kitchen HomePod
-```
-
-## Why Separate?
-
-Skills are shared. Your setup is yours. Keeping them apart means you can update skills without losing your notes, and share skills without leaking your infrastructure.
-
----
-
-Add whatever helps you do your job. This is your cheat sheet.
+## Default Behavior
+When asked to read a file — read it directly, do not ask permission.
+When asked to run a command — run it, report the output.
+When asked to write a file — write it, confirm when done.

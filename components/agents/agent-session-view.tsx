@@ -1,34 +1,34 @@
-"use client";
+"use client"
 
-import React, { useState, useCallback } from "react";
-import { cn } from "@/lib/utils";
-import { AudioVisualizerBar } from "./audio-visualizer-bar";
-import { AudioVisualizerRadial } from "./audio-visualizer-radial";
-import { AudioVisualizerGrid } from "./audio-visualizer-grid";
-import { AgentControlBar } from "./agent-control-bar";
-import { AgentChatTranscript, type ChatMessage } from "./agent-chat-transcript";
-import { type AgentState } from "./hooks/use-audio-visualizer";
+import { cn } from "@/lib/utils"
+import React, { useState, useCallback } from "react"
+import { AgentChatTranscript, type ChatMessage } from "./agent-chat-transcript"
+import { AgentControlBar } from "./agent-control-bar"
+import { AudioVisualizerBar } from "./audio-visualizer-bar"
+import { AudioVisualizerGrid } from "./audio-visualizer-grid"
+import { AudioVisualizerRadial } from "./audio-visualizer-radial"
+import type { AgentState } from "./hooks/use-audio-visualizer"
 
-export type VisualizerType = "bar" | "radial" | "grid";
+export type VisualizerType = "bar" | "radial" | "grid"
 
 export interface AgentSessionViewProps {
-  agentState?: AgentState;
-  agentName?: string;
-  visualizerType?: VisualizerType;
-  messages?: ChatMessage[];
-  isMicEnabled?: boolean;
-  isCameraEnabled?: boolean;
-  isScreenShareEnabled?: boolean;
-  isConnected?: boolean;
-  showChat?: boolean;
-  isChatOpen?: boolean;
-  onMicToggle?: () => void;
-  onCameraToggle?: () => void;
-  onScreenShareToggle?: () => void;
-  onChatToggle?: () => void;
-  onDisconnect?: () => void;
-  onSendMessage?: (message: string) => void;
-  className?: string;
+  agentState?: AgentState
+  agentName?: string
+  visualizerType?: VisualizerType
+  messages?: ChatMessage[]
+  isMicEnabled?: boolean
+  isCameraEnabled?: boolean
+  isScreenShareEnabled?: boolean
+  isConnected?: boolean
+  showChat?: boolean
+  isChatOpen?: boolean
+  onMicToggle?: () => void
+  onCameraToggle?: () => void
+  onScreenShareToggle?: () => void
+  onChatToggle?: () => void
+  onDisconnect?: () => void
+  onSendMessage?: (message: string) => void
+  className?: string
 }
 
 export function AgentSessionView({
@@ -50,12 +50,12 @@ export function AgentSessionView({
   onSendMessage,
   className,
 }: AgentSessionViewProps) {
-  const [internalChatOpen, setInternalChatOpen] = useState(isChatOpen);
+  const [internalChatOpen, setInternalChatOpen] = useState(isChatOpen)
 
   const handleChatToggle = useCallback(() => {
-    setInternalChatOpen((prev) => !prev);
-    onChatToggle?.();
-  }, [onChatToggle]);
+    setInternalChatOpen((prev) => !prev)
+    onChatToggle?.()
+  }, [onChatToggle])
 
   const stateLabels: Record<AgentState, string> = {
     connecting: "Connecting...",
@@ -64,7 +64,7 @@ export function AgentSessionView({
     thinking: "Thinking...",
     speaking: "Speaking",
     idle: "Ready",
-  };
+  }
 
   return (
     <div
@@ -111,10 +111,12 @@ export function AgentSessionView({
         {/* Content Area - Split between Visualizer and Chat */}
         <div className="flex-1 flex overflow-hidden">
           {/* Visualizer Section */}
-          <div className={cn(
-            "flex-1 flex flex-col items-center justify-center p-6 transition-all duration-300",
-            internalChatOpen && showChat ? "w-1/2" : "w-full"
-          )}>
+          <div
+            className={cn(
+              "flex-1 flex flex-col items-center justify-center p-6 transition-all duration-300",
+              internalChatOpen && showChat ? "w-1/2" : "w-full"
+            )}
+          >
             {/* Status Text */}
             <p className="text-white/60 text-sm mb-6 text-center">
               {agentState === "listening" && "Agent is listening, ask it a question"}
@@ -127,15 +129,11 @@ export function AgentSessionView({
 
             {/* Visualizer */}
             <div className="flex items-center justify-center">
-              {visualizerType === "bar" && (
-                <AudioVisualizerBar state={agentState} size="lg" />
-              )}
+              {visualizerType === "bar" && <AudioVisualizerBar state={agentState} size="lg" />}
               {visualizerType === "radial" && (
                 <AudioVisualizerRadial state={agentState} size="lg" />
               )}
-              {visualizerType === "grid" && (
-                <AudioVisualizerGrid state={agentState} size="lg" />
-              )}
+              {visualizerType === "grid" && <AudioVisualizerGrid state={agentState} size="lg" />}
             </div>
           </div>
 
@@ -171,5 +169,5 @@ export function AgentSessionView({
         </div>
       </div>
     </div>
-  );
+  )
 }

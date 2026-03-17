@@ -1,8 +1,8 @@
 "use client"
 
-import * as React from "react"
-import * as ProgressPrimitive from "@radix-ui/react-progress"
 import { cn } from "@/lib/utils"
+import * as ProgressPrimitive from "@radix-ui/react-progress"
+import * as React from "react"
 
 const GlassProgress = React.forwardRef<
   React.ElementRef<typeof ProgressPrimitive.Root>,
@@ -15,7 +15,7 @@ const GlassProgress = React.forwardRef<
       className={cn(
         "relative h-3 w-full overflow-hidden rounded-full",
         "bg-white/10 backdrop-blur-xl border border-white/20",
-        className,
+        className
       )}
       {...props}
     >
@@ -23,7 +23,7 @@ const GlassProgress = React.forwardRef<
         className={cn(
           "h-full transition-all duration-500 ease-out rounded-full",
           "bg-linear-to-r from-cyan-400 via-blue-400 to-purple-400",
-          "shadow-[0_0_12px_rgba(59,130,246,0.5)]",
+          "shadow-[0_0_12px_rgba(59,130,246,0.5)]"
         )}
         style={{ width: `${value || 0}%` }}
       />

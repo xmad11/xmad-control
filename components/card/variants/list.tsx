@@ -16,9 +16,9 @@ export interface ListVariantProps {
   cuisine?: string
   category?: string // Alias for cuisine (for BlogCard)
   rating?: number
-  price?: PriceTier
+  price?: PriceTier | string
   location?: RestaurantLocation
-  badges?: ShadiBadge[]
+  badges?: (string | ShadiBadge)[]
   isFavorite?: boolean
   href?: string
   onFavoriteToggle?: () => void

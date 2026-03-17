@@ -1,11 +1,17 @@
 "use client"
 
-import * as React from "react"
-import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { AlertCircle, AlertTriangle, CheckCircle, Info, X } from "lucide-react"
+import * as React from "react"
 
 type NotificationType = "success" | "error" | "warning" | "info"
-type NotificationPosition = "top-right" | "top-left" | "bottom-right" | "bottom-left" | "top-center" | "bottom-center"
+type NotificationPosition =
+  | "top-right"
+  | "top-left"
+  | "bottom-right"
+  | "bottom-left"
+  | "top-center"
+  | "bottom-center"
 
 interface Notification {
   id: string
@@ -117,13 +123,18 @@ const positionStyles: Record<NotificationPosition, { container: string; animatio
   },
 }
 
-function GlassNotificationContainer({ position = "bottom-right" }: { position?: NotificationPosition }) {
+function GlassNotificationContainer({
+  position = "bottom-right",
+}: { position?: NotificationPosition }) {
   const { notifications, removeNotification } = useNotification()
   const positionConfig = positionStyles[position]
 
   return (
     <div
-      className={cn("fixed z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none", positionConfig.container)}
+      className={cn(
+        "fixed z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none",
+        positionConfig.container
+      )}
       role="region"
       aria-label="Notifications"
     >
@@ -181,7 +192,12 @@ function GlassNotificationItem({
       role="alert"
     >
       <div className="relative">
-        <div className={cn("absolute -inset-1.5 rounded-xl bg-linear-to-r blur-xl opacity-60", config.gradient)} />
+        <div
+          className={cn(
+            "absolute -inset-1.5 rounded-xl bg-linear-to-r blur-xl opacity-60",
+            config.gradient
+          )}
+        />
 
         {/* Main container with enhanced glass */}
         <div
@@ -190,7 +206,7 @@ function GlassNotificationItem({
             "bg-white/10 backdrop-blur-2xl",
             "shadow-[0_8px_32px_rgba(0,0,0,0.3),inset_0_1px_1px_rgba(255,255,255,0.15)]",
             "overflow-hidden",
-            config.border,
+            config.border
           )}
         >
           {/* Glass highlight layers */}
@@ -202,7 +218,7 @@ function GlassNotificationItem({
               className={cn(
                 "flex items-center justify-center w-8 h-8 rounded-lg shrink-0",
                 "border border-white/10",
-                `bg-linear-to-br ${config.gradient}`,
+                `bg-linear-to-br ${config.gradient}`
               )}
             >
               <Icon className={cn("w-5 h-5", config.iconColor)} aria-hidden="true" />
@@ -210,7 +226,9 @@ function GlassNotificationItem({
 
             <div className="flex-1 min-w-0">
               <h4 className="font-medium text-white">{notification.title}</h4>
-              {notification.description && <p className="mt-1 text-sm text-white/60">{notification.description}</p>}
+              {notification.description && (
+                <p className="mt-1 text-sm text-white/60">{notification.description}</p>
+              )}
             </div>
 
             <button
@@ -226,7 +244,10 @@ function GlassNotificationItem({
           {duration !== 0 && (
             <div className="h-1 bg-white/5">
               <div
-                className={cn("h-full transition-all duration-100 ease-linear", `bg-linear-to-r ${config.gradient}`)}
+                className={cn(
+                  "h-full transition-all duration-100 ease-linear",
+                  `bg-linear-to-r ${config.gradient}`
+                )}
                 style={{ width: `${progress}%` }}
                 role="progressbar"
                 aria-valuenow={progress}
@@ -258,13 +279,18 @@ export function GlassNotification({
 
   return (
     <div className={cn("relative", className)}>
-      <div className={cn("absolute -inset-1.5 rounded-xl bg-linear-to-r blur-xl opacity-60", config.gradient)} />
+      <div
+        className={cn(
+          "absolute -inset-1.5 rounded-xl bg-linear-to-r blur-xl opacity-60",
+          config.gradient
+        )}
+      />
       <div
         className={cn(
           "relative rounded-xl border",
           "bg-white/10 backdrop-blur-2xl",
           "shadow-[0_8px_32px_rgba(0,0,0,0.3),inset_0_1px_1px_rgba(255,255,255,0.15)]",
-          config.border,
+          config.border
         )}
       >
         <div className="absolute inset-0 rounded-xl bg-linear-to-b from-white/15 to-transparent pointer-events-none" />
@@ -272,7 +298,7 @@ export function GlassNotification({
           <div
             className={cn(
               "flex items-center justify-center w-8 h-8 rounded-lg shrink-0 border border-white/10",
-              `bg-linear-to-br ${config.gradient}`,
+              `bg-linear-to-br ${config.gradient}`
             )}
           >
             <Icon className={cn("w-5 h-5", config.iconColor)} />

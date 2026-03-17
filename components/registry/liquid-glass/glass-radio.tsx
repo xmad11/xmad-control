@@ -1,9 +1,9 @@
 "use client"
 
-import * as React from "react"
-import * as RadioGroupPrimitive from "@radix-ui/react-radio-group"
-import { motion, Variants } from "framer-motion"
 import { cn } from "@/lib/utils"
+import * as RadioGroupPrimitive from "@radix-ui/react-radio-group"
+import { type Variants, motion } from "framer-motion"
+import * as React from "react"
 
 const indicatorVariants = {
   initial: { scale: 0, opacity: 0 },
@@ -26,7 +26,8 @@ const GlassRadioGroup = React.forwardRef<
 })
 GlassRadioGroup.displayName = RadioGroupPrimitive.Root.displayName
 
-export interface GlassRadioGroupItemProps extends React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item> {
+export interface GlassRadioGroupItemProps
+  extends React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item> {
   label?: string
 }
 
@@ -49,7 +50,7 @@ const GlassRadioGroupItem = React.forwardRef<
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
           "disabled:cursor-not-allowed disabled:opacity-50",
           "data-[state=checked]:border-cyan-400/60",
-          className,
+          className
         )}
         {...props}
       >
@@ -68,7 +69,10 @@ const GlassRadioGroupItem = React.forwardRef<
         </RadioGroupPrimitive.Indicator>
       </RadioGroupPrimitive.Item>
       {label && (
-        <label htmlFor={radioId} className="text-sm font-medium text-white/80 cursor-pointer select-none">
+        <label
+          htmlFor={radioId}
+          className="text-sm font-medium text-white/80 cursor-pointer select-none"
+        >
           {label}
         </label>
       )}

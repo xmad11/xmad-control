@@ -5,21 +5,21 @@
 
 "use client"
 
-import * as React from "react"
+import { TIMING } from "@/config/dashboard"
+import { cn } from "@/lib/utils"
 import {
-  CheckCircle,
   AlertCircle,
   AlertTriangle,
+  CheckCircle,
+  Database,
   Info,
-  X,
+  Shield,
   Wifi,
   WifiOff,
-  Database,
-  Shield,
+  X,
   Zap,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { TIMING } from "@/config/dashboard"
+import * as React from "react"
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -124,38 +124,41 @@ export function NotificationProvider({
     }
   }, [])
 
-  const addNotification = React.useCallback((options: NotificationOptions): string => {
-    const id = `notification-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
-    const duration = options.duration ?? DEFAULT_DURATION
+  const addNotification = React.useCallback(
+    (options: NotificationOptions): string => {
+      const id = `notification-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
+      const duration = options.duration ?? DEFAULT_DURATION
 
-    const newNotification: Notification = {
-      id,
-      type: options.type || "info",
-      title: options.title,
-      description: options.description,
-      duration,
-      action: options.action,
-      icon: options.icon,
-      timestamp: Date.now(),
-    }
+      const newNotification: Notification = {
+        id,
+        type: options.type || "info",
+        title: options.title,
+        description: options.description,
+        duration,
+        action: options.action,
+        icon: options.icon,
+        timestamp: Date.now(),
+      }
 
-    setNotifications((prev) => {
-      const updated = [newNotification, ...prev]
-      // Keep only maxNotifications
-      return updated.slice(0, maxNotifications)
-    })
+      setNotifications((prev) => {
+        const updated = [newNotification, ...prev]
+        // Keep only maxNotifications
+        return updated.slice(0, maxNotifications)
+      })
 
-    // Auto-dismiss after duration
-    if (duration > 0) {
-      const timeout = setTimeout(() => {
-        removeNotification(id)
-      }, duration)
+      // Auto-dismiss after duration
+      if (duration > 0) {
+        const timeout = setTimeout(() => {
+          removeNotification(id)
+        }, duration)
 
-      timeoutsRef.current.set(id, timeout)
-    }
+        timeoutsRef.current.set(id, timeout)
+      }
 
-    return id
-  }, [maxNotifications, removeNotification])
+      return id
+    },
+    [maxNotifications, removeNotification]
+  )
 
   const clearAll = React.useCallback(() => {
     setNotifications([])
@@ -308,10 +311,7 @@ const typeConfig = {
   },
 }
 
-const positionStyles: Record<
-  NotificationPosition,
-  { container: string; animation: string }
-> = {
+const positionStyles: Record<NotificationPosition, { container: string; animation: string }> = {
   "top-right": {
     container: "top-4 right-4",
     animation: "animate-in slide-in-from-right-full",
@@ -482,6 +482,7 @@ function NotificationToast({
 
               {/* Close button */}
               <button
+                type="button"
                 onClick={onClose}
                 aria-label="Dismiss notification"
                 className={cn(
@@ -499,6 +500,7 @@ function NotificationToast({
             {notification.action && (
               <div className="mt-3 pt-3 border-t border-white/10">
                 <button
+                  type="button"
                   onClick={() => {
                     notification.action!.onClick()
                     onClose()
@@ -510,8 +512,8 @@ function NotificationToast({
                     notification.action.variant === "primary"
                       ? "bg-white/20 text-white hover:bg-white/30"
                       : notification.action.variant === "secondary"
-                      ? "bg-white/10 text-white/80 hover:bg-white/20"
-                      : "text-white/60 hover:text-white hover:bg-white/5"
+                        ? "bg-white/10 text-white/80 hover:bg-white/20"
+                        : "text-white/60 hover:text-white hover:bg-white/5"
                   )}
                 >
                   {notification.action.label}
@@ -531,6 +533,7 @@ function NotificationToast({
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-label="Auto-dismiss progress"
+                tabIndex={0}
               />
             </div>
           )}
@@ -547,4 +550,3 @@ function NotificationToast({
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export { NotificationToast as NotificationToastStandalone }
-

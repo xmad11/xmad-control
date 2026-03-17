@@ -1,9 +1,9 @@
 "use client"
 
-import * as React from "react"
+import { cn } from "@/lib/utils"
 import * as SelectPrimitive from "@radix-ui/react-select"
 import { Check, ChevronDown, ChevronUp } from "lucide-react"
-import { cn } from "@/lib/utils"
+import * as React from "react"
 
 const GlassSelect = SelectPrimitive.Root
 
@@ -27,7 +27,7 @@ const GlassSelectTrigger = React.forwardRef<
       "focus:ring-2 focus:ring-cyan-400/30 focus:ring-offset-0",
       "disabled:cursor-not-allowed disabled:opacity-50",
       "[&>span]:line-clamp-1",
-      className,
+      className
     )}
     {...props}
   >
@@ -85,7 +85,7 @@ const GlassSelectContent = React.forwardRef<
         "data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
         position === "popper" &&
           "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
-        className,
+        className
       )}
       position={position}
       {...props}
@@ -95,7 +95,7 @@ const GlassSelectContent = React.forwardRef<
         className={cn(
           "p-1",
           position === "popper" &&
-            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]",
+            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
         )}
       >
         {children}
@@ -130,7 +130,7 @@ const GlassSelectItem = React.forwardRef<
       "focus:bg-white/10 focus:text-white",
       "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       "transition-colors duration-150",
-      className,
+      className
     )}
     {...props}
   >
@@ -148,7 +148,11 @@ const GlassSelectSeparator = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Separator>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Separator>
 >(({ className, ...props }, ref) => (
-  <SelectPrimitive.Separator ref={ref} className={cn("-mx-1 my-1 h-px bg-white/10", className)} {...props} />
+  <SelectPrimitive.Separator
+    ref={ref}
+    className={cn("-mx-1 my-1 h-px bg-white/10", className)}
+    {...props}
+  />
 ))
 GlassSelectSeparator.displayName = SelectPrimitive.Separator.displayName
 

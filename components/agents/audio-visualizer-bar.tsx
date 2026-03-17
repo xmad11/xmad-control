@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import React, { useMemo, type ComponentProps, type CSSProperties } from "react";
-import { type VariantProps, cva } from "class-variance-authority";
-import { cn } from "@/lib/utils";
-import { useAudioVisualizerBarAnimator, type AgentState } from "./hooks/use-audio-visualizer";
+import { cn } from "@/lib/utils"
+import { type VariantProps, cva } from "class-variance-authority"
+import React, { useMemo, type ComponentProps, type CSSProperties } from "react"
+import { type AgentState, useAudioVisualizerBarAnimator } from "./hooks/use-audio-visualizer"
 
 export const AudioVisualizerBarElementVariants = cva(
   [
@@ -23,7 +23,7 @@ export const AudioVisualizerBarElementVariants = cva(
     },
     defaultVariants: { size: "md" },
   }
-);
+)
 
 export const AudioVisualizerBarVariants = cva(
   "relative flex items-end justify-center gap-1 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10 p-2",
@@ -39,14 +39,14 @@ export const AudioVisualizerBarVariants = cva(
     },
     defaultVariants: { size: "md" },
   }
-);
+)
 
 export interface AudioVisualizerBarProps {
-  size?: "icon" | "sm" | "md" | "lg" | "xl";
-  state?: AgentState;
-  color?: string;
-  barCount?: number;
-  className?: string;
+  size?: "icon" | "sm" | "md" | "lg" | "xl"
+  state?: AgentState
+  color?: string
+  barCount?: number
+  className?: string
 }
 
 export function AudioVisualizerBar({
@@ -57,31 +57,38 @@ export function AudioVisualizerBar({
   className,
   style,
   ...props
-}: AudioVisualizerBarProps & ComponentProps<"div"> & VariantProps<typeof AudioVisualizerBarVariants>) {
+}: AudioVisualizerBarProps &
+  ComponentProps<"div"> &
+  VariantProps<typeof AudioVisualizerBarVariants>) {
   const _barCount = useMemo(() => {
-    if (barCount) return barCount;
-    return size === "icon" || size === "sm" ? 3 : 5;
-  }, [barCount, size]);
+    if (barCount) return barCount
+    return size === "icon" || size === "sm" ? 3 : 5
+  }, [barCount, size])
 
   const sequencerInterval = useMemo(() => {
     switch (state) {
-      case "connecting": return 2000 / _barCount;
-      case "initializing": return 2000;
-      case "listening": return 500;
-      case "thinking": return 150;
-      default: return 1000;
+      case "connecting":
+        return 2000 / _barCount
+      case "initializing":
+        return 2000
+      case "listening":
+        return 500
+      case "thinking":
+        return 150
+      default:
+        return 1000
     }
-  }, [state, _barCount]);
+  }, [state, _barCount])
 
-  const highlightedIndices = useAudioVisualizerBarAnimator(state, _barCount, sequencerInterval);
+  const highlightedIndices = useAudioVisualizerBarAnimator(state, _barCount, sequencerInterval)
 
   // Simulate volume bands for speaking state
   const bands = useMemo(() => {
     if (state === "speaking") {
-      return Array.from({ length: _barCount }, () => Math.random() * 0.8 + 0.2);
+      return Array.from({ length: _barCount }, () => Math.random() * 0.8 + 0.2)
     }
-    return new Array(_barCount).fill(0.3);
-  }, [state, _barCount]);
+    return new Array(_barCount).fill(0.3)
+  }, [state, _barCount])
 
   return (
     <div
@@ -90,12 +97,12 @@ export function AudioVisualizerBar({
       {...props}
     >
       {bands.map((band: number, idx: number) => {
-        const isHighlighted = highlightedIndices.includes(idx);
-        const height = state === "speaking" ? `${band * 100}%` : isHighlighted ? "80%" : "30%";
+        const isHighlighted = highlightedIndices.includes(idx)
+        const height = state === "speaking" ? `${band * 100}%` : isHighlighted ? "80%" : "30%"
 
         return (
           <div
-            key={`${_barCount}-${idx}`}
+            key={`bar-${idx}-${band.toFixed(2)}`}
             data-index={idx}
             data-highlighted={isHighlighted}
             className={cn(AudioVisualizerBarElementVariants({ size }))}
@@ -104,8 +111,8 @@ export function AudioVisualizerBar({
               transition: "height 0.15s ease-out",
             }}
           />
-        );
+        )
       })}
     </div>
-  );
+  )
 }

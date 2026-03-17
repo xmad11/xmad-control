@@ -1,8 +1,8 @@
 "use client"
 
-import * as React from "react"
-import * as PopoverPrimitive from "@radix-ui/react-popover"
 import { cn } from "@/lib/utils"
+import * as PopoverPrimitive from "@radix-ui/react-popover"
+import * as React from "react"
 
 const GlassPopover = PopoverPrimitive.Root
 
@@ -34,7 +34,7 @@ const GlassPopoverContent = React.forwardRef<
         // Glass highlight
         "before:absolute before:inset-0 before:rounded-xl",
         "before:bg-gradient-to-b before:from-white/15 before:to-transparent before:pointer-events-none",
-        className,
+        className
       )}
       {...props}
     />

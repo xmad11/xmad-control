@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-03-15T07:49:55.415Z",
+  "generatedAt": "2026-03-17T09:38:16.849Z",
   "summary": {
     "totalTokens": 60,
-    "usedTokens": 153
+    "usedTokens": 155
   },
   "tokenUsage": {},
   "componentCoverage": [
@@ -22,6 +22,11 @@
       "unusedTokens": []
     },
     {
+      "component": "components/ui/ChatFab.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
       "component": "components/ui/PageTitle.tsx",
       "coverage": 1,
       "unusedTokens": []
@@ -29,6 +34,11 @@
     {
       "component": "components/ui/loading-states/LoadingStates.tsx",
       "coverage": 0.7954545454545454,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/ui/label.tsx",
+      "coverage": 0,
       "unusedTokens": []
     },
     {
@@ -72,8 +82,18 @@
       "unusedTokens": []
     },
     {
+      "component": "components/ui/BackgroundLayer.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
       "component": "components/ui/Button.tsx",
       "coverage": 1,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/ui/FloatingTabs.tsx",
+      "coverage": 0,
       "unusedTokens": []
     },
     {
@@ -104,6 +124,11 @@
     {
       "component": "components/ui/pwa-components/InstallPrompt.tsx",
       "coverage": 1,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/error-boundary.tsx",
+      "coverage": 0,
       "unusedTokens": []
     },
     {
@@ -197,6 +222,16 @@
       "unusedTokens": []
     },
     {
+      "component": "components/memory/MemoryEditor.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/chat/ChatInterface.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
       "component": "components/images/OptimizedImage.tsx",
       "coverage": 0.1,
       "unusedTokens": []
@@ -272,6 +307,16 @@
       "unusedTokens": []
     },
     {
+      "component": "components/ai-dock/AiChatSheet.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/ai-dock/MiniWaveIndicator.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
       "component": "components/gallery/ImageRail.tsx",
       "coverage": 1,
       "unusedTokens": []
@@ -283,6 +328,36 @@
     },
     {
       "component": "components/navigation/NavigationProvider.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/agents/audio-visualizer-grid.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/agents/agent-control-bar.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/agents/audio-visualizer-bar.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/agents/audio-visualizer-radial.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/agents/agent-chat-transcript.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/agents/agent-session-view.tsx",
       "coverage": 0,
       "unusedTokens": []
     },
@@ -302,8 +377,153 @@
       "unusedTokens": []
     },
     {
+      "component": "components/carousel/WidgetCarousel.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/elevenlabs/conversation-bar.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/elevenlabs/shimmering-text.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/elevenlabs/response.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/elevenlabs/conversation.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/elevenlabs/live-waveform.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
       "component": "components/dashboard/TabContentWrapper.tsx",
       "coverage": 1,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/glass/glass-skeleton.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/glass/glass-switch.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/glass/glass-input.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/glass/glass-checkbox.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/glass/glass-textarea.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/glass/glass-breadcrumb.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/glass/glass-badge.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/glass/glass-scroll-area.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/glass/glass-table.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/glass/glass-avatar.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/glass/glass-dialog.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/glass/glass-button.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/glass/glass-select.tsx",
+      "coverage": 0.07692307692307693,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/glass/glass-popover.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/glass/glass-slider.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/glass/glass-sheet.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/glass/glass-alert-dialog.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/glass/glass-progress.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/glass/glass-radio.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/glass/glass-tooltip.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/glass/glass-separator.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/glass/glass-tabs.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/glass/glass-card.tsx",
+      "coverage": 0,
       "unusedTokens": []
     },
     {
@@ -337,6 +557,11 @@
       "unusedTokens": []
     },
     {
+      "component": "components/pwa/pwa-install-prompt.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
       "component": "components/pwa/OfflineBanner.tsx",
       "coverage": 0.75,
       "unusedTokens": []
@@ -348,6 +573,241 @@
     },
     {
       "component": "components/typography/MorphingText.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/liquid-glass/glass-skeleton.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/liquid-glass/glass-switch.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/liquid-glass/glass-input.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/liquid-glass/glass-checkbox.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/liquid-glass/glass-textarea.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/liquid-glass/glass-breadcrumb.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/liquid-glass/glass-badge.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/liquid-glass/glass-scroll-area.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/liquid-glass/glass-table.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/liquid-glass/glass-avatar.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/liquid-glass/glass-dialog.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/liquid-glass/glass-button.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/liquid-glass/glass-select.tsx",
+      "coverage": 0.07692307692307693,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/liquid-glass/glass-popover.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/liquid-glass/glass-slider.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/liquid-glass/glass-sheet.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/liquid-glass/glass-alert-dialog.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/liquid-glass/glass-progress.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/liquid-glass/glass-radio.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/liquid-glass/glass-tooltip.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/liquid-glass/glass-separator.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/liquid-glass/glass-tabs.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/liquid-glass/glass-card.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/agents-ui/audio-visualizer-grid.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/agents-ui/agent-control-bar.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/agents-ui/audio-visualizer-bar.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/agents-ui/audio-visualizer-radial.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/agents-ui/agent-chat-transcript.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/agents-ui/agent-session-view.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/innovative/glass-gauge.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/innovative/glass-morph-card.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/innovative/glass-command-palette.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/innovative/glass-notification.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/innovative/glass-timeline.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/innovative/glass-dock.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/innovative/glass-ripple.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/innovative/glass-spotlight.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/widgets/clock-widget.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/widgets/stats-widget.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/widgets/base-widget.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/widgets/weather-widget.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/widgets/calendar-widget.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/registry/widgets/stock-widget.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/sheet/glass-sheet.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/widgets/clock-widget.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/widgets/base-widget.tsx",
+      "coverage": 0,
+      "unusedTokens": []
+    },
+    {
+      "component": "components/NotificationSystem.tsx",
       "coverage": 0,
       "unusedTokens": []
     },

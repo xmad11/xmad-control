@@ -1,7 +1,7 @@
 "use client"
 
-import * as React from "react"
 import { cn } from "@/lib/utils"
+import * as React from "react"
 
 interface GlassMorphCardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode
@@ -19,7 +19,10 @@ const glowColors = {
 }
 
 const GlassMorphCard = React.forwardRef<HTMLDivElement, GlassMorphCardProps>(
-  ({ className, children, intensity = 15, glowColor = "cyan", disabled = false, ...props }, ref) => {
+  (
+    { className, children, intensity = 15, glowColor = "cyan", disabled = false, ...props },
+    ref
+  ) => {
     const cardRef = React.useRef<HTMLDivElement>(null)
     const [transform, setTransform] = React.useState({ rotateX: 0, rotateY: 0 })
     const [lightPosition, setLightPosition] = React.useState({ x: 50, y: 50 })
@@ -44,7 +47,7 @@ const GlassMorphCard = React.forwardRef<HTMLDivElement, GlassMorphCardProps>(
           y: (y / rect.height) * 100,
         })
       },
-      [intensity, disabled],
+      [intensity, disabled]
     )
 
     const handleMouseLeave = React.useCallback(() => {
@@ -58,13 +61,18 @@ const GlassMorphCard = React.forwardRef<HTMLDivElement, GlassMorphCardProps>(
     }, [])
 
     return (
-      <div ref={ref} className={cn("relative", className)} style={{ perspective: "1000px" }} {...props}>
+      <div
+        ref={ref}
+        className={cn("relative", className)}
+        style={{ perspective: "1000px" }}
+        {...props}
+      >
         {/* Glow effect */}
         <div
           className={cn(
             "absolute -inset-2 rounded-2xl bg-linear-to-r blur-xl transition-opacity duration-300",
             glowColors[glowColor],
-            isHovered ? "opacity-80" : "opacity-40",
+            isHovered ? "opacity-80" : "opacity-40"
           )}
         />
 
@@ -79,7 +87,7 @@ const GlassMorphCard = React.forwardRef<HTMLDivElement, GlassMorphCardProps>(
             "bg-white/10 backdrop-blur-xl",
             "shadow-[0_8px_32px_rgba(0,0,0,0.37)]",
             "overflow-hidden transition-transform duration-200 ease-out",
-            !disabled && "cursor-pointer",
+            !disabled && "cursor-pointer"
           )}
           style={{
             transform: `rotateX(${transform.rotateX}deg) rotateY(${transform.rotateY}deg)`,
@@ -103,8 +111,8 @@ const GlassMorphCard = React.forwardRef<HTMLDivElement, GlassMorphCardProps>(
             className="absolute inset-0 rounded-2xl pointer-events-none transition-opacity duration-300"
             style={{
               boxShadow: isHovered
-                ? `inset 2px 2px 10px rgba(255,255,255,0.2), inset -2px -2px 10px rgba(0,0,0,0.1)`
-                : `inset 1px 1px 2px rgba(255,255,255,0.1)`,
+                ? "inset 2px 2px 10px rgba(255,255,255,0.2), inset -2px -2px 10px rgba(0,0,0,0.1)"
+                : "inset 1px 1px 2px rgba(255,255,255,0.1)",
             }}
           />
 
@@ -115,7 +123,7 @@ const GlassMorphCard = React.forwardRef<HTMLDivElement, GlassMorphCardProps>(
         </div>
       </div>
     )
-  },
+  }
 )
 GlassMorphCard.displayName = "GlassMorphCard"
 

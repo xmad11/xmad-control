@@ -1,9 +1,9 @@
 "use client"
 
-import * as React from "react"
+import { cn } from "@/lib/utils"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { X } from "lucide-react"
-import { cn } from "@/lib/utils"
+import * as React from "react"
 
 const GlassDialog = DialogPrimitive.Root
 
@@ -23,7 +23,7 @@ const GlassDialogOverlay = React.forwardRef<
       "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm",
       "data-[state=open]:animate-in data-[state=closed]:animate-out",
       "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-      className,
+      className
     )}
     {...props}
   />
@@ -50,7 +50,7 @@ const GlassDialogContent = React.forwardRef<
         "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
         "data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%]",
         "data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]",
-        className,
+        className
       )}
       {...props}
     >
@@ -70,7 +70,10 @@ const GlassDialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDiv
 GlassDialogHeader.displayName = "GlassDialogHeader"
 
 const GlassDialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-6", className)} {...props} />
+  <div
+    className={cn("flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-6", className)}
+    {...props}
+  />
 )
 GlassDialogFooter.displayName = "GlassDialogFooter"
 
@@ -90,7 +93,11 @@ const GlassDialogDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
 >(({ className, ...props }, ref) => (
-  <DialogPrimitive.Description ref={ref} className={cn("text-sm text-white/60", className)} {...props} />
+  <DialogPrimitive.Description
+    ref={ref}
+    className={cn("text-sm text-white/60", className)}
+    {...props}
+  />
 ))
 GlassDialogDescription.displayName = DialogPrimitive.Description.displayName
 

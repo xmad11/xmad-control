@@ -1,8 +1,8 @@
 "use client"
 
-import * as React from "react"
-import * as SliderPrimitive from "@radix-ui/react-slider"
 import { cn } from "@/lib/utils"
+import * as SliderPrimitive from "@radix-ui/react-slider"
+import * as React from "react"
 
 const GlassSlider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
@@ -16,14 +16,14 @@ const GlassSlider = React.forwardRef<
     <SliderPrimitive.Track
       className={cn(
         "relative h-2 w-full grow overflow-hidden rounded-full",
-        "bg-white/10 backdrop-blur-xl border border-white/20",
+        "bg-white/10 backdrop-blur-xl border border-white/20"
       )}
     >
       <SliderPrimitive.Range
         className={cn(
           "absolute h-full rounded-full",
           "bg-linear-to-r from-cyan-400 via-blue-400 to-purple-400",
-          "shadow-[0_0_8px_rgba(59,130,246,0.4)]",
+          "shadow-[0_0_8px_rgba(59,130,246,0.4)]"
         )}
       />
     </SliderPrimitive.Track>
@@ -35,7 +35,7 @@ const GlassSlider = React.forwardRef<
         "transition-all duration-200",
         "hover:scale-110 hover:shadow-[0_0_16px_rgba(59,130,246,0.5)]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50",
-        "disabled:pointer-events-none disabled:opacity-50",
+        "disabled:pointer-events-none disabled:opacity-50"
       )}
     />
   </SliderPrimitive.Root>

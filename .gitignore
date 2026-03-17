@@ -84,7 +84,15 @@ runtime/
 # Temp files
 memory-log.txt
 *.tmp
-*.temp# 
+*.temp
+
+# Audio files (workspace media)
+*.mp3
+*.wav
+*.ogg
+*.m4a
+
+# 
 # Cache refresh 
 tsconfig.tsbuildinfo
 

@@ -1,0 +1,120 @@
+{
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "zai/glm-4.7",
+        "fallbacks": [
+          "zai/glm-5",
+          "zai/glm-4.6"
+        ]
+      },
+      "workspace": "/Users/ahmadabdullah/xmad-control/openclaw/workspace",
+      "contextPruning": {
+        "mode": "cache-ttl",
+        "ttl": "30m"
+      },
+      "compaction": {
+        "mode": "safeguard",
+        "reserveTokensFloor": 12000
+      },
+      "heartbeat": {
+        "every": "0m"
+      }
+    }
+  },
+  "channels": {
+    "whatsapp": {
+      "enabled": true,
+      "dmPolicy": "pairing",
+      "allowFrom": [
+        "+971504042000",
+        "+971502059116"
+      ],
+      "groupAllowFrom": [
+        "+971504042000",
+        "+971502059116"
+      ],
+      "groupPolicy": "allowlist",
+      "textChunkLimit": 4000,
+      "chunkMode": "length",
+      "blockStreaming": true,
+      "debounceMs": 0,
+      "mediaMaxMb": 5
+    }
+  },
+  "plugins": {
+    "entries": {
+      "whatsapp": {
+        "enabled": true
+      },
+      "memory-lancedb": {
+        "enabled": false
+      },
+      "browser": {
+        "enabled": false
+      },
+      "canvas": {
+        "enabled": false
+      },
+      "nodes": {
+        "enabled": false
+      },
+      "cron": {
+        "enabled": false
+      },
+      "discord": {
+        "enabled": false
+      },
+      "gateway": {
+        "enabled": false
+      },
+      "hooks": {
+        "enabled": false
+      },
+      "sandbox": {
+        "enabled": false
+      }
+    }
+  },
+  "tools": {
+    "profile": "full",
+    "allow": [
+      "bash",
+      "process",
+      "read",
+      "write",
+      "edit"
+    ],
+    "deny": [
+      "browser",
+      "canvas",
+      "nodes",
+      "cron",
+      "discord",
+      "gateway"
+    ]
+  },
+  "gateway": {
+    "port": 18789,
+    "mode": "local",
+    "auth": {
+      "mode": "token",
+      "token": "a49b6ef672db3a62018a9e23ad56c7717231b6f01ba9a550"
+    }
+  },
+  "update": {
+    "auto": {
+      "enabled": true
+    },
+    "channel": "stable"
+  },
+  "messages": {
+    "tts": {
+      "auto": "inbound",
+      "provider": "edge"
+    }
+  },
+  "hooks": {
+    "enabled": false
+  }
+}

@@ -5,7 +5,7 @@
 
 "use client"
 
-import { Component, type ReactNode, type ErrorInfo } from "react"
+import { Component, type ErrorInfo, type ReactNode } from "react"
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // PROPS
@@ -141,7 +141,7 @@ interface SurfaceErrorBoundaryProps {
 export function SurfaceErrorBoundary({ surfaceId, children }: SurfaceErrorBoundaryProps) {
   return (
     <ErrorBoundary
-      fallback={(error, retry) => (
+      fallback={(_error, retry) => (
         <div className="flex items-center justify-center p-8 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10">
           <div className="text-center">
             <p className="text-white/60 text-sm mb-2">Surface "{surfaceId}" failed to load</p>

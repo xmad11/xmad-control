@@ -1,8 +1,8 @@
 "use client"
 
-import * as React from "react"
-import * as SeparatorPrimitive from "@radix-ui/react-separator"
 import { cn } from "@/lib/utils"
+import * as SeparatorPrimitive from "@radix-ui/react-separator"
+import * as React from "react"
 
 const GlassSeparator = React.forwardRef<
   React.ElementRef<typeof SeparatorPrimitive.Root>,
@@ -15,7 +15,7 @@ const GlassSeparator = React.forwardRef<
     className={cn(
       "shrink-0 bg-gradient-to-r from-transparent via-white/20 to-transparent",
       orientation === "horizontal" ? "h-px w-full" : "h-full w-px",
-      className,
+      className
     )}
     {...props}
   />

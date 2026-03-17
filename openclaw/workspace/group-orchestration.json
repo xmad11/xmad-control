@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "owner": {
+    "name": "Ahmad",
+    "numbers": ["+971502059116", "+971504042000"]
+  },
+  "whatsapp": {
+    "authorized_numbers": ["+971502059116", "+971504042000"],
+    "ignore_others": true,
+    "one_time_messaging": true
+  },
+  "groups": {
+    "NOVA Group": {
+      "jid": "120363424299484560@g.us",
+      "name": "NOVA Group",
+      "agents": ["NOVA"],
+      "purpose": "Main coordination - send tasks here to distribute to agents",
+      "respond_to": ["+971502059116", "+971504042000"],
+      "trigger_keywords": ["divide", "orchestrat", "coordinate", "all agents", "tell"]
+    },
+    "Manager": {
+      "jid": "PENDING_GROUP_ID",
+      "name": "Manager",
+      "agents": ["NOVA"],
+      "purpose": "Management tasks - planning, supervision, coordination",
+      "respond_to": ["+971502059116", "+971504042000"],
+      "trigger_keywords": ["manage", "plan", "supervise", "coordinate", "status", "priority"]
+    },
+    "Developer": {
+      "jid": "PENDING_GROUP_ID",
+      "name": "Developer",
+      "agents": ["NOVA"],
+      "purpose": "Coding tasks - development, bugs, features",
+      "respond_to": ["+971502059116", "+971504042000"],
+      "trigger_keywords": [
+        "code",
+        "develop",
+        "bug",
+        "feature",
+        "fix",
+        "audit",
+        "implement",
+        "refactor"
+      ]
+    },
+    "Researcher": {
+      "jid": "PENDING_GROUP_ID",
+      "name": "Researcher",
+      "agents": ["NOVA"],
+      "purpose": "Research tasks - analysis, comparison, documentation",
+      "respond_to": ["+971502059116", "+971504042000"],
+      "trigger_keywords": [
+        "research",
+        "analyze",
+        "compare",
+        "find",
+        "search",
+        "lookup",
+        "review",
+        "best",
+        "vs"
+      ]
+    },
+    "Automator": {
+      "jid": "PENDING_GROUP_ID",
+      "name": "Automator",
+      "agents": ["NOVA"],
+      "purpose": "Automation - scripts, cron jobs, repetitive tasks",
+      "respond_to": ["+971502059116", "+971504042000"],
+      "trigger_keywords": ["automate", "script", "run", "execute", "schedule", "cron"]
+    }
+  },
+  "orchestration": {
+    "enabled": true,
+    "mode": "group_based",
+    "workflow": "nova_distribute",
+    "collect_responses": true,
+    "consolidate": true
+  },
+  "agent_routing": {
+    "auto_detect_agent": true,
+    "keyword_based": true,
+    "fallback_agent": "NOVA"
+  }
+}
