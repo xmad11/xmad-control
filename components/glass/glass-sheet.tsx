@@ -19,9 +19,10 @@ const GlassSheetOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Overlay
     className={cn(
-      "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm",
+      "fixed inset-0 z-50 bg-black/70 backdrop-blur-sm",
       "data-[state=open]:animate-in data-[state=closed]:animate-out",
       "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "after:absolute after:inset-0 after:bg-[var(--widget-cyan)]/5 after:pointer-events-none",
       className
     )}
     {...props}
@@ -33,12 +34,13 @@ GlassSheetOverlay.displayName = SheetPrimitive.Overlay.displayName
 const sheetVariants = cva(
   cn(
     "fixed z-50 gap-4 p-6",
-    "bg-white/10 backdrop-blur-2xl border border-white/20",
-    "shadow-[0_8px_32px_rgba(0,0,0,0.4)]",
+    "bg-[#0a1628]/90 backdrop-blur-2xl",
+    "border border-[var(--widget-cyan)]/30",
+    "shadow-[0_0_30px_rgba(34,211,238,0.15),0_8px_32px_rgba(0,0,0,0.4)]",
     "transition ease-in-out duration-300",
     "data-[state=open]:animate-in data-[state=closed]:animate-out",
     "before:absolute before:inset-0",
-    "before:bg-gradient-to-b before:from-white/15 before:to-transparent before:pointer-events-none"
+    "before:bg-gradient-to-b before:from-[var(--widget-cyan)]/10 before:to-transparent before:pointer-events-none"
   ),
   {
     variants: {
