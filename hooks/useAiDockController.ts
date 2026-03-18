@@ -246,11 +246,17 @@ export function useAiDockController({
       isHoldingRef.current = false
       clearHoldTimer()
 
-      // If hold was NOT triggered (short tap), expand tabs
-      if (!wasHoldTriggered && !voiceMode) {
-        resetCollapseTimer()
+      // If hold was NOT triggered (short tap)
+      if (!wasHoldTriggered) {
+        if (voiceMode) {
+          // During voice mode: expand tabs
+          expandTabs()
+        } else {
+          // Normal mode: reset collapse timer
+          resetCollapseTimer()
+        }
       }
-    }, [clearHoldTimer, resetCollapseTimer, voiceMode]),
+    }, [clearHoldTimer, resetCollapseTimer, expandTabs, voiceMode]),
 
     onPointerLeave: useCallback(() => {
       isHoldingRef.current = false
