@@ -107,10 +107,18 @@ export function HomeClient() {
     showIndicator,
     openSheet,
     closeSheet,
+    resetCollapseTimer,
     holdHandlers,
     keyboardHandlers,
     ariaProps,
   } = useAiDockController()
+
+  // Wrap surface change to reset collapse timer when clicking tabs
+  const handleTabChange = (value: string) => {
+    handleSurfaceChange(value)
+    // Reset the auto-collapse timer when clicking a tab
+    resetCollapseTimer()
+  }
 
   // Lock body scroll when sheet is open
   useEffect(() => {
@@ -139,7 +147,7 @@ export function HomeClient() {
           ════════════════════════════════════════════════════════════════════════ */}
       <GlassTabs
         value={activeSurface}
-        onValueChange={handleSurfaceChange}
+        onValueChange={handleTabChange}
         className="relative z-10 flex flex-col transition-all duration-500"
       >
         {/* Content area - use SurfaceManager with token-based bottom padding */}
