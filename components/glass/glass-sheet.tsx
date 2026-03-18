@@ -19,10 +19,9 @@ const GlassSheetOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Overlay
     className={cn(
-      "fixed inset-0 z-50 bg-black/70 backdrop-blur-sm",
+      "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm",
       "data-[state=open]:animate-in data-[state=closed]:animate-out",
       "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-      "after:absolute after:inset-0 after:bg-[var(--widget-cyan)]/5 after:pointer-events-none",
       className
     )}
     {...props}
@@ -32,33 +31,36 @@ const GlassSheetOverlay = React.forwardRef<
 GlassSheetOverlay.displayName = SheetPrimitive.Overlay.displayName
 
 const sheetVariants = cva(
-  cn(
-    "fixed z-50 gap-4 p-6",
-    "bg-[#0a1628]/90 backdrop-blur-2xl",
-    "border border-[var(--widget-cyan)]/30",
-    "shadow-[0_0_30px_rgba(34,211,238,0.15),0_8px_32px_rgba(0,0,0,0.4)]",
-    "transition ease-in-out duration-300",
-    "data-[state=open]:animate-in data-[state=closed]:animate-out",
-    "before:absolute before:inset-0",
-    "before:bg-gradient-to-b before:from-[var(--widget-cyan)]/10 before:to-transparent before:pointer-events-none"
-  ),
+  "fixed z-50 gap-4 p-6 backdrop-blur-2xl transition ease-in-out duration-300",
   {
     variants: {
       side: {
         top: cn(
           "inset-x-0 top-0 border-b rounded-b-2xl h-[60vh]",
+          "bg-[var(--bg-3)]/95 border-[var(--widget-cyan)]/30",
+          "shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_var(--widget-cyan)/20]",
+          "before:absolute before:inset-0 before:bg-gradient-to-b before:from-[var(--widget-cyan)]/10 before:to-transparent before:pointer-events-none",
           "data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top"
         ),
         bottom: cn(
           "inset-x-0 bottom-0 border-t rounded-t-2xl h-[60vh]",
+          "bg-[var(--bg-3)]/95 border-[var(--widget-purple)]/30",
+          "shadow-[0_-8px_32px_rgba(0,0,0,0.4),inset_0_-1px_0_var(--widget-purple)/20]",
+          "before:absolute before:inset-0 before:bg-gradient-to-t before:from-[var(--widget-purple)]/10 before:to-transparent before:pointer-events-none",
           "data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom"
         ),
         left: cn(
           "inset-y-0 left-0 h-full w-[60vw] border-r rounded-r-2xl",
+          "bg-[var(--bg-3)]/95 border-[var(--widget-cyan)]/30",
+          "shadow-[8px_0_32px_rgba(0,0,0,0.4),inset_-1px_0_0_var(--widget-cyan)/20]",
+          "before:absolute before:inset-0 before:bg-gradient-to-r before:from-[var(--widget-cyan)]/10 before:to-transparent before:pointer-events-none",
           "data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left"
         ),
         right: cn(
           "inset-y-0 right-0 h-full w-[60vw] border-l rounded-l-2xl",
+          "bg-[var(--bg-3)]/95 border-[var(--widget-cyan)]/30",
+          "shadow-[-8px_0_32px_rgba(0,0,0,0.4),inset_1px_0_0_var(--widget-cyan)/20]",
+          "before:absolute before:inset-0 before:bg-gradient-to-l before:from-[var(--widget-cyan)]/10 before:to-transparent before:pointer-events-none",
           "data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right"
         ),
       },
