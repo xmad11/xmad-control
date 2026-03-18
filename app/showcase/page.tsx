@@ -8,6 +8,13 @@
 import { WidgetCarousel } from "@/components/carousel/WidgetCarousel"
 import { GlassBadge } from "@/components/glass/glass-badge"
 import {
+  GlassWidgetBase,
+  MiniStatWidget,
+  MultiGaugeWidget,
+  MultiProgressWidget,
+  ServerStatusCard,
+} from "@/components/widgets/base-widget"
+import {
   CalendarWidget,
   CompactCalendarWidget,
   EventsCalendarWidget,
@@ -19,11 +26,7 @@ import {
   TimerWidget,
   WorldClockWidget,
 } from "@/components/widgets/clock-widget"
-import {
-  CircularProgressStat,
-  MetricStat,
-  StatCard,
-} from "@/components/widgets/stats-widget"
+import { CircularProgressStat, MetricStat, StatCard } from "@/components/widgets/stats-widget"
 import {
   CompactStockWidget,
   MarketOverviewWidget,
@@ -35,13 +38,6 @@ import {
   ForecastWidget,
   HourlyWeatherWidget,
 } from "@/components/widgets/weather-widget"
-import {
-  GlassWidgetBase,
-  MiniStatWidget,
-  MultiGaugeWidget,
-  MultiProgressWidget,
-  ServerStatusCard,
-} from "@/components/widgets/base-widget"
 import { WORLD_CLOCKS } from "@/config/dashboard"
 import {
   Activity,
@@ -101,9 +97,9 @@ export default function ShowcasePage() {
       />
 
       {/* Content */}
-      <div className="relative z-10 w-full">
+      <div className="relative z-10 w-full overflow-y-auto">
         {/* Hero Section */}
-        <section className="container mx-auto px-4 pt-20 pb-12">
+        <section className="container mx-auto px-4 pt-20 pb-8">
           <div className="w-full text-center">
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white mb-6">
               <span className="block">XMAD Control</span>
@@ -148,32 +144,32 @@ export default function ShowcasePage() {
           </div>
 
           {/* Calendar & Clock Widgets */}
-          <div className="mb-4">
-            <h3 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-3">
+          <div className="mb-8">
+            <h3 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-4">
               Calendar & Time
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 w-full">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
               <CompactCalendarWidget />
               <AnalogClockWidget size="lg" showNumbers={true} />
               <DigitalClockWidget showSeconds={false} />
               <StopwatchWidget />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 w-full mt-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full mt-4">
               <CalendarWidget />
               <TimerWidget initialMinutes={5} />
               <WorldClockWidget clocks={WORLD_CLOCKS} />
             </div>
-            <div className="mt-3">
+            <div className="mt-4">
               <EventsCalendarWidget date={new Date()} events={sampleEvents} className="w-full" />
             </div>
           </div>
 
           {/* Weather Widgets */}
-          <div className="mb-4">
-            <h3 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-3">
+          <div className="mb-8">
+            <h3 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-4">
               Weather
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 w-full">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
               <CurrentWeatherWidget
                 location="San Francisco"
                 temperature={72}
@@ -211,11 +207,11 @@ export default function ShowcasePage() {
           </div>
 
           {/* Stock Widgets */}
-          <div className="mb-4">
-            <h3 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-3">
+          <div className="mb-8">
+            <h3 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-4">
               Stock & Finance
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 w-full">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
               <StockTickerWidget symbol="AAPL" price={198.45} change={2.34} changePercent={1.19} />
               <CompactStockWidget
                 symbol="GOOGL"
@@ -229,11 +225,11 @@ export default function ShowcasePage() {
           </div>
 
           {/* Stats Widgets */}
-          <div className="mb-4">
-            <h3 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-3">
+          <div className="mb-8">
+            <h3 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-4">
               Stats & Metrics
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 w-full">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
               <StatCard
                 title="Revenue"
                 value="$124,500"
@@ -261,11 +257,11 @@ export default function ShowcasePage() {
           </div>
 
           {/* Dashboard Widgets */}
-          <div className="mb-4">
-            <h3 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-3">
+          <div className="mb-8">
+            <h3 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-4">
               Dashboard System
             </h3>
-            <div className="mb-4">
+            <div className="mb-6">
               <WidgetCarousel gap="sm" itemsPerView={{ base: 1, sm: 1, lg: 2, xl: 3 }}>
                 <MultiGaugeWidget
                   title="System Resources"
@@ -317,7 +313,7 @@ export default function ShowcasePage() {
                 </GlassWidgetBase>
               </WidgetCarousel>
             </div>
-            <div className="mb-4">
+            <div className="mb-6">
               <WidgetCarousel gap="sm" itemsPerView={{ base: 1, sm: 2, lg: 3, xl: 4 }}>
                 <ServerStatusCard
                   icon={Server}
@@ -356,7 +352,7 @@ export default function ShowcasePage() {
                 </GlassWidgetBase>
               </WidgetCarousel>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <MiniStatWidget icon={Activity} label="Requests/min" value="1.2K" glowColor="cyan" />
               <MiniStatWidget icon={Database} label="Data In" value="45 MB" glowColor="green" />
               <MiniStatWidget icon={Cpu} label="Data Out" value="128 MB" glowColor="purple" />
