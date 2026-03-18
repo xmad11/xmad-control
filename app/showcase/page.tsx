@@ -84,7 +84,7 @@ export default function ShowcasePage() {
   ]
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 -mt-[var(--header-total-height)]">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 pt-[calc(var(--header-total-height)+1rem)]">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-cyan-950/20 via-transparent to-purple-950/10" />
       <div
@@ -99,14 +99,17 @@ export default function ShowcasePage() {
       {/* Content */}
       <div className="relative z-10 w-full overflow-y-auto">
         {/* Hero Section */}
-        <section className="container mx-auto px-4 pt-20 pb-8">
+        <section className="container mx-auto px-4 pt-8 pb-8">
           <div className="w-full text-center">
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white mb-6">
-              <span className="block">XMAD Control</span>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white mb-2">
               <span className="block bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-                Component Showcase
+                XMAD
               </span>
             </h1>
+            <p className="text-xl md:text-2xl text-white/60 mb-8 tracking-wide leading-relaxed">
+              <span className="block">NextGen</span>
+              <span className="block">Ecosystem</span>
+            </p>
             <p className="text-lg md:text-xl text-white/50 w-full mx-auto mb-10 leading-relaxed">
               Explore our collection of liquid glass components and widgets for building beautiful
               dashboards and control panels.
