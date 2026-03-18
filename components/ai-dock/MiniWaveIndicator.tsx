@@ -14,6 +14,50 @@ import { aiDockTokens } from "@/design/tokens/ai-dock.tokens"
 import { cn } from "@/lib/utils"
 import React from "react"
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// WAVE BARS COMPONENT (shared between modes)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function WaveBars() {
+  const waveHeight = "10px"
+  const waveWidth = "3px"
+  const duration = `${aiDockTokens.motion.waveDurationSec}s`
+
+  return (
+    <>
+      <div className="flex items-center justify-center gap-[3px] h-4">
+        {[0, 1, 2].map((i) => (
+          <span
+            key={i}
+            className="wave-bar rounded-full bg-cyan-400"
+            style={{
+              width: waveWidth,
+              height: waveHeight,
+              animationName: "wave-bar-anim",
+              animationDuration: duration,
+              animationTimingFunction: "ease-in-out",
+              animationIterationCount: "infinite",
+              animationDelay: `${i * 100}ms`,
+              transformOrigin: "center",
+              willChange: "transform",
+            }}
+          />
+        ))}
+      </div>
+      <style jsx global>{`
+        @keyframes wave-bar-anim {
+          0%, 100% { transform: scaleY(0.4); }
+          50% { transform: scaleY(1); }
+        }
+      `}</style>
+    </>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MAIN COMPONENT
+// ═══════════════════════════════════════════════════════════════════════════════
+
 interface MiniWaveIndicatorProps {
   /** Show the wave animation */
   active?: boolean
@@ -31,44 +75,11 @@ export function MiniWaveIndicator({
   expanded = false,
   className,
 }: MiniWaveIndicatorProps) {
-  const waveHeight = "8px"
-  const waveWidth = "2px"
-  const waveGap = "2px"
-  const duration = `${aiDockTokens.motion.waveDurationSec}s`
-
-  // Expanded mode: inline wave for button content
+  // Expanded mode: inline wave for button content (centered)
   if (expanded && active) {
     return (
-      <div
-        className={cn(
-          "relative z-10 flex items-end justify-center",
-          "pointer-events-none",
-          className
-        )}
-        style={{
-          gap: waveGap,
-          height: "16px",
-        }}
-      >
-        <div className="flex items-end gap-[2px]">
-          {[0, 1, 2].map((i) => (
-            <span
-              key={i}
-              className="wave-bar rounded-full bg-cyan-400"
-              style={{
-                width: waveWidth,
-                height: waveHeight,
-                animationName: "wave-bar-anim",
-                animationDuration: duration,
-                animationTimingFunction: "ease-in-out",
-                animationIterationCount: "infinite",
-                animationDelay: `${i * 75}ms`,
-                transformOrigin: "bottom",
-                willChange: "transform",
-              }}
-            />
-          ))}
-        </div>
+      <div className={cn("flex items-center justify-center", className)}>
+        <WaveBars />
       </div>
     )
   }
@@ -84,38 +95,10 @@ export function MiniWaveIndicator({
       )}
       style={{
         bottom: `calc(100% + ${aiDockTokens.position.waveOffsetY})`,
-        gap: waveGap,
         height: "16px",
       }}
     >
-      {active && !collapsed && (
-        // Wave bars - CSS animation only (using separate properties, not shorthand)
-        <div className="flex items-end gap-[2px]">
-          {[0, 1, 2].map((i) => (
-            <span
-              key={i}
-              className="wave-bar rounded-full bg-cyan-400"
-              style={{
-                width: waveWidth,
-                height: waveHeight,
-                animationName: "wave-bar-anim",
-                animationDuration: duration,
-                animationTimingFunction: "ease-in-out",
-                animationIterationCount: "infinite",
-                animationDelay: `${i * 75}ms`,
-                transformOrigin: "bottom",
-                willChange: "transform",
-              }}
-            />
-          ))}
-          <style jsx>{`
-            @keyframes wave-bar-anim {
-              0%, 100% { transform: scaleY(0.6); }
-              50% { transform: scaleY(1); }
-            }
-          `}</style>
-        </div>
-      )}
+      {active && !collapsed && <WaveBars />}
 
       {collapsed && !active && (
         // Collapsed dot indicator - CSS pulse only

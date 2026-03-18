@@ -164,6 +164,39 @@ export function HomeClient() {
           style={{ paddingBottom: `calc(0.5rem + ${SAFE_AREA_BOTTOM})` }}
         >
           <div className="relative flex flex-col items-center pointer-events-auto gap-1">
+            {/* Voice mode active + tabs collapsed: Wave button to expand tabs / hold to stop */}
+            <AnimatePresence>
+              {!tabsExpanded && voiceMode && (
+                <button
+                  onContextMenu={(e) => e.preventDefault()}
+                  {...holdHandlers}
+                  className={`
+                    transition-all ease-out select-none touch-none flex
+                    relative p-3 rounded-xl
+                    bg-cyan-500/20 backdrop-blur-xl border border-cyan-400/30
+                    shadow-[0_4px_16px_rgba(0,0,0,0.2)]
+                    hover:bg-cyan-500/30 scale-110 ring-2 ring-cyan-400/50
+                  `}
+                  style={{
+                    transitionDuration: `${aiDockTokens.motion.tabExpand}ms`,
+                    WebkitTouchCallout: "none",
+                    WebkitUserSelect: "none",
+                    userSelect: "none",
+                  }}
+                  aria-label="Voice active - hold to stop, tap to expand tabs"
+                  onClick={resetCollapseTimer}
+                >
+                  <MiniWaveIndicator active expanded />
+                  {/* Glow effect */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.6 }}
+                    className="absolute -inset-2 rounded-xl bg-cyan-500/30 blur-lg pointer-events-none"
+                  />
+                </button>
+              )}
+            </AnimatePresence>
+
             {/* Voice mode active + tabs expanded: Wave button to open sheet / hold to stop */}
             <AnimatePresence>
               {tabsExpanded && voiceMode && (
@@ -205,34 +238,28 @@ export function HomeClient() {
               )}
             </AnimatePresence>
 
-            {/* Collapsed state - single floating button
-                HOLD → Toggle voice mode
-                TAP → Expand tabs */}
-            <button
-              onContextMenu={(e) => e.preventDefault()}
-              {...holdHandlers}
-              {...keyboardHandlers}
-              {...ariaProps}
-              className={`
-                transition-all ease-out select-none touch-none
-                ${tabsExpanded ? "hidden" : "flex"}
-                relative p-3 rounded-xl
-                bg-white/10 backdrop-blur-xl border border-white/20
-                shadow-[0_4px_16px_rgba(0,0,0,0.2)]
-                hover:bg-white/15
-                ${voiceMode ? "scale-110 ring-2 ring-cyan-400/50" : "active:scale-95"}
-              `}
-              style={{
-                transitionDuration: `${aiDockTokens.motion.tabExpand}ms`,
-                WebkitTouchCallout: "none",
-                WebkitUserSelect: "none",
-                userSelect: "none",
-              }}
-            >
-              {/* Voice mode: show wave inside button, no mic icon */}
-              {voiceMode ? (
-                <MiniWaveIndicator active expanded />
-              ) : (
+            {/* Collapsed state - single floating button (only when NOT voice mode) */}
+            {!voiceMode && (
+              <button
+                onContextMenu={(e) => e.preventDefault()}
+                {...holdHandlers}
+                {...keyboardHandlers}
+                {...ariaProps}
+                className={`
+                  transition-all ease-out select-none touch-none
+                  ${tabsExpanded || voiceMode ? "hidden" : "flex"}
+                  relative p-3 rounded-xl
+                  bg-white/10 backdrop-blur-xl border border-white/20
+                  shadow-[0_4px_16px_rgba(0,0,0,0.2)]
+                  hover:bg-white/15 active:scale-95
+                `}
+                style={{
+                  transitionDuration: `${aiDockTokens.motion.tabExpand}ms`,
+                  WebkitTouchCallout: "none",
+                  WebkitUserSelect: "none",
+                  userSelect: "none",
+                }}
+              >
                 <div className="relative z-10 flex items-center justify-center">
                   {(() => {
                     const activeTabData = tabs.find((t) => t.value === activeSurface)
@@ -240,19 +267,9 @@ export function HomeClient() {
                     return TabIcon ? <TabIcon className="h-4 w-4 text-white" /> : null
                   })()}
                 </div>
-              )}
-              <div className="absolute -inset-1 rounded-xl bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 blur-lg opacity-60" />
-
-              {/* Glow effect when voice mode is active */}
-              {voiceMode && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 0.6 }}
-                  exit={{ opacity: 0 }}
-                  className="absolute -inset-2 rounded-xl bg-cyan-500/30 blur-lg"
-                />
-              )}
-            </button>
+                <div className="absolute -inset-1 rounded-xl bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 blur-lg opacity-60" />
+              </button>
+            )}
 
             {/* Expanded state - tabs */}
             <div
