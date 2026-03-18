@@ -14,12 +14,25 @@
   --glass-bg: rgba(255, 255, 255, 0.85);
   --glass-border: rgba(0, 0, 0, 0.12);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  --glass-shadow-widget: 0 8px 32px rgba(0, 0, 0, 0.37);
+  --glass-shadow-inset: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  --glass-stroke-subtle: rgba(255, 255, 255, 0.1);
 
   /* Absolute gray token – never derived */
   --gray: oklch(0.48 0.028 250.0);
 
   /* Component tokens - filter dropdown system */
   --dropdown-width: 280px;
+
+  /* Widget color tokens - dashboard accent colors */
+  --widget-cyan: oklch(0.7 0.15 190.0);
+  --widget-purple: oklch(0.6 0.18 290.0);
+  --widget-green: oklch(0.65 0.18 150.0);
+  --widget-amber: oklch(0.72 0.16 70.0);
+  --widget-blue: oklch(0.55 0.18 250.0);
+  --widget-pink: oklch(0.65 0.18 350.0);
+  --widget-red: oklch(0.55 0.2 25.0);
+  --widget-gray: oklch(0.62 0.025 250.0);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────

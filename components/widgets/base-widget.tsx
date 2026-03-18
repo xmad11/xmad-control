@@ -134,47 +134,50 @@ const widthClasses: Record<WidgetWidth, string> = {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// GLOW COLORS - Gradient based (from ein-ui)
+// WIDGET COLOR MAPPINGS - Using design tokens via CSS custom properties
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const glowColors: Record<GlowColor, string> = {
-  cyan: "from-cyan-500/30 via-blue-500/30 to-purple-500/30",
-  purple: "from-purple-500/30 via-pink-500/30 to-purple-500/30",
-  green: "from-emerald-500/30 via-teal-500/30 to-emerald-500/30",
-  amber: "from-amber-500/30 via-orange-500/30 to-amber-500/30",
-  blue: "from-blue-500/30 via-indigo-500/30 to-blue-500/30",
-  pink: "from-pink-500/30 via-rose-500/30 to-pink-500/30",
-  red: "from-red-500/30 via-rose-500/30 to-red-500/30",
-  gray: "from-gray-500/30 via-slate-500/30 to-gray-500/30",
+  cyan: "from-[color:var(--widget-cyan)]/30 via-[color:var(--glow-blue)]/30 to-[color:var(--widget-purple)]/30",
+  purple:
+    "from-[color:var(--widget-purple)]/30 via-[color:var(--widget-pink)]/30 to-[color:var(--widget-purple)]/30",
+  green:
+    "from-[color:var(--glow-green)]/30 via-[color:var(--glow-cyan)]/30 to-[color:var(--glow-green)]/30",
+  amber:
+    "from-[color:var(--widget-amber)]/30 via-[color:var(--color-accent-rust)]/30 to-[color:var(--widget-amber)]/30",
+  blue: "from-[color:var(--widget-blue)]/30 via-[color:var(--color-accent-indigo)]/30 to-[color:var(--widget-blue)]/30",
+  pink: "from-[color:var(--widget-pink)]/30 via-[color:var(--color-accent-rose)]/30 to-[color:var(--widget-pink)]/30",
+  red: "from-[color:var(--widget-red)]/30 via-[color:var(--color-accent-rose)]/30 to-[color:var(--widget-red)]/30",
+  gray: "from-[color:var(--gray)]/30 via-[color:var(--gray)]/30 to-[color:var(--gray)]/30",
 }
 
 const gaugeColors: Record<GlowColor, string> = {
-  cyan: "text-cyan-400",
-  purple: "text-purple-400",
-  green: "text-green-400",
-  amber: "text-amber-400",
-  blue: "text-blue-400",
-  pink: "text-pink-400",
-  red: "text-red-400",
-  gray: "text-gray-400",
+  cyan: "text-[color:var(--widget-cyan)]",
+  purple: "text-[color:var(--widget-purple)]",
+  green: "text-[color:var(--widget-green)]",
+  amber: "text-[color:var(--widget-amber)]",
+  blue: "text-[color:var(--widget-blue)]",
+  pink: "text-[color:var(--widget-pink)]",
+  red: "text-[color:var(--widget-red)]",
+  gray: "text-[color:var(--gray)]",
 }
 
 const progressColors: Record<GlowColor, string> = {
-  cyan: "from-cyan-500 to-cyan-400",
-  purple: "from-purple-500 to-purple-400",
-  green: "from-green-500 to-green-400",
-  amber: "from-amber-500 to-amber-400",
-  blue: "from-blue-500 to-blue-400",
-  pink: "from-pink-500 to-pink-400",
-  red: "from-red-500 to-red-400",
-  gray: "from-gray-500 to-gray-400",
+  cyan: "bg-[color:var(--widget-cyan)]",
+  purple: "bg-[color:var(--widget-purple)]",
+  green: "bg-[color:var(--widget-green)]",
+  amber: "bg-[color:var(--widget-amber)]",
+  blue: "bg-[color:var(--widget-blue)]",
+  pink: "bg-[color:var(--widget-pink)]",
+  red: "bg-[color:var(--widget-red)]",
+  gray: "bg-[color:var(--gray)]",
 }
 
 const statusColors: Record<StatusType, string> = {
-  online: "bg-green-400",
-  offline: "bg-red-400",
-  warning: "bg-amber-400",
-  error: "bg-red-500",
+  online: "bg-[color:var(--color-success)]",
+  offline: "bg-[color:var(--color-error)]",
+  warning: "bg-[color:var(--color-warning)]",
+  error: "bg-[color:var(--color-error)]",
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -275,13 +278,13 @@ const GlassWidgetBase = React.forwardRef<HTMLDivElement, GlassWidgetBaseProps>(
           className={cn(
             "relative h-full rounded-2xl border border-white/20",
             "bg-white/10 backdrop-blur-xl",
-            "shadow-[0_8px_32px_rgba(0,0,0,0.37)]",
+            "shadow-[var(--glass-shadow-widget)]",
             // Inner highlight gradient
             "before:absolute before:inset-0 before:rounded-2xl",
             "before:bg-gradient-to-b before:from-white/20 before:to-transparent before:pointer-events-none",
             // Inner shadow for depth
             "after:absolute after:inset-px after:rounded-[calc(1rem-1px)]",
-            "after:shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] after:pointer-events-none",
+            "after:shadow-[var(--glass-shadow-inset)] after:pointer-events-none",
             sizeClasses[size],
             width && width !== "full" && widthClasses[width],
             width === "full" && "w-full",
@@ -346,10 +349,10 @@ export function ServerStatusCard({
 
 export function TaskCard({ name, status, progress, className = "" }: TaskCardProps) {
   const statusColor = {
-    running: "text-green-400",
-    pending: "text-amber-400",
-    completed: "text-cyan-400",
-    paused: "text-purple-400",
+    running: "text-[color:var(--color-success)]",
+    pending: "text-[color:var(--color-warning)]",
+    completed: "text-[color:var(--widget-cyan)]",
+    paused: "text-[color:var(--widget-purple)]",
   }[status]
 
   return (
@@ -359,9 +362,11 @@ export function TaskCard({ name, status, progress, className = "" }: TaskCardPro
         <span className={`text-xs ${statusColor}`}>{status}</span>
       </div>
       <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-        <div
-          className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400 rounded-full transition-all"
-          style={{ width: `${progress}%` }}
+        <motion.div
+          className="h-full bg-[color:var(--widget-cyan)] rounded-full"
+          initial={{ width: 0 }}
+          animate={{ width: `${progress}%` }}
+          transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
         />
       </div>
       <div className="text-white/40 text-xs mt-1">{progress}%</div>
@@ -399,11 +404,13 @@ export function StatCard({
           {change && (
             <div className="flex items-center gap-1 mt-1">
               {trend === "up" ? (
-                <ArrowUpRight className="h-3 w-3 text-green-400" />
+                <ArrowUpRight className="h-3 w-3 text-[color:var(--color-success)]" />
               ) : (
-                <ArrowDownRight className="h-3 w-3 text-red-400" />
+                <ArrowDownRight className="h-3 w-3 text-[color:var(--color-error)]" />
               )}
-              <span className={`text-xs ${trend === "up" ? "text-green-400" : "text-red-400"}`}>
+              <span
+                className={`text-xs ${trend === "up" ? "text-[color:var(--color-success)]" : "text-[color:var(--color-error)]"}`}
+              >
                 {change}
               </span>
             </div>
@@ -457,7 +464,7 @@ export function GaugeWidget({
             cy="48"
             r="40"
             fill="none"
-            stroke="rgba(255,255,255,0.1)"
+            stroke="var(--glass-stroke-subtle)"
             strokeWidth="8"
           />
           <motion.circle
@@ -505,7 +512,12 @@ export function MultiGaugeWidget({
   className = "",
 }: MultiGaugeWidgetProps) {
   return (
-    <GlassWidgetBase size="lg" width="md" glowColor={glowColor} className={className}>
+    <GlassWidgetBase
+      size={title ? "lg" : "md"}
+      width="md"
+      glowColor={glowColor}
+      className={className}
+    >
       {title && <div className="text-sm text-white/60 mb-4 uppercase tracking-wider">{title}</div>}
       <div className="flex justify-around">
         {gauges.map((gauge) => (
@@ -523,7 +535,12 @@ export function MultiProgressWidget({
   className = "",
 }: MultiProgressWidgetProps) {
   return (
-    <GlassWidgetBase size="lg" width="md" glowColor={glowColor} className={className}>
+    <GlassWidgetBase
+      size={title ? "lg" : "md"}
+      width="md"
+      glowColor={glowColor}
+      className={className}
+    >
       {title && <div className="text-sm text-white/60 mb-4 uppercase tracking-wider">{title}</div>}
       <div className="space-y-4">
         {items.map((item, index) => {
@@ -545,7 +562,7 @@ export function MultiProgressWidget({
               </div>
               <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                 <motion.div
-                  className={`h-full bg-gradient-to-r ${progressColors[item.color || "cyan"]} rounded-full`}
+                  className={`h-full ${progressColors[item.color || "cyan"]} rounded-full`}
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(percentage, 100)}%` }}
                   transition={{

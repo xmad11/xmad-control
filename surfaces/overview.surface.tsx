@@ -21,11 +21,10 @@ export function OverviewSurface() {
 
   return (
     <>
-      {/* Row 1 - System Gauges */}
+      {/* Row 1 - System Gauges (no titles) */}
       <div className="mb-4">
         <WidgetCarousel gap="sm" itemsPerView={{ base: 1, sm: 1, lg: 2, xl: 3 }}>
           <MultiGaugeWidget
-            title="System Resources"
             gauges={[
               { label: "RAM", value: stats?.memory.percentage ?? 52, unit: "%", color: "green" },
               { label: "CPU", value: stats?.cpu ?? 45, unit: "%", color: "blue" },
@@ -34,7 +33,6 @@ export function OverviewSurface() {
             glowColor="green"
           />
           <MultiProgressWidget
-            title="Usage"
             items={[
               {
                 label: "RAM",
@@ -54,10 +52,7 @@ export function OverviewSurface() {
             ]}
             glowColor="green"
           />
-          <GlassWidgetBase size="lg" width="md" glowColor="blue">
-            <div className="text-sm text-white/60 mb-4 uppercase tracking-wider">
-              System Forecast
-            </div>
+          <GlassWidgetBase size="md" width="md" glowColor="blue">
             <div className="grid grid-cols-3 gap-2">
               {[
                 { label: "1h", high: 52, low: 38 },
@@ -129,7 +124,13 @@ export function OverviewSurface() {
       {/* Row 4 - Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {[
-          { symbol: "CPU", name: "Processor Load", price: stats?.cpu ?? 45, change: 2.34, glow: "cyan" as const },
+          {
+            symbol: "CPU",
+            name: "Processor Load",
+            price: stats?.cpu ?? 45,
+            change: 2.34,
+            glow: "cyan" as const,
+          },
           {
             symbol: "RAM",
             name: "Memory Usage",
@@ -145,12 +146,7 @@ export function OverviewSurface() {
             glow: "green" as const,
           },
         ].map((stock) => (
-          <GlassWidgetBase
-            key={stock.symbol}
-            size="md"
-            width="full"
-            glowColor={stock.glow}
-          >
+          <GlassWidgetBase key={stock.symbol} size="md" width="full" glowColor={stock.glow}>
             <div className="flex items-center justify-between mb-2">
               <div>
                 <div className="text-white font-bold">{stock.symbol}</div>
