@@ -3,7 +3,7 @@
    Glass morphism theme consistent with dashboard
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = "v1"
+const CACHE_VERSION = "v2"
 const CACHE_NAME = `xmad-control-${CACHE_VERSION}`
 
 // Assets to cache immediately on install
