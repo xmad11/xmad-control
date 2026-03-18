@@ -10,7 +10,8 @@ import { type NextRequest, NextResponse } from "next/server"
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // Dev bypass: Set TAILSCALE_GUARD_DISABLED=true to bypass in any environment
-const GUARD_DISABLED = process.env.TAILSCALE_GUARD_DISABLED === "true"
+// Disabled by default for Vercel deployments (Tailscale guard only works on self-hosted)
+const GUARD_DISABLED = process.env.TAILSCALE_GUARD_DISABLED === "true" || process.env.VERCEL === "1"
 
 // Logging throttle: Only log same IP once per minute
 const LOG_THROTTLE_MS = 60_000
