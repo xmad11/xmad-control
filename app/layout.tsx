@@ -175,7 +175,7 @@ export default function RootLayout({
               <ConditionalHeader />
 
               {/* Page content */}
-              <main id="main-content" className="w-full pt-[var(--header-total-height)]">
+              <main id="main-content" className="w-full">
                 {children}
               </main>
             </NavigationProvider>
