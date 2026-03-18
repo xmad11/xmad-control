@@ -148,22 +148,21 @@ export default function ShowcasePage() {
             <h3 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-4">
               Calendar & Time
             </h3>
-            <div className="mb-6">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
-                <CompactCalendarWidget />
-                <AnalogClockWidget size="lg" showNumbers={true} />
-                <DigitalClockWidget showSeconds={false} />
-                <StopwatchWidget />
-              </div>
+            {/* Small widgets row */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full mb-6 items-start">
+              <CompactCalendarWidget />
+              <AnalogClockWidget size="lg" showNumbers={true} />
+              <DigitalClockWidget showSeconds={false} />
+              <StopwatchWidget />
             </div>
-            <div className="mb-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
-                <CalendarWidget />
-                <TimerWidget initialMinutes={5} />
-                <WorldClockWidget clocks={WORLD_CLOCKS} />
-              </div>
+            {/* Medium widgets row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full mb-6 items-start">
+              <CalendarWidget />
+              <TimerWidget initialMinutes={5} />
+              <WorldClockWidget clocks={WORLD_CLOCKS} />
             </div>
-            <div>
+            {/* Large widget - full width */}
+            <div className="w-full">
               <EventsCalendarWidget date={new Date()} events={sampleEvents} className="w-full" />
             </div>
           </div>
@@ -173,42 +172,44 @@ export default function ShowcasePage() {
             <h3 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-4">
               Weather
             </h3>
-            <div className="mb-6">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
-                <CurrentWeatherWidget
-                  location="San Francisco"
-                  temperature={72}
-                  feelsLike={70}
-                  high={78}
-                  low={62}
-                  condition="sunny"
-                  humidity={65}
-                  windSpeed={12}
-                />
-                <ForecastWidget forecast={forecastData} />
-                <HourlyWeatherWidget
-                  hours={[
-                    { time: "1 AM", temperature: 22, icon: "sun" },
-                    { time: "2 AM", temperature: 21, icon: "cloud" },
-                    { time: "3 AM", temperature: 20, icon: "rain" },
-                    { time: "4 AM", temperature: 19, icon: "cloud" },
-                    { time: "5 AM", temperature: 18, icon: "sun" },
-                    { time: "6 AM", temperature: 20, icon: "snow" },
-                    { time: "7 AM", temperature: 22, icon: "sun" },
-                    { time: "8 AM", temperature: 24, icon: "cloud" },
-                    { time: "9 AM", temperature: 26, icon: "sun" },
-                  ]}
-                />
-                <DetailedWeatherWidget
-                  temperature={72}
-                  condition="Partly Cloudy"
-                  icon="cloud"
-                  location="New York"
-                  humidity={58}
-                  windSpeed={15}
-                  feelsLike={70}
-                />
-              </div>
+            {/* Small widgets row */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full mb-6 items-start">
+              <CurrentWeatherWidget
+                location="San Francisco"
+                temperature={72}
+                feelsLike={70}
+                high={78}
+                low={62}
+                condition="sunny"
+                humidity={65}
+                windSpeed={12}
+              />
+            </div>
+            {/* Large widgets row - 3 per row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full items-start">
+              <ForecastWidget forecast={forecastData} />
+              <HourlyWeatherWidget
+                hours={[
+                  { time: "1 AM", temperature: 22, icon: "sun" },
+                  { time: "2 AM", temperature: 21, icon: "cloud" },
+                  { time: "3 AM", temperature: 20, icon: "rain" },
+                  { time: "4 AM", temperature: 19, icon: "cloud" },
+                  { time: "5 AM", temperature: 18, icon: "sun" },
+                  { time: "6 AM", temperature: 20, icon: "snow" },
+                  { time: "7 AM", temperature: 22, icon: "sun" },
+                  { time: "8 AM", temperature: 24, icon: "cloud" },
+                  { time: "9 AM", temperature: 26, icon: "sun" },
+                ]}
+              />
+              <DetailedWeatherWidget
+                temperature={72}
+                condition="Partly Cloudy"
+                icon="cloud"
+                location="New York"
+                humidity={58}
+                windSpeed={15}
+                feelsLike={70}
+              />
             </div>
           </div>
 
@@ -217,23 +218,20 @@ export default function ShowcasePage() {
             <h3 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-4">
               Stock & Finance
             </h3>
-            <div className="mb-6">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
-                <StockTickerWidget
-                  symbol="AAPL"
-                  price={198.45}
-                  change={2.34}
-                  changePercent={1.19}
-                />
-                <CompactStockWidget
-                  symbol="GOOGL"
-                  price={178.25}
-                  change={-1.87}
-                  changePercent={-1.04}
-                />
-                <StockTickerWidget symbol="TSLA" price={245.8} change={5.62} changePercent={2.34} />
-                <MarketOverviewWidget indices={marketIndices} />
-              </div>
+            {/* Small widgets row */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full mb-6 items-start">
+              <StockTickerWidget symbol="AAPL" price={198.45} change={2.34} changePercent={1.19} />
+              <CompactStockWidget
+                symbol="GOOGL"
+                price={178.25}
+                change={-1.87}
+                changePercent={-1.04}
+              />
+              <StockTickerWidget symbol="TSLA" price={245.8} change={5.62} changePercent={2.34} />
+            </div>
+            {/* Large widget - full width */}
+            <div className="w-full">
+              <MarketOverviewWidget indices={marketIndices} />
             </div>
           </div>
 
@@ -242,32 +240,31 @@ export default function ShowcasePage() {
             <h3 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-4">
               Stats & Metrics
             </h3>
-            <div className="mb-6">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
-                <StatCard
-                  title="Revenue"
-                  value="$124,500"
-                  change={{ value: 12.5, type: "increase" }}
-                  icon={<TrendingUp className="w-5 h-5" />}
-                  glowColor="green"
-                />
-                <StatCard
-                  title="Expenses"
-                  value="$82,300"
-                  change={{ value: 8.2, type: "decrease" }}
-                  icon={<TrendingDown className="w-5 h-5" />}
-                  glowColor="red"
-                />
-                <MetricStat
-                  label="Bandwidth"
-                  value={750}
-                  max={1000}
-                  unit="Mbps"
-                  icon={<Globe className="w-4 h-4" />}
-                  glowColor="blue"
-                />
-                <CircularProgressStat label="Completion" value={78} unit="%" glowColor="purple" />
-              </div>
+            {/* All large widgets - 4 per row */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full items-start">
+              <StatCard
+                title="Revenue"
+                value="$124,500"
+                change={{ value: 12.5, type: "increase" }}
+                icon={<TrendingUp className="w-5 h-5" />}
+                glowColor="green"
+              />
+              <StatCard
+                title="Expenses"
+                value="$82,300"
+                change={{ value: 8.2, type: "decrease" }}
+                icon={<TrendingDown className="w-5 h-5" />}
+                glowColor="red"
+              />
+              <MetricStat
+                label="Bandwidth"
+                value={750}
+                max={1000}
+                unit="Mbps"
+                icon={<Globe className="w-4 h-4" />}
+                glowColor="blue"
+              />
+              <CircularProgressStat label="Completion" value={78} unit="%" glowColor="purple" />
             </div>
           </div>
 
@@ -390,4 +387,3 @@ export default function ShowcasePage() {
     </div>
   )
 }
-
