@@ -288,21 +288,21 @@ export function HomeClient() {
 
       {/* LEFT SHEET - Navigation (60% width) */}
       <GlassSheet open={isSheetOpen("left")} onOpenChange={(open) => !open && closeSheet()}>
-        <GlassSheetContent side="left" className="w-[60vw] p-0">
+        <GlassSheetContent side="left" className="p-0">
           <LeftSheetContent />
         </GlassSheetContent>
       </GlassSheet>
 
       {/* RIGHT SHEET - Settings (60% width) */}
       <GlassSheet open={isSheetOpen("right")} onOpenChange={(open) => !open && closeSheet()}>
-        <GlassSheetContent side="right" className="w-[60vw] p-0">
+        <GlassSheetContent side="right" className="p-0">
           <RightSheetContent />
         </GlassSheetContent>
       </GlassSheet>
 
       {/* BOTTOM SHEET - Chat (60% height) */}
       <GlassSheet open={isSheetOpen("bottom")} onOpenChange={(open) => !open && closeSheet()}>
-        <GlassSheetContent side="bottom" className="h-[60vh] p-0 rounded-t-2xl">
+        <GlassSheetContent side="bottom" className="p-0">
           <GlassSheetHeader className="sr-only">
             <GlassSheetTitle>AI Chat</GlassSheetTitle>
           </GlassSheetHeader>
