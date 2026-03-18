@@ -8,11 +8,25 @@
 import { ChatInterface } from "@/components/chat/ChatInterface"
 import { Suspense } from "react"
 
-// Mock send handler - TODO: wire to real AI backend
+// Send handler - wired to /api/xmad/chat (forwards to OpenClaw gateway)
 async function handleSendMessage(message: string): Promise<string> {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 800))
-  return `I received your message: "${message}". This is a demo response. In production, this would connect to your AI backend.`
+  try {
+    const response = await fetch("/api/xmad/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message }),
+    })
+
+    const data = await response.json()
+
+    if (data.success && data.message) {
+      return data.message
+    }
+
+    return data.error || "AI service temporarily unavailable."
+  } catch {
+    return "AI service temporarily unavailable. Please try again."
+  }
 }
 
 export function ChatSurface() {

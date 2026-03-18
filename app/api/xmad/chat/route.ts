@@ -9,6 +9,7 @@ import { type NextRequest, NextResponse } from "next/server"
 // CONFIG
 // ═══════════════════════════════════════════════════════════════════════════════
 
+const isVercel = process.env.VERCEL === "1"
 const OPENCLAW_GATEWAY = process.env.OPENCLAW_GATEWAY_URL || "http://127.0.0.1:18789"
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -32,6 +33,23 @@ interface OpenClawResponse {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export async function POST(request: NextRequest) {
+  // On Vercel, return mock response (serverless cannot reach local OpenClaw)
+  if (isVercel) {
+    try {
+      const body: ChatRequest = await request.json()
+      return NextResponse.json({
+        success: true,
+        message: `Chat is available when connected to xmad gateway. On Vercel, AI features require the self-hosted dashboard. Your message was: "${body.message?.slice(0, 50) || ""}"`,
+        note: "Connect via Tailscale to your self-hosted dashboard for full AI features.",
+      })
+    } catch {
+      return NextResponse.json({
+        success: false,
+        error: "Invalid request",
+      }, { status: 400 })
+    }
+  }
+
   try {
     // Parse request body
     const body: ChatRequest = await request.json()
@@ -65,7 +83,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: "AI service unavailable. Please check if OpenClaw gateway is running.",
+          error: "AI service temporarily unavailable.",
         },
         { status: 503 }
       )
@@ -77,7 +95,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: data.error || "No response from AI service",
+          error: "AI service temporarily unavailable.",
         },
         { status: 500 }
       )
@@ -94,18 +112,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: "Request timeout. AI service took too long to respond.",
+          error: "AI service temporarily unavailable.",
         },
         { status: 504 }
       )
     }
 
-    // Handle other errors
+    // Handle other errors - never expose internal errors
     console.error("Chat API error:", error)
     return NextResponse.json(
       {
         success: false,
-        error: "Internal server error",
+        error: "AI service temporarily unavailable.",
       },
       { status: 500 }
     )

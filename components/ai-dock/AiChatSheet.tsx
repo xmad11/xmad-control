@@ -128,8 +128,8 @@ export function AiChatSheet({ isOpen, onClose, className }: AiChatSheetProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages.length])
 
-  // Send message handler
-  const handleSendMessage = useCallback((content: string) => {
+  // Send message handler - wired to /api/xmad/chat
+  const handleSendMessage = useCallback(async (content: string) => {
     if (!content.trim()) return
 
     const userMessage: ChatMessage = {
@@ -142,16 +142,35 @@ export function AiChatSheet({ isOpen, onClose, className }: AiChatSheetProps) {
     setMessages((prev) => [...prev, userMessage])
     setInputValue("")
 
-    // Simulate AI response (replace with actual AI integration)
-    setTimeout(() => {
+    try {
+      // Call the chat API
+      const response = await fetch("/api/xmad/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: content.trim() }),
+      })
+
+      const data = await response.json()
+
       const aiResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: `I received your message: "${content.trim()}". This is a demo response. In production, this would connect to your AI backend.`,
+        content: data.success
+          ? data.message
+          : data.error || "AI service temporarily unavailable.",
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, aiResponse])
-    }, 1000)
+    } catch {
+      // Handle network errors gracefully
+      const aiResponse: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "AI service temporarily unavailable. Please try again.",
+        timestamp: new Date(),
+      }
+      setMessages((prev) => [...prev, aiResponse])
+    }
   }, [])
 
   // Handle key press
