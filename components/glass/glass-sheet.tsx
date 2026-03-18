@@ -44,9 +44,9 @@ const sheetVariants = cva(
         ),
         bottom: cn(
           "inset-x-0 bottom-0 border-t rounded-t-2xl h-[60vh]",
-          "bg-[var(--bg-3)]/95 border-[var(--widget-purple)]/30",
-          "shadow-[0_-8px_32px_rgba(0,0,0,0.4),inset_0_-1px_0_var(--widget-purple)/20]",
-          "before:absolute before:inset-0 before:bg-gradient-to-t before:from-[var(--widget-purple)]/10 before:to-transparent before:pointer-events-none",
+          "bg-[var(--bg-3)]/95 border-[var(--widget-cyan)]/30",
+          "shadow-[0_-8px_32px_rgba(0,0,0,0.4),inset_0_-1px_0_var(--widget-cyan)/20]",
+          "before:absolute before:inset-0 before:bg-gradient-to-t before:from-[var(--widget-cyan)]/10 before:to-transparent before:pointer-events-none",
           "data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom"
         ),
         left: cn(
