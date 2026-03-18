@@ -156,7 +156,7 @@ export async function subscribeToPushNotifications(
   try {
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(serverPublicKey),
+      applicationServerKey: urlBase64ToUint8Array(serverPublicKey) as BufferSource,
     })
 
     console.log("Push notification subscription successful:", subscription)
