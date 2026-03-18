@@ -111,6 +111,7 @@ export function HomeClient() {
     tabsExpanded,
     voiceMode,
     voiceToast,
+    isTransitioning,
     resetCollapseTimer,
     expandTabs,
     holdHandlers,
@@ -121,10 +122,13 @@ export function HomeClient() {
   // Sheet Context - global sheet state (shared with AppHeader in layout)
   const { activeSheet, openSheet, closeSheet, isSheetOpen } = useSheetContext()
 
-  // Wrap surface change to reset collapse timer
+  // Wrap surface change to coordinate with dock controller
   const handleTabChange = (value: string) => {
     handleSurfaceChange(value)
-    resetCollapseTimer()
+    // Only reset timer if not transitioning (prevents race condition)
+    if (!isTransitioning) {
+      resetCollapseTimer()
+    }
   }
 
   // Lock body scroll when any sheet is open

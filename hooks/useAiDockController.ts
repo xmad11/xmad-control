@@ -42,6 +42,7 @@ interface UseAiDockControllerReturn {
   voiceMode: boolean
   voiceToast: VoiceToast
   showIndicator: boolean
+  isTransitioning: boolean
 
   // Actions
   openSheet: () => void
@@ -85,6 +86,7 @@ export function useAiDockController({
   const [voiceMode, setVoiceMode] = useState(false)
   const [voiceToast, setVoiceToast] = useState<VoiceToast>({ show: false, message: "", type: "on" })
   const [showIndicator, setShowIndicator] = useState(false)
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
   // Timers - all via useRef for stability
   const collapseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -201,16 +203,22 @@ export function useAiDockController({
 
   // Sheet actions
   const openSheet = useCallback(() => {
+    setIsTransitioning(true)
     setIsSheetOpen(true)
     setDockState("sheet")
     setShowIndicator(false)
     if (indicatorTimerRef.current) clearTimeout(indicatorTimerRef.current)
+    // Clear transition after animation completes
+    setTimeout(() => setIsTransitioning(false), aiDockTokens.motion.sheetEnter)
   }, [])
 
   const closeSheet = useCallback(() => {
+    setIsTransitioning(true)
     setIsSheetOpen(false)
     setDockState("idle")
     setShowIndicator(false)
+    // Clear transition after animation completes
+    setTimeout(() => setIsTransitioning(false), aiDockTokens.motion.sheetExit)
   }, [])
 
   // Clear hold timer helper
@@ -227,6 +235,9 @@ export function useAiDockController({
   const holdHandlers = {
     onPointerDown: useCallback(
       (e: React.PointerEvent) => {
+        // Guard: prevent gesture during sheet open or transitioning
+        if (isSheetOpen || isTransitioning) return
+
         startPosRef.current = { x: e.clientX, y: e.clientY }
         triggeredRef.current = false
         isHoldingRef.current = true
@@ -238,7 +249,7 @@ export function useAiDockController({
           }
         }, HOLD_TRIGGER_MS)
       },
-      [toggleVoiceMode]
+      [toggleVoiceMode, isSheetOpen, isTransitioning]
     ),
 
     onPointerUp: useCallback(() => {
@@ -325,6 +336,7 @@ export function useAiDockController({
     voiceMode,
     voiceToast,
     showIndicator,
+    isTransitioning,
     openSheet,
     closeSheet,
     resetCollapseTimer,
