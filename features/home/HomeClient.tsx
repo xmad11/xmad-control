@@ -11,7 +11,7 @@ import { aiDockTokens } from "@/design/tokens/ai-dock.tokens"
 import { SurfaceManager } from "@/runtime/SurfaceManager"
 import { DashboardDataContext, useSurfaceController } from "@/runtime/useSurfaceController"
 import { AnimatePresence, motion } from "framer-motion"
-import { MessageSquare } from "lucide-react"
+import { MessageSquare, Mic, MicOff } from "lucide-react"
 import { useEffect } from "react"
 
 import { AiChatSheet } from "@/components/ai-dock/AiChatSheet"
@@ -39,6 +39,50 @@ const ANIMATION = {
 const SAFE_AREA_BOTTOM = aiDockTokens.position.safeAreaBottom
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// VOICE TOAST COMPONENT
+// ═══════════════════════════════════════════════════════════════════════════════
+
+interface VoiceToastProps {
+  show: boolean
+  message: string
+  type: "on" | "off"
+}
+
+function VoiceToast({ show, message, type }: VoiceToastProps) {
+  const isActive = type === "on"
+  const Icon = isActive ? Mic : MicOff
+
+  return (
+    <AnimatePresence>
+      {show && (
+        <motion.div
+          initial={{ opacity: 0, y: 20, scale: 0.9 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -10, scale: 0.9 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+          className="fixed bottom-32 left-1/2 -translate-x-1/2 z-50 pointer-events-none"
+        >
+          <div
+            className={`
+              flex items-center gap-2 px-4 py-2 rounded-full
+              backdrop-blur-xl border shadow-lg
+              ${
+                isActive
+                  ? "bg-cyan-500/20 border-cyan-400/30 text-cyan-100"
+                  : "bg-white/10 border-white/20 text-white/80"
+              }
+            `}
+          >
+            <Icon className={`h-4 w-4 ${isActive ? "text-cyan-400" : "text-white/60"}`} />
+            <span className="text-sm font-medium">{message}</span>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -58,13 +102,14 @@ export function HomeClient() {
   const {
     tabsExpanded,
     isSheetOpen,
-    isHolding,
+    voiceMode,
+    voiceToast,
     showIndicator,
     openSheet,
     closeSheet,
-    resetCollapseTimer,
     holdHandlers,
     keyboardHandlers,
+    ariaProps,
   } = useAiDockController()
 
   // Lock body scroll when sheet is open
@@ -129,12 +174,14 @@ export function HomeClient() {
               )}
             </AnimatePresence>
 
-            {/* Collapsed state - single floating button with HOLD gesture for Voice */}
+            {/* Collapsed state - single floating button
+                HOLD → Toggle voice mode
+                TAP → Expand tabs */}
             <button
-              onClick={resetCollapseTimer}
               onContextMenu={(e) => e.preventDefault()}
               {...holdHandlers}
               {...keyboardHandlers}
+              {...ariaProps}
               className={`
                 transition-all ease-out select-none touch-none
                 ${tabsExpanded ? "hidden" : "flex"}
@@ -142,7 +189,7 @@ export function HomeClient() {
                 bg-white/10 backdrop-blur-xl border border-white/20
                 shadow-[0_4px_16px_rgba(0,0,0,0.2)]
                 hover:bg-white/15
-                ${isHolding ? "scale-110" : "active:scale-95"}
+                ${voiceMode ? "scale-110 ring-2 ring-cyan-400/50" : "active:scale-95"}
               `}
               style={{
                 transitionDuration: `${aiDockTokens.motion.tabExpand}ms`,
@@ -150,27 +197,25 @@ export function HomeClient() {
                 WebkitUserSelect: "none",
                 userSelect: "none",
               }}
-              aria-label={
-                isHolding ? "Voice input active, release to send" : "Hold to speak or press Enter"
-              }
-              aria-expanded={tabsExpanded}
-              aria-controls="dashboard-tab-list"
-              aria-pressed={isHolding}
             >
               <div className="relative z-10 flex items-center justify-center">
-                {(() => {
-                  const activeTabData = tabs.find((t) => t.value === activeSurface)
-                  const TabIcon = activeTabData?.icon
-                  return TabIcon ? <TabIcon className="h-4 w-4 text-white" /> : null
-                })()}
+                {voiceMode ? (
+                  <Mic className="h-4 w-4 text-cyan-400" />
+                ) : (
+                  (() => {
+                    const activeTabData = tabs.find((t) => t.value === activeSurface)
+                    const TabIcon = activeTabData?.icon
+                    return TabIcon ? <TabIcon className="h-4 w-4 text-white" /> : null
+                  })()
+                )}
               </div>
               <div className="absolute -inset-1 rounded-xl bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 blur-lg opacity-60" />
 
-              {/* Mini Wave Indicator on collapsed button */}
-              <MiniWaveIndicator active={isHolding} collapsed={showIndicator && !isHolding} />
+              {/* Mini Wave Indicator - shows when voice mode is active */}
+              <MiniWaveIndicator active={voiceMode} collapsed={showIndicator && !voiceMode} />
 
-              {/* Glow effect when holding */}
-              {isHolding && (
+              {/* Glow effect when voice mode is active */}
+              {voiceMode && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 0.6 }}
@@ -196,7 +241,6 @@ export function HomeClient() {
                     value={tab.value}
                     className="group p-2 transition-all rounded-lg"
                     style={{ transitionDuration: `${aiDockTokens.motion.intentMedium}ms` }}
-                    onClick={resetCollapseTimer}
                   >
                     <tab.icon className="h-3.5 w-3.5" />
                     <span className="ml-1.5 text-xs hidden group-data-[state=active]:inline whitespace-nowrap">
@@ -209,6 +253,11 @@ export function HomeClient() {
           </div>
         </div>
       </GlassTabs>
+
+      {/* ════════════════════════════════════════════════════════════════════════
+          VOICE TOAST - Shows "Voice mode ON" / "Voice mode OFF"
+          ════════════════════════════════════════════════════════════════════════ */}
+      <VoiceToast show={voiceToast.show} message={voiceToast.message} type={voiceToast.type} />
 
       {/* ════════════════════════════════════════════════════════════════════════
           AI CHAT SHEET - Lazy loaded bottom sheet

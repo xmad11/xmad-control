@@ -1,6 +1,12 @@
 /* ═══════════════════════════════════════════════════════════════════════════════
    USE AI DOCK CONTROLLER - State machine for AI dock interactions
    Single source of truth for dock state AND tab expansion
+
+   Behavior:
+   - Click → Expand tabs (if collapsed)
+   - Hold (500ms) → Toggle voice mode ON/OFF
+   - Voice mode auto-off after 30 seconds
+   - Toast messages for voice state changes
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 "use client"
@@ -9,11 +15,23 @@ import { TIMING } from "@/config/dashboard"
 import { type AiDockState, aiDockTokens } from "@/design/tokens/ai-dock.tokens"
 import { useCallback, useEffect, useRef, useState } from "react"
 
+/** Voice mode auto-off timeout (30 seconds) */
+const VOICE_MODE_TIMEOUT_MS = 30_000
+
+/** Hold duration to trigger voice toggle (500ms) */
+const HOLD_TRIGGER_MS = 500
+
 interface UseAiDockControllerOptions {
-  /** Callback when voice should start */
+  /** Callback when voice mode starts */
   onVoiceStart?: () => void
-  /** Callback when voice should stop */
+  /** Callback when voice mode stops */
   onVoiceStop?: () => void
+}
+
+interface VoiceToast {
+  show: boolean
+  message: string
+  type: "on" | "off"
 }
 
 interface UseAiDockControllerReturn {
@@ -21,18 +39,20 @@ interface UseAiDockControllerReturn {
   dockState: AiDockState
   tabsExpanded: boolean
   isSheetOpen: boolean
-  isHolding: boolean
+  voiceMode: boolean
+  voiceToast: VoiceToast
   showIndicator: boolean
 
   // Actions
   openSheet: () => void
   closeSheet: () => void
   resetCollapseTimer: () => void
+  dismissToast: () => void
 
   // Hold handlers (spread onto element)
   holdHandlers: {
     onPointerDown: (e: React.PointerEvent) => void
-    onPointerUp: () => void
+    onPointerUp: (e: React.PointerEvent) => void
     onPointerLeave: () => void
     onPointerMove: (e: React.PointerEvent) => void
   }
@@ -61,22 +81,28 @@ export function useAiDockController({
   const [dockState, setDockState] = useState<AiDockState>("idle")
   const [tabsExpanded, setTabsExpanded] = useState(true)
   const [isSheetOpen, setIsSheetOpen] = useState(false)
-  const [isHolding, setIsHolding] = useState(false)
+  const [voiceMode, setVoiceMode] = useState(false)
+  const [voiceToast, setVoiceToast] = useState<VoiceToast>({ show: false, message: "", type: "on" })
   const [showIndicator, setShowIndicator] = useState(false)
 
   // Timers - all via useRef for stability
   const collapseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const voiceModeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const indicatorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const startPosRef = useRef<{ x: number; y: number } | null>(null)
   const triggeredRef = useRef(false)
   const isInitialMount = useRef(true)
+  const isHoldingRef = useRef(false)
 
   // Cleanup all timers on unmount
   useEffect(() => {
     return () => {
       if (collapseTimerRef.current) clearTimeout(collapseTimerRef.current)
       if (holdTimerRef.current) clearTimeout(holdTimerRef.current)
+      if (voiceModeTimerRef.current) clearTimeout(voiceModeTimerRef.current)
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
       if (indicatorTimerRef.current) clearTimeout(indicatorTimerRef.current)
     }
   }, [])
@@ -91,8 +117,67 @@ export function useAiDockController({
     }
   }, [])
 
+  // Show toast helper
+  const showToast = useCallback((type: "on" | "off") => {
+    const message = type === "on" ? "Voice mode ON" : "Voice mode OFF"
+    setVoiceToast({ show: true, message, type })
+
+    // Auto-dismiss toast after 2 seconds
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
+    toastTimerRef.current = setTimeout(() => {
+      setVoiceToast((prev) => ({ ...prev, show: false }))
+    }, 2000)
+  }, [])
+
+  // Dismiss toast manually
+  const dismissToast = useCallback(() => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
+    setVoiceToast((prev) => ({ ...prev, show: false }))
+  }, [])
+
+  // Toggle voice mode
+  const toggleVoiceMode = useCallback(() => {
+    setVoiceMode((prev) => {
+      const newMode = !prev
+
+      if (newMode) {
+        // Voice mode ON
+        setDockState("holding")
+        setShowIndicator(true)
+        showToast("on")
+        onVoiceStart?.()
+
+        // Auto-off after 30 seconds
+        if (voiceModeTimerRef.current) clearTimeout(voiceModeTimerRef.current)
+        voiceModeTimerRef.current = setTimeout(() => {
+          setVoiceMode(false)
+          setDockState("idle")
+          setShowIndicator(false)
+          showToast("off")
+          onVoiceStop?.()
+        }, VOICE_MODE_TIMEOUT_MS)
+      } else {
+        // Voice mode OFF
+        setDockState("idle")
+        setShowIndicator(false)
+        showToast("off")
+        onVoiceStop?.()
+
+        if (voiceModeTimerRef.current) {
+          clearTimeout(voiceModeTimerRef.current)
+          voiceModeTimerRef.current = null
+        }
+      }
+
+      return newMode
+    })
+  }, [onVoiceStart, onVoiceStop, showToast])
+
   // Reset collapse timer - keeps tabs expanded, then auto-collapses
   const resetCollapseTimer = useCallback(() => {
+    // If voice mode is active, don't expand tabs
+    if (voiceMode) return
+
     if (collapseTimerRef.current) {
       clearTimeout(collapseTimerRef.current)
     }
@@ -100,31 +185,7 @@ export function useAiDockController({
     collapseTimerRef.current = setTimeout(() => {
       setTabsExpanded(false)
     }, TIMING.TAB_COLLAPSE)
-  }, [])
-
-  // Clear indicator after timeout
-  const startIndicatorTimeout = useCallback(() => {
-    if (indicatorTimerRef.current) clearTimeout(indicatorTimerRef.current)
-    indicatorTimerRef.current = setTimeout(() => {
-      setShowIndicator(false)
-      setDockState("idle")
-    }, aiDockTokens.motion.indicatorTimeoutMs)
-  }, [])
-
-  // Hold gesture actions
-  const startHold = useCallback(() => {
-    setIsHolding(true)
-    setDockState("holding")
-    onVoiceStart?.()
-  }, [onVoiceStart])
-
-  const endHold = useCallback(() => {
-    setIsHolding(false)
-    setShowIndicator(true)
-    setDockState("indicator")
-    onVoiceStop?.()
-    startIndicatorTimeout()
-  }, [onVoiceStop, startIndicatorTimeout])
+  }, [voiceMode])
 
   // Sheet actions
   const openSheet = useCallback(() => {
@@ -147,38 +208,42 @@ export function useAiDockController({
       holdTimerRef.current = null
     }
     startPosRef.current = null
+    isHoldingRef.current = false
   }, [])
 
-  // Hold gesture handlers
+  // Hold gesture handlers - toggle voice mode on hold
   const holdHandlers = {
     onPointerDown: useCallback(
       (e: React.PointerEvent) => {
         startPosRef.current = { x: e.clientX, y: e.clientY }
         triggeredRef.current = false
+        isHoldingRef.current = true
 
         holdTimerRef.current = setTimeout(() => {
-          if (!triggeredRef.current) {
+          if (!triggeredRef.current && isHoldingRef.current) {
             triggeredRef.current = true
-            startHold()
+            toggleVoiceMode()
           }
-        }, aiDockTokens.gesture.holdMs)
+        }, HOLD_TRIGGER_MS)
       },
-      [startHold]
+      [toggleVoiceMode]
     ),
 
     onPointerUp: useCallback(() => {
-      if (isHolding) {
-        endHold()
-      }
+      const wasHoldTriggered = triggeredRef.current
+      isHoldingRef.current = false
       clearHoldTimer()
-    }, [isHolding, endHold, clearHoldTimer]),
+
+      // If hold was NOT triggered (short tap), expand tabs
+      if (!wasHoldTriggered && !voiceMode) {
+        resetCollapseTimer()
+      }
+    }, [clearHoldTimer, resetCollapseTimer, voiceMode]),
 
     onPointerLeave: useCallback(() => {
-      if (isHolding) {
-        endHold()
-      }
+      isHoldingRef.current = false
       clearHoldTimer()
-    }, [isHolding, endHold, clearHoldTimer]),
+    }, [clearHoldTimer]),
 
     onPointerMove: useCallback(
       (e: React.PointerEvent) => {
@@ -197,40 +262,31 @@ export function useAiDockController({
     ),
   }
 
-  // Keyboard handlers for accessibility (Enter/Space to trigger hold)
+  // Keyboard handlers for accessibility
   const keyboardHandlers = {
     onKeyDown: useCallback(
       (e: React.KeyboardEvent) => {
-        // Enter or Space starts hold
+        // Enter or Space toggles voice mode
         if ((e.key === "Enter" || e.key === " ") && !e.repeat) {
           e.preventDefault()
           if (!triggeredRef.current) {
             triggeredRef.current = true
-            startHold()
+            toggleVoiceMode()
           }
         }
-        // Escape cancels hold
-        if (e.key === "Escape" && isHolding) {
+        // Escape stops voice mode
+        if (e.key === "Escape" && voiceMode) {
           e.preventDefault()
-          endHold()
+          toggleVoiceMode()
           clearHoldTimer()
         }
       },
-      [startHold, endHold, clearHoldTimer, isHolding]
+      [toggleVoiceMode, clearHoldTimer, voiceMode]
     ),
 
-    onKeyUp: useCallback(
-      (e: React.KeyboardEvent) => {
-        // Enter or Space release ends hold
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault()
-          if (isHolding) {
-            endHold()
-          }
-        }
-      },
-      [isHolding, endHold]
-    ),
+    onKeyUp: useCallback(() => {
+      // No action needed for toggle mode
+    }, []),
   }
 
   // ARIA props for accessibility
@@ -238,19 +294,23 @@ export function useAiDockController({
     role: "button" as const,
     tabIndex: 0,
     "aria-expanded": isSheetOpen,
-    "aria-label": isHolding ? "Voice input active, release to send" : "Hold to speak or press Enter",
-    "aria-pressed": isHolding,
+    "aria-label": voiceMode
+      ? "Voice mode active, tap to stop or wait 30 seconds"
+      : "Hold to toggle voice mode, tap to expand tabs",
+    "aria-pressed": voiceMode,
   }
 
   return {
     dockState,
     tabsExpanded,
     isSheetOpen,
-    isHolding,
+    voiceMode,
+    voiceToast,
     showIndicator,
     openSheet,
     closeSheet,
     resetCollapseTimer,
+    dismissToast,
     holdHandlers,
     keyboardHandlers,
     ariaProps,
