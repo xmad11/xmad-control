@@ -1,3 +1,7 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   WIDGET CAROUSEL - Drag-to-scroll container with GPU optimization
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
 "use client"
 
 import { cn } from "@/lib/utils"
@@ -9,7 +13,7 @@ export interface WidgetCarouselProps {
   className?: string
   /** Gap between items - default is 12px (sm) */
   gap?: "none" | "xs" | "sm" | "md"
-  /** Number of items to show at different breakpoints */
+  /** Number to show at different breakpoints */
   itemsPerView?: {
     base?: number
     sm?: number
@@ -18,6 +22,14 @@ export interface WidgetCarouselProps {
     xl?: number
   }
 }
+
+// biome-ignore lint/correctness/noUnusedVariables: gap is used in gapPx calculation
+const WIDGET_GAP_SIZES = {
+  none: 0,
+  xs: 8,
+  sm: 12,
+  md: 16,
+} as const
 
 export function WidgetCarousel({
   children,
@@ -35,14 +47,6 @@ export function WidgetCarousel({
     dragFree: false,
     containScroll: "trimSnaps",
   })
-
-  // Gap sizes in pixels
-  const gapSizes = {
-    none: 0,
-    xs: 8,
-    sm: 12,
-    md: 16,
-  }
 
   // Handle responsive items per view
   useEffect(() => {
@@ -76,30 +80,37 @@ export function WidgetCarousel({
   }, [itemsPerView])
 
   // Re-initialize Embla when items per view changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: currentItemsPerView triggers reInit on breakpoint change
   useEffect(() => {
     if (emblaApi) {
       emblaApi.reInit()
     }
   }, [currentItemsPerView, emblaApi])
 
-  const gapPx = gapSizes[gap]
+  const gapPx = WIDGET_GAP_SIZES[gap]
   const gapClass = gap === "none" ? "" : `gap-${gap === "xs" ? "2" : gap === "sm" ? "3" : "4"}`
 
   // Calculate item width: (100% - gaps) / itemsPerView
   // Example: 4 items with 12px gap = (100% - 36px) / 4
+  // This inline style is required for dynamic calc() - cannot be achieved with CSS variables
+  // design-tokens-disable: INLINE_STYLE
   const totalGapPx = gapPx * (currentItemsPerView - 1)
+  const itemWidthStyle = `calc((100% - ${totalGapPx}px) / ${currentItemsPerView})`
 
   return (
-    <div className={cn("w-full select-none overflow-hidden", className)}>
-      <div className="overflow-hidden" ref={emblaRef}>
+    <div
+      className={cn(
+        "w-full select-none overflow-hidden contain-layout-paint-size will-change-transform",
+        className
+      )}
+    >
+      <div className="overflow-hidden will-change-transform" ref={emblaRef}>
         <div className={cn("flex", gapClass)}>
           {React.Children.map(children, (child, index) => (
             <div
               key={`carousel-item-${index}`}
               className="flex-shrink-0 flex-grow-0 min-w-0"
-              style={{
-                width: `calc((100% - ${totalGapPx}px) / ${currentItemsPerView})`,
-              }}
+              style={{ width: itemWidthStyle }}
             >
               {child}
             </div>

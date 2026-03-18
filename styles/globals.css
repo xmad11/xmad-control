@@ -640,3 +640,41 @@ input[type="search"]:focus-visible {
   background: var(--color-success);
   box-shadow: 0 0 8px var(--color-success);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   PERFORMANCE OPTIMIZATION - Containment and GPU hints
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* Carousel container - prevents scroll reflow from affecting layout */
+.contain-layout-paint-size {
+  contain: layout paint size;
+}
+
+/* Background blob animation - GPU-optimized with transform */
+@keyframes blob-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1.05);
+  }
+}
+
+.animate-blob-pulse {
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
+  animation: blob-pulse 20s ease-in-out infinite;
+}
+
+.animate-blob-pulse-delay-1 {
+  animation-delay: -7s;
+  animation-duration: 22s;
+}
+
+.animate-blob-pulse-delay-2 {
+  animation-delay: -14s;
+  animation-duration: 24s;
+}
