@@ -59,41 +59,24 @@ export function SurfaceManager({ activeSurface }: SurfaceManagerProps) {
   )
 
   useEffect(() => {
-    // DEBUG: Log active surface
-    console.log("[SurfaceManager] ACTIVE SURFACE:", activeSurface)
-
     // Check cache first
     if (componentCache.has(activeSurface)) {
-      console.log("[SurfaceManager] Using cached component for:", activeSurface)
       setSurfaceComponent(() => componentCache.get(activeSurface)!)
       return
     }
 
     // Get surface definition and lazy load
     const surfaceDef = SURFACE_REGISTRY[activeSurface]
-    console.log(
-      "[SurfaceManager] Surface definition:",
-      surfaceDef ? "found" : "NOT FOUND",
-      "for",
-      activeSurface
-    )
-
     if (surfaceDef?.lazy) {
       surfaceDef
         .lazy()
         .then((mod) => {
-          console.log(
-            "[SurfaceManager] Loaded module for:",
-            activeSurface,
-            "default:",
-            !!mod.default
-          )
           const Component = mod.default
           componentCache.set(activeSurface, Component)
           setSurfaceComponent(() => Component)
         })
         .catch((err) => {
-          console.error("[SurfaceManager] FAILED to load surface:", activeSurface, err)
+          console.error("[SurfaceManager] Failed to load surface:", activeSurface, err)
         })
     }
   }, [activeSurface])

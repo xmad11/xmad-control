@@ -646,8 +646,9 @@ input[type="search"]:focus-visible {
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 /* Carousel container - prevents scroll reflow from affecting layout */
+/* NOTE: Removed 'size' containment as it requires explicit dimensions and was causing carousel collapse */
 .contain-layout-paint-size {
-  contain: layout paint size;
+  contain: layout paint;
 }
 
 /* Background blob animation - GPU-optimized with transform */

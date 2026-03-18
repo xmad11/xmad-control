@@ -38,9 +38,7 @@ const mockBackupStats: BackupStats = {
 }
 
 export function BackupsSurface() {
-  console.log("[BackupsSurface] Component rendering...")
-  const dashboardData = useDashboardData() // Context provider required for surface
-  console.log("[BackupsSurface] Dashboard data:", dashboardData)
+  useDashboardData() // Context provider required for surface
 
   // Use mock data - when API route exists, replace with:
   // const { data: backupStats } = useSWR('/api/xmad/backups/stats', fetcher)
