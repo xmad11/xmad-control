@@ -1,18 +1,23 @@
 /* ═══════════════════════════════════════════════════════════════════════════════
    APP HEADER - XMAD Control Dashboard
-   Single source of truth for header across all pages
+   Single source of truth for header
    - XMAD Logo (left) → opens LEFT sheet
+   - Theme icon → opens ThemeModal
    - Menu icon (right) → opens RIGHT sheet
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 "use client"
 
+import { Bars3BottomRightIcon } from "@/components/icons"
 import { BackButton } from "@/components/navigation/BackButton"
 import { useNavigation } from "@/components/navigation/NavigationProvider"
+import { THEME_ICONS } from "@/components/theme-constants"
 import { useSheetContext } from "@/context/SheetContext"
 import { type ThemeMode, useTheme } from "@/context/ThemeContext"
-import { Menu } from "lucide-react"
+import { usePathname } from "next/navigation"
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
+import SideMenu from "./SideMenu"
+import ThemeModal from "./ThemeModal"
 
 export type UserRole = "guest" | "user" | "owner" | "admin"
 
@@ -35,18 +40,20 @@ function AppHeaderComponent({
   title,
   subtitle,
 }: AppHeaderProps) {
-  const { mounted: themeMounted } = useTheme()
-  const { showBackButton } = useNavigation()
-  const { activeSheet, openSheet, closeSheet, isSheetOpen } = useSheetContext()
+  const { mode, mounted: themeMounted } = useTheme()
+  const { activePanel, openMenu, openTheme, closeAll, showBackButton } = useNavigation()
+  const { openSheet, closeSheet, isSheetOpen } = useSheetContext()
+  const pathname = usePathname()
   const [visible, setVisible] = useState(true)
   const [isScrolled, setIsScrolled] = useState(false)
   const lastScrollY = useRef(0)
   const ticking = useRef(false)
 
+  // Only show theme icon on home page
+  const isHomePage = pathname === "/"
+
   /* ─────────────────────────────────────────────────────────────────────────
      Scroll handler with requestAnimationFrame throttling
-     - Hides header on scroll down, shows on scroll up
-     - Prevents layout thrashing
      ───────────────────────────────────────────────────────────────────────── */
   useEffect(() => {
     const updateScrollState = () => {
@@ -74,7 +81,7 @@ function AppHeaderComponent({
   }, [])
 
   /* ─────────────────────────────────────────────────────────────────────────
-     Sheet handlers
+     Panel handlers - uses NavigationContext for theme, SheetContext for sheets
      ───────────────────────────────────────────────────────────────────────── */
   const handleLogoClick = useCallback(
     (e: React.MouseEvent) => {
@@ -86,6 +93,18 @@ function AppHeaderComponent({
       }
     },
     [isSheetOpen, closeSheet, openSheet]
+  )
+
+  const handleThemeClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation()
+      if (activePanel === "theme") {
+        closeAll()
+      } else {
+        openTheme()
+      }
+    },
+    [activePanel, closeAll, openTheme]
   )
 
   const handleMenuClick = useCallback(
@@ -101,22 +120,30 @@ function AppHeaderComponent({
   )
 
   const handleHeaderClick = useCallback(() => {
-    if (activeSheet) {
+    if (activePanel !== "none") {
+      closeAll()
+    }
+    if (isSheetOpen("left") || isSheetOpen("right")) {
       closeSheet()
     }
-  }, [activeSheet, closeSheet])
+  }, [activePanel, closeAll, isSheetOpen, closeSheet])
 
   const handleHeaderKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" && activeSheet) {
-        closeSheet()
+      if (e.key === "Enter") {
+        if (activePanel !== "none") {
+          closeAll()
+        }
+        if (isSheetOpen("left") || isSheetOpen("right")) {
+          closeSheet()
+        }
       }
     },
-    [activeSheet, closeSheet]
+    [activePanel, closeAll, isSheetOpen, closeSheet]
   )
 
   /* ─────────────────────────────────────────────────────────────────────────
-     Pre-compute class names to reduce string operations on each render
+     Pre-compute class names
      ───────────────────────────────────────────────────────────────────────── */
   const headerClasses = useMemo(() => {
     const visibilityClasses = visible
@@ -130,72 +157,94 @@ function AppHeaderComponent({
     return `fixed top-[var(--header-offset-top)] left-1/2 -translate-x-1/2 z-[var(--z-header)] w-[var(--header-width)] transition-all duration-700 ${visibilityClasses} ${scrolledClasses}`
   }, [visible, isScrolled])
 
-  const showHeaderClick = activeSheet !== null
+  const ThemeIcon = THEME_ICONS[mode]
+
+  const showHeaderClick = activePanel !== "none" || isSheetOpen("left") || isSheetOpen("right")
 
   return (
-    <nav
-      onClick={showHeaderClick ? handleHeaderClick : undefined}
-      onKeyDown={showHeaderClick ? handleHeaderKeyDown : undefined}
-      className={headerClasses}
-      aria-label="Main navigation"
-    >
-      <div className="flex justify-between items-center">
-        {/* Left side - Back button (conditional) + Logo */}
-        <div className="flex items-center gap-[var(--spacing-md)]">
-          {/* Back Button - shows when enabled via navigation context AND theme is mounted */}
-          {showBackButton && themeMounted && <BackButton className="flex-shrink-0" />}
+    <>
+      <nav
+        onClick={showHeaderClick ? handleHeaderClick : undefined}
+        onKeyDown={showHeaderClick ? handleHeaderKeyDown : undefined}
+        className={headerClasses}
+        aria-label="Main navigation"
+      >
+        <div className="flex justify-between items-center">
+          {/* Left side - Back button (conditional) + Logo */}
+          <div className="flex items-center gap-[var(--spacing-md)]">
+            {/* Back Button - shows when enabled via navigation context AND theme is mounted */}
+            {showBackButton && themeMounted && <BackButton className="flex-shrink-0" />}
 
-          {/* Logo - Opens LEFT sheet */}
-          <button
-            type="button"
-            onClick={handleLogoClick}
-            className="flex items-center gap-[var(--header-logo-gap)] group bg-transparent touch-target"
-            aria-label="Open navigation"
-            aria-expanded={isSheetOpen("left")}
-          >
-            {/* XMAD Logo Icon */}
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white bg-gradient-to-br from-cyan-400 to-purple-500">
-              X
-            </div>
-            <span className="text-[var(--font-size-xl)] font-black tracking-tight text-[var(--fg)] hidden sm:inline">
-              XMAD
-            </span>
-
-            {/* Show title/subtitle if provided */}
-            {title && (
-              <div className="flex items-center gap-[var(--spacing-xs)]">
-                <span className="text-[var(--font-size-lg)] font-black tracking-tight text-[var(--fg)]">
-                  {title}
-                </span>
-                {subtitle && (
-                  <span className="text-[var(--font-size-lg)] font-black tracking-tight text-[var(--color-primary)] italic">
-                    {subtitle}
-                  </span>
-                )}
+            {/* Logo - Opens LEFT sheet */}
+            <button
+              type="button"
+              onClick={handleLogoClick}
+              className="flex items-center gap-[var(--header-logo-gap)] group bg-transparent touch-target"
+              aria-label="Open navigation"
+              aria-expanded={isSheetOpen("left")}
+            >
+              {/* XMAD Logo Icon */}
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white bg-gradient-to-br from-cyan-400 to-purple-500">
+                X
               </div>
-            )}
-          </button>
-        </div>
+              <span className="text-[var(--font-size-xl)] font-black tracking-tight text-[var(--fg)] hidden sm:inline">
+                XMAD
+              </span>
 
-        {/* Right side - Menu icon (opens RIGHT sheet) */}
-        <div className="flex items-center gap-[var(--header-actions-gap)]">
-          <button
-            type="button"
-            onClick={handleMenuClick}
-            className="transition-all active:scale-95 group relative p-[var(--spacing-sm)] touch-target"
-            aria-label="Open menu"
-            aria-expanded={isSheetOpen("right")}
-          >
-            <Menu className="h-[var(--icon-size-lg)] w-[var(--icon-size-lg)] text-[var(--fg)] stroke-[2px]" />
-          </button>
+              {/* Show title/subtitle if provided */}
+              {title && (
+                <div className="flex items-center gap-[var(--spacing-xs)]">
+                  <span className="text-[var(--font-size-lg)] font-black tracking-tight text-[var(--fg)]">
+                    {title}
+                  </span>
+                  {subtitle && (
+                    <span className="text-[var(--font-size-lg)] font-black tracking-tight text-[var(--color-primary)] italic">
+                      {subtitle}
+                    </span>
+                  )}
+                </div>
+              )}
+            </button>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-[var(--header-actions-gap)]">
+            <div className="h-[var(--icon-size-lg)] w-[var(--divider-width)] bg-[var(--color-gray-500)] mx-[var(--spacing-sm)] hidden md:block opacity-[var(--opacity-subtle)]" />
+
+            {/* Theme Launcher - only on home page */}
+            {isHomePage && (
+              <button
+                type="button"
+                onClick={handleThemeClick}
+                className="transition-all active:scale-95 group relative p-[var(--spacing-sm)] touch-target"
+                aria-label="Toggle theme"
+              >
+                <ThemeIcon className="h-[var(--icon-size-lg)] w-[var(--icon-size-lg)] text-[var(--fg)] stroke-[2px]" />
+              </button>
+            )}
+
+            {/* Menu Launcher - Opens RIGHT sheet */}
+            <button
+              type="button"
+              onClick={handleMenuClick}
+              className="transition-all active:scale-95 group relative p-[var(--spacing-sm)] touch-target"
+              aria-label="Open menu"
+              aria-expanded={isSheetOpen("right")}
+            >
+              <Bars3BottomRightIcon className="h-[var(--icon-size-lg)] w-[var(--icon-size-lg)] text-[var(--fg)] stroke-[2px]" />
+            </button>
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      {/* Theme Modal - uses NavigationContext */}
+      {activePanel === "theme" && <ThemeModal isOpen={true} onClose={closeAll} />}
+    </>
   )
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   React.memo wrapper - Prevents unnecessary re-renders when props haven't changed
+   React.memo wrapper
    ───────────────────────────────────────────────────────────────────────── */
 export const AppHeader = memo(AppHeaderComponent)
 
