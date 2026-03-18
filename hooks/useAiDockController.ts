@@ -47,6 +47,7 @@ interface UseAiDockControllerReturn {
   openSheet: () => void
   closeSheet: () => void
   resetCollapseTimer: () => void
+  expandTabs: () => void
   dismissToast: () => void
 
   // Hold handlers (spread onto element)
@@ -175,7 +176,7 @@ export function useAiDockController({
 
   // Reset collapse timer - keeps tabs expanded, then auto-collapses
   const resetCollapseTimer = useCallback(() => {
-    // If voice mode is active, don't expand tabs
+    // If voice mode is active, don't expand tabs (use expandTabs instead)
     if (voiceMode) return
 
     if (collapseTimerRef.current) {
@@ -186,6 +187,17 @@ export function useAiDockController({
       setTabsExpanded(false)
     }, TIMING.TAB_COLLAPSE)
   }, [voiceMode])
+
+  // Expand tabs - always works, even during voice mode
+  const expandTabs = useCallback(() => {
+    if (collapseTimerRef.current) {
+      clearTimeout(collapseTimerRef.current)
+    }
+    setTabsExpanded(true)
+    collapseTimerRef.current = setTimeout(() => {
+      setTabsExpanded(false)
+    }, TIMING.TAB_COLLAPSE)
+  }, [])
 
   // Sheet actions
   const openSheet = useCallback(() => {
@@ -310,6 +322,7 @@ export function useAiDockController({
     openSheet,
     closeSheet,
     resetCollapseTimer,
+    expandTabs,
     dismissToast,
     holdHandlers,
     keyboardHandlers,

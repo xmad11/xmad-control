@@ -107,6 +107,7 @@ export function HomeClient() {
     openSheet,
     closeSheet,
     resetCollapseTimer,
+    expandTabs,
     holdHandlers,
     keyboardHandlers,
     ariaProps,
@@ -184,7 +185,7 @@ export function HomeClient() {
                     userSelect: "none",
                   }}
                   aria-label="Voice active - hold to stop, tap to expand tabs"
-                  onClick={resetCollapseTimer}
+                  onClick={expandTabs}
                 >
                   <MiniWaveIndicator active expanded />
                   {/* Glow effect */}
