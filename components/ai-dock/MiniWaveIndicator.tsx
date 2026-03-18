@@ -1,6 +1,11 @@
 /* ═══════════════════════════════════════════════════════════════════════════════
-   MINI WAVE INDICATOR - CSS-only wave animation above tab
+   MINI WAVE INDICATOR - CSS-only wave animation
    Zero JS animation, pure CSS transforms - NO framer-motion
+
+   Modes:
+   - collapsed=true: Small pulsing dot indicator
+   - active + expanded: Inline wave bars (for button content)
+   - active only: Absolute positioned wave above element
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 "use client"
@@ -14,6 +19,8 @@ interface MiniWaveIndicatorProps {
   active?: boolean
   /** Show collapsed dot indicator instead of wave */
   collapsed?: boolean
+  /** Show inline (not absolute positioned) - for use inside buttons */
+  expanded?: boolean
   /** Position above element */
   className?: string
 }
@@ -21,6 +28,7 @@ interface MiniWaveIndicatorProps {
 export function MiniWaveIndicator({
   active = false,
   collapsed = false,
+  expanded = false,
   className,
 }: MiniWaveIndicatorProps) {
   const waveHeight = "8px"
@@ -28,6 +36,44 @@ export function MiniWaveIndicator({
   const waveGap = "2px"
   const duration = `${aiDockTokens.motion.waveDurationSec}s`
 
+  // Expanded mode: inline wave for button content
+  if (expanded && active) {
+    return (
+      <div
+        className={cn(
+          "relative z-10 flex items-end justify-center",
+          "pointer-events-none",
+          className
+        )}
+        style={{
+          gap: waveGap,
+          height: "16px",
+        }}
+      >
+        <div className="flex items-end gap-[2px]">
+          {[0, 1, 2].map((i) => (
+            <span
+              key={i}
+              className="wave-bar rounded-full bg-cyan-400"
+              style={{
+                width: waveWidth,
+                height: waveHeight,
+                animationName: "wave-bar-anim",
+                animationDuration: duration,
+                animationTimingFunction: "ease-in-out",
+                animationIterationCount: "infinite",
+                animationDelay: `${i * 75}ms`,
+                transformOrigin: "bottom",
+                willChange: "transform",
+              }}
+            />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // Default mode: absolute positioned indicator above element
   return (
     <div
       className={cn(

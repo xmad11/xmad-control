@@ -104,7 +104,6 @@ export function HomeClient() {
     isSheetOpen,
     voiceMode,
     voiceToast,
-    showIndicator,
     openSheet,
     closeSheet,
     resetCollapseTimer,
@@ -165,9 +164,33 @@ export function HomeClient() {
           style={{ paddingBottom: `calc(0.5rem + ${SAFE_AREA_BOTTOM})` }}
         >
           <div className="relative flex flex-col items-center pointer-events-auto gap-1">
-            {/* Chat icon above - click only (no hold gesture) */}
+            {/* Voice mode active + tabs expanded: Wave button to open sheet / hold to stop */}
             <AnimatePresence>
-              {tabsExpanded && (
+              {tabsExpanded && voiceMode && (
+                <motion.button
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 4 }}
+                  transition={{ duration: ANIMATION.intentFast }}
+                  onContextMenu={(e) => e.preventDefault()}
+                  {...holdHandlers}
+                  className="relative p-2 rounded-lg bg-cyan-500/20 backdrop-blur-xl border border-cyan-400/30 hover:bg-cyan-500/30 transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.2)] select-none touch-none"
+                  style={{
+                    WebkitTouchCallout: "none",
+                    WebkitUserSelect: "none",
+                    userSelect: "none",
+                  }}
+                  aria-label="Voice active - hold to stop, tap to open chat"
+                  onClick={openSheet}
+                >
+                  <MiniWaveIndicator active expanded />
+                </motion.button>
+              )}
+            </AnimatePresence>
+
+            {/* Chat icon above - only when tabs expanded and NOT voice mode */}
+            <AnimatePresence>
+              {tabsExpanded && !voiceMode && (
                 <motion.button
                   initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -206,21 +229,19 @@ export function HomeClient() {
                 userSelect: "none",
               }}
             >
-              <div className="relative z-10 flex items-center justify-center">
-                {voiceMode ? (
-                  <Mic className="h-4 w-4 text-cyan-400" />
-                ) : (
-                  (() => {
+              {/* Voice mode: show wave inside button, no mic icon */}
+              {voiceMode ? (
+                <MiniWaveIndicator active expanded />
+              ) : (
+                <div className="relative z-10 flex items-center justify-center">
+                  {(() => {
                     const activeTabData = tabs.find((t) => t.value === activeSurface)
                     const TabIcon = activeTabData?.icon
                     return TabIcon ? <TabIcon className="h-4 w-4 text-white" /> : null
-                  })()
-                )}
-              </div>
+                  })()}
+                </div>
+              )}
               <div className="absolute -inset-1 rounded-xl bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 blur-lg opacity-60" />
-
-              {/* Mini Wave Indicator - shows when voice mode is active */}
-              <MiniWaveIndicator active={voiceMode} collapsed={showIndicator && !voiceMode} />
 
               {/* Glow effect when voice mode is active */}
               {voiceMode && (
