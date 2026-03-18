@@ -132,17 +132,24 @@ export function HomeClient() {
             {/* Collapsed state - single floating button with HOLD gesture for Voice */}
             <button
               onClick={resetCollapseTimer}
+              onContextMenu={(e) => e.preventDefault()}
               {...holdHandlers}
               {...keyboardHandlers}
               className={`
-                transition-all ease-out select-none
+                transition-all ease-out select-none touch-none
                 ${tabsExpanded ? "hidden" : "flex"}
                 relative p-3 rounded-xl
                 bg-white/10 backdrop-blur-xl border border-white/20
                 shadow-[0_4px_16px_rgba(0,0,0,0.2)]
-                hover:bg-white/15 active:scale-95
+                hover:bg-white/15
+                ${isHolding ? "scale-110" : "active:scale-95"}
               `}
-              style={{ transitionDuration: `${aiDockTokens.motion.tabExpand}ms` }}
+              style={{
+                transitionDuration: `${aiDockTokens.motion.tabExpand}ms`,
+                WebkitTouchCallout: "none",
+                WebkitUserSelect: "none",
+                userSelect: "none",
+              }}
               aria-label={
                 isHolding ? "Voice input active, release to send" : "Hold to speak or press Enter"
               }
