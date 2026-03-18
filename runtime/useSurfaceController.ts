@@ -22,7 +22,16 @@ import type {
   SystemStats,
 } from "@/types/surface.types"
 import { Brain, HardDrive, LayoutDashboard, MessageSquare, Monitor, Zap } from "lucide-react"
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react"
+import {
+  createContext,
+  startTransition,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // DASHBOARD DATA CONTEXT
@@ -168,7 +177,10 @@ export function useSurfaceController() {
       })
       if (response.ok) {
         const data = await response.json()
-        setStats(data)
+        // Use startTransition to prevent polling from blocking UI animations
+        startTransition(() => {
+          setStats(data)
+        })
       }
     } catch (error) {
       // Ignore abort errors
@@ -176,11 +188,13 @@ export function useSurfaceController() {
         return
       }
       // Use fallback data if API not available
-      setStats({
-        cpu: DEFAULTS.STATS.CPU,
-        memory: DEFAULTS.STATS.MEMORY,
-        disk: DEFAULTS.STATS.DISK,
-        uptime: DEFAULTS.STATS.UPTIME,
+      startTransition(() => {
+        setStats({
+          cpu: DEFAULTS.STATS.CPU,
+          memory: DEFAULTS.STATS.MEMORY,
+          disk: DEFAULTS.STATS.DISK,
+          uptime: DEFAULTS.STATS.UPTIME,
+        })
       })
     }
   }, [])
@@ -266,12 +280,16 @@ export function useSurfaceController() {
     setActiveSurface(value as SurfaceId)
   }, [])
 
-  // Get tabs with resolved icons
-  const tabs = TAB_CONFIG.map((tab) => ({
-    value: tab.value,
-    icon: iconMap[tab.icon] || LayoutDashboard,
-    label: tab.label,
-  }))
+  // Get tabs with resolved icons - memoized to prevent tab bar re-renders
+  const tabs = useMemo(
+    () =>
+      TAB_CONFIG.map((tab) => ({
+        value: tab.value,
+        icon: iconMap[tab.icon] || LayoutDashboard,
+        label: tab.label,
+      })),
+    [] // iconMap and TAB_CONFIG are static imports
+  )
 
   return {
     activeSurface,

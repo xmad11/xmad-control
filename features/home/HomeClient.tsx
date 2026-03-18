@@ -20,7 +20,7 @@ import { SurfaceManager } from "@/runtime/SurfaceManager"
 import { DashboardDataContext, useSurfaceController } from "@/runtime/useSurfaceController"
 import { AnimatePresence, motion } from "framer-motion"
 import { MessageSquare, Mic, MicOff } from "lucide-react"
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 
 import { MiniWaveIndicator } from "@/components/ai-dock/MiniWaveIndicator"
 import { SurfaceErrorBoundary } from "@/components/error-boundary"
@@ -131,6 +131,12 @@ export function HomeClient() {
     }
   }
 
+  // Memoize context value to prevent render storms
+  const dataContextValue = useMemo(
+    () => ({ stats, services, processes }),
+    [stats, services, processes]
+  )
+
   // Lock body scroll when any sheet is open
   useEffect(() => {
     if (activeSheet) {
@@ -147,7 +153,7 @@ export function HomeClient() {
   }, [activeSheet])
 
   return (
-    <DataContext.Provider value={{ stats, services, processes }}>
+    <DataContext.Provider value={dataContextValue}>
       {/* ════════════════════════════════════════════════════════════════════════
           BACKGROUND
           ════════════════════════════════════════════════════════════════════════ */}
