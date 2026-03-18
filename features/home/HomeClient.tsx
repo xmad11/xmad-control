@@ -6,6 +6,8 @@
 "use client"
 
 import { GlassTabs, GlassTabsList, GlassTabsTrigger } from "@/components/glass/glass-tabs"
+import { WIDGET_LAYOUT } from "@/config/dashboard"
+import { aiDockTokens } from "@/design/tokens/ai-dock.tokens"
 import { SurfaceManager } from "@/runtime/SurfaceManager"
 import { DashboardDataContext, useSurfaceController } from "@/runtime/useSurfaceController"
 import { AnimatePresence, motion } from "framer-motion"
@@ -17,6 +19,24 @@ import { MiniWaveIndicator } from "@/components/ai-dock/MiniWaveIndicator"
 import { ErrorBoundary, SurfaceErrorBoundary } from "@/components/error-boundary"
 import { BackgroundBlobs } from "@/features/dashboard-ui/BackgroundBlobs"
 import { useAiDockController } from "@/hooks/useAiDockController"
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CONSTANTS FROM TOKENS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/** Bottom padding for content area to avoid tab bar overlap */
+const CONTENT_BOTTOM_PADDING = WIDGET_LAYOUT.BOTTOM_PADDING // "pb-28"
+
+/** Animation durations from tokens */
+const ANIMATION = {
+  /** Tab expand/collapse duration */
+  tabExpand: aiDockTokens.motion.tabExpand / 1000, // Convert ms to seconds for Framer
+  /** Fast micro-interaction */
+  intentFast: aiDockTokens.motion.intentFast / 1000,
+} as const
+
+/** Safe area bottom for mobile devices */
+const SAFE_AREA_BOTTOM = aiDockTokens.position.safeAreaBottom
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // MAIN COMPONENT
@@ -77,8 +97,8 @@ export function HomeClient() {
         onValueChange={handleSurfaceChange}
         className="relative z-10 flex flex-col transition-all duration-500"
       >
-        {/* Content area - use SurfaceManager */}
-        <div className="relative z-10 flex-1 px-3 py-4 md:px-4 lg:px-6 pb-24">
+        {/* Content area - use SurfaceManager with token-based bottom padding */}
+        <div className={`relative z-10 flex-1 px-3 py-4 md:px-4 lg:px-6 ${CONTENT_BOTTOM_PADDING}`}>
           <SurfaceErrorBoundary surfaceId={activeSurface}>
             <SurfaceManager activeSurface={activeSurface} />
           </SurfaceErrorBoundary>
@@ -87,16 +107,19 @@ export function HomeClient() {
         {/* ════════════════════════════════════════════════════════════════════════
             FLOATING TAB BAR - With AI Dock State Machine
             ════════════════════════════════════════════════════════════════════════ */}
-        <div className="fixed bottom-0 left-0 right-0 z-20 flex justify-center pb-2 pointer-events-none">
-          <div className="relative flex flex-col items-center pointer-events-auto">
+        <div
+          className="fixed bottom-0 left-0 right-0 z-20 flex justify-center pointer-events-none"
+          style={{ paddingBottom: `calc(0.5rem + ${SAFE_AREA_BOTTOM})` }}
+        >
+          <div className="relative flex flex-col items-center pointer-events-auto gap-1.5">
             {/* Chat icon above - click only (no hold gesture) */}
             <AnimatePresence>
               {tabsExpanded && (
                 <motion.button
-                  initial={{ opacity: 0, y: 8 }}
+                  initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 8 }}
-                  transition={{ duration: 0.15 }}
+                  exit={{ opacity: 0, y: 4 }}
+                  transition={{ duration: ANIMATION.intentFast }}
                   className="relative p-2 rounded-lg bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/15 transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.2)]"
                   aria-label="Open chat"
                   onClick={openSheet}
@@ -112,7 +135,7 @@ export function HomeClient() {
               {...holdHandlers}
               {...keyboardHandlers}
               className={`
-                transition-all duration-300 ease-out select-none
+                transition-all ease-out select-none
                 ${tabsExpanded ? "opacity-0 scale-75 pointer-events-none absolute" : "opacity-100 scale-100"}
                 relative p-3 rounded-xl
                 bg-white/10 backdrop-blur-xl border border-white/20
@@ -121,6 +144,7 @@ export function HomeClient() {
                 before:absolute before:inset-0 before:rounded-xl
                 before:bg-gradient-to-b before:from-white/20 before:to-transparent before:pointer-events-none
               `}
+              style={{ transitionDuration: `${aiDockTokens.motion.tabExpand}ms` }}
               aria-label={
                 isHolding ? "Voice input active, release to send" : "Hold to speak or press Enter"
               }
@@ -155,16 +179,18 @@ export function HomeClient() {
             <div
               id="dashboard-tab-list"
               className={`
-                transition-all duration-300 ease-out origin-bottom
+                transition-all ease-out origin-bottom
                 ${tabsExpanded ? "opacity-100 scale-100" : "opacity-0 scale-75 pointer-events-none absolute"}
               `}
+              style={{ transitionDuration: `${aiDockTokens.motion.tabExpand}ms` }}
             >
-              <GlassTabsList className="flex items-center justify-center gap-0.5 px-1.5 py-1 h-auto">
+              <GlassTabsList className="flex items-center justify-center gap-1 px-1.5 py-1 h-auto">
                 {tabs.map((tab) => (
                   <GlassTabsTrigger
                     key={tab.value}
                     value={tab.value}
-                    className="group p-2 transition-all duration-200 rounded-lg"
+                    className="group p-2 transition-all rounded-lg"
+                    style={{ transitionDuration: `${aiDockTokens.motion.intentMedium}ms` }}
                     onClick={resetCollapseTimer}
                   >
                     <tab.icon className="h-3.5 w-3.5" />
