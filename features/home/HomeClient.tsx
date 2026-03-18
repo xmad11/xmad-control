@@ -155,7 +155,8 @@ export function HomeClient() {
       <GlassTabs
         value={activeSurface}
         onValueChange={handleTabChange}
-        className="relative z-10 flex flex-col transition-all duration-500"
+        className="relative z-10 flex flex-col transition-all"
+        style={{ transitionDuration: `${aiDockTokens.motion.intentSlow}ms` }}
       >
         {/* Content area */}
         <div
