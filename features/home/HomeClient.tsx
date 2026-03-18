@@ -111,7 +111,7 @@ export function HomeClient() {
           className="fixed bottom-0 left-0 right-0 z-20 flex justify-center pointer-events-none"
           style={{ paddingBottom: `calc(0.5rem + ${SAFE_AREA_BOTTOM})` }}
         >
-          <div className="relative flex flex-col items-center pointer-events-auto gap-1.5">
+          <div className="relative flex flex-col items-center pointer-events-auto gap-1">
             {/* Chat icon above - click only (no hold gesture) */}
             <AnimatePresence>
               {tabsExpanded && (
@@ -129,20 +129,18 @@ export function HomeClient() {
               )}
             </AnimatePresence>
 
-            {/* Collapsed state - single floating button with HOLD gesture for voice */}
+            {/* Collapsed state - single floating button with HOLD gesture for Voice */}
             <button
               onClick={resetCollapseTimer}
               {...holdHandlers}
               {...keyboardHandlers}
               className={`
                 transition-all ease-out select-none
-                ${tabsExpanded ? "opacity-0 scale-75 pointer-events-none absolute" : "opacity-100 scale-100"}
+                ${tabsExpanded ? "hidden" : "flex"}
                 relative p-3 rounded-xl
                 bg-white/10 backdrop-blur-xl border border-white/20
                 shadow-[0_4px_16px_rgba(0,0,0,0.2)]
                 hover:bg-white/15 active:scale-95
-                before:absolute before:inset-0 before:rounded-xl
-                before:bg-gradient-to-b before:from-white/20 before:to-transparent before:pointer-events-none
               `}
               style={{ transitionDuration: `${aiDockTokens.motion.tabExpand}ms` }}
               aria-label={
