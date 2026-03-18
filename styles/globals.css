@@ -453,3 +453,190 @@ input[type="search"]:focus-visible {
     oklch(from var(--glow-green) l c h / 0.2), inset 0 0 30px
     oklch(from var(--glow-green) l c h / 0.1);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   AI DOCK ANIMATION DURATIONS - From ai-dock.tokens.ts
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* Tab expand/collapse duration */
+.duration-tab-expand {
+  transition-duration: 300ms;
+}
+
+/* Intent medium duration */
+.duration-intent-medium {
+  transition-duration: 200ms;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   GLASS TAB BUTTON - For floating tab bar
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.glass-tab-button {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: var(--glass-shadow-widget);
+  transition-duration: 300ms;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   GLASS VOICE BUTTON - Active state
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.glass-voice-button-active {
+  background: rgba(34, 211, 238, 0.15);
+  border-color: rgba(34, 211, 238, 0.3);
+  box-shadow: var(--glass-shadow-widget), 0 0 20px rgba(34, 211, 238, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   GLASS HEADER BUTTON - For header buttons
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.glass-header-button {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: var(--glass-shadow-widget);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   GLASS LOGO ICON - Gradient for XMAD logo
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.bg-gradient-cyan-purple {
+  background: linear-gradient(135deg, var(--widget-cyan), var(--widget-purple));
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   TAB BAR SAFE AREA - Bottom padding for mobile
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.tab-bar-safe-area {
+  padding-bottom: calc(0.5rem + var(--safe-area-bottom, 0px));
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   TABS GLOW GRADIENT - For collapsed tab button glow
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.bg-gradient-tabs-glow {
+  background: linear-gradient(
+    90deg,
+    rgba(34, 211, 238, 0.15),
+    rgba(139, 92, 246, 0.15),
+    rgba(236, 72, 153, 0.15)
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   GLASS INSET SHADOW - For glass panels
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.glass-inset-shadow {
+  box-shadow: var(--glass-shadow-inset);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   CYAN GLOW UTILITIES - For cyan-colored elements
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.bg-cyan-glow {
+  background-color: var(--widget-cyan);
+}
+
+.text-cyan-glow {
+  color: var(--widget-cyan);
+}
+
+.border-cyan-glow {
+  border-color: var(--widget-cyan);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   GREEN GLOW BOX - For status indicators
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.bg-green-glow-box {
+  background: rgba(34, 197, 94, 0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   CHAT MESSAGES CONTAINER - For bottom sheet
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.chat-messages-container {
+  height: calc(60vh - 280px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   CYAN TOGGLE KNOB - For toggle switches
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.cyan-toggle-knob {
+  box-shadow: 0 0 10px var(--widget-cyan);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   GLASS STATUS DOT - For status indicators
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.glass-status-dot {
+  box-shadow: 0 0 6px currentColor;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   CYAN PURPLE GRADIENT BOX - For AI chat header
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.bg-cyan-purple-gradient {
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.2), rgba(139, 92, 246, 0.15));
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   GLASS SETTINGS ITEM - For settings sheet toggle items
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.glass-settings-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: var(--glass-shadow-inset);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   GLASS TOGGLE SWITCH - For toggle switches
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.glass-toggle-enabled {
+  background: rgba(34, 211, 238, 0.3);
+  border-color: rgba(34, 211, 238, 0.4);
+}
+
+.glass-toggle-disabled {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   GLASS TOGGLE KNOB - For toggle switch knobs
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.glass-toggle-knob-enabled {
+  background: var(--widget-cyan);
+  box-shadow: 0 0 10px var(--widget-cyan);
+}
+
+.glass-toggle-knob-disabled {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   SUCCESS STATUS DOT - For connected/green status indicators
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.success-status-dot {
+  background: var(--color-success);
+  box-shadow: 0 0 8px var(--color-success);
+}
