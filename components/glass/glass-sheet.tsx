@@ -3,7 +3,6 @@
 import { cn } from "@/lib/utils"
 import * as SheetPrimitive from "@radix-ui/react-dialog"
 import { type VariantProps, cva } from "class-variance-authority"
-import { X } from "lucide-react"
 import * as React from "react"
 
 const GlassSheet = SheetPrimitive.Root
@@ -79,11 +78,7 @@ const GlassSheetContent = React.forwardRef<
   <GlassSheetPortal>
     <GlassSheetOverlay />
     <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({ side }), className)} {...props}>
-      <div className="relative z-10">{children}</div>
-      <SheetPrimitive.Close className="absolute right-4 top-4 rounded-lg p-1 text-white/60 transition-all hover:text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/50">
-        <X className="h-4 w-4" />
-        <span className="sr-only">Close</span>
-      </SheetPrimitive.Close>
+      <div className="relative z-10 h-full">{children}</div>
     </SheetPrimitive.Content>
   </GlassSheetPortal>
 ))

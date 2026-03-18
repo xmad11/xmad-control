@@ -288,14 +288,14 @@ export function HomeClient() {
 
       {/* LEFT SHEET - Navigation (60% width) */}
       <GlassSheet open={isSheetOpen("left")} onOpenChange={(open) => !open && closeSheet()}>
-        <GlassSheetContent side="left" className="w-[60vw] max-w-md p-0">
+        <GlassSheetContent side="left" className="w-[60vw] p-0">
           <LeftSheetContent />
         </GlassSheetContent>
       </GlassSheet>
 
       {/* RIGHT SHEET - Settings (60% width) */}
       <GlassSheet open={isSheetOpen("right")} onOpenChange={(open) => !open && closeSheet()}>
-        <GlassSheetContent side="right" className="w-[60vw] max-w-md p-0">
+        <GlassSheetContent side="right" className="w-[60vw] p-0">
           <RightSheetContent />
         </GlassSheetContent>
       </GlassSheet>
