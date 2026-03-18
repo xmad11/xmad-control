@@ -161,14 +161,18 @@ function AppHeaderComponent({
 
   const showHeaderClick = activePanel !== "none" || isSheetOpen("left") || isSheetOpen("right")
 
+  // Hide header when side sheets are open
+  const isSideSheetOpen = isSheetOpen("left") || isSheetOpen("right")
+
   return (
     <>
-      <nav
-        onClick={showHeaderClick ? handleHeaderClick : undefined}
-        onKeyDown={showHeaderClick ? handleHeaderKeyDown : undefined}
-        className={headerClasses}
-        aria-label="Main navigation"
-      >
+      {!isSideSheetOpen && (
+        <nav
+          onClick={showHeaderClick ? handleHeaderClick : undefined}
+          onKeyDown={showHeaderClick ? handleHeaderKeyDown : undefined}
+          className={headerClasses}
+          aria-label="Main navigation"
+        >
         <div className="flex justify-between items-center">
           {/* Left side - Back button (conditional) + Logo */}
           <div className="flex items-center gap-[var(--spacing-md)]">
@@ -236,6 +240,7 @@ function AppHeaderComponent({
           </div>
         </div>
       </nav>
+      )}
 
       {/* Theme Modal - uses NavigationContext */}
       {activePanel === "theme" && <ThemeModal isOpen={true} onClose={closeAll} />}
