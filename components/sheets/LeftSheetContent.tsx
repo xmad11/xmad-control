@@ -90,14 +90,6 @@ export function LeftSheetContent({ onNavigate }: LeftSheetContentProps) {
           })}
         </div>
       </nav>
-
-      {/* Footer */}
-      <div className="border-t border-white/10 p-4 backdrop-blur-sm">
-        <div className="flex items-center gap-2 text-xs text-white/40">
-          <div className="h-2 w-2 rounded-full bg-success glass-status-dot" />
-          <span>System Online</span>
-        </div>
-      </div>
     </div>
   )
 }

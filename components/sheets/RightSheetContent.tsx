@@ -130,14 +130,6 @@ export function RightSheetContent({ onToggle }: RightSheetContentProps) {
           </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <div className="border-t border-white/10 p-4 backdrop-blur-xl glass-inset-shadow">
-        <GlassButton variant="outline" className="w-full justify-center">
-          <Sun className="h-4 w-4 mr-2" />
-          Switch to Light Mode
-        </GlassButton>
-      </div>
     </div>
   )
 }
