@@ -15,6 +15,7 @@ import { THEME_ICONS } from "@/components/theme-constants"
 import { useSheetContext } from "@/context/SheetContext"
 import { type ThemeMode, useTheme } from "@/context/ThemeContext"
 import { usePathname } from "next/navigation"
+import { Server } from "lucide-react"
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import SideMenu from "./SideMenu"
 import ThemeModal from "./ThemeModal"
@@ -187,9 +188,9 @@ function AppHeaderComponent({
               aria-label="Open navigation"
               aria-expanded={isSheetOpen("left")}
             >
-              {/* XMAD Logo Icon */}
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white bg-gradient-to-br from-cyan-400 to-purple-500">
-                X
+              {/* Server Icon */}
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--widget-cyan)]/20 border border-[var(--widget-cyan)]/30">
+                <Server className="h-4 w-4 text-[var(--widget-cyan)]" />
               </div>
               <span className="text-[var(--font-size-xl)] font-black tracking-tight text-[var(--fg)] hidden sm:inline">
                 XMAD
