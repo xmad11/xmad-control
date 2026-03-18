@@ -203,20 +203,127 @@ export const MEMORY_WIDGETS = {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const AUTOMATION_WIDGETS = {
-  /** Sample automation tasks */
-  TASKS: [
-    { id: "1", name: "Database Backup", status: "completed" as const, progress: 100 },
-    { id: "2", name: "Log Rotation", status: "running" as const, progress: 67 },
-    { id: "3", name: "Cache Cleanup", status: "pending" as const, progress: 0 },
-    { id: "4", name: "Health Check", status: "paused" as const, progress: 23 },
+  /** Stats cards */
+  STATS: [
+    {
+      label: "Tasks Completed",
+      value: "1,234",
+      change: "+12.5%",
+      trend: "up" as const,
+      icon: "CheckCircle2" as const,
+      color: "green" as const,
+    },
+    {
+      label: "Active Workflows",
+      value: "48",
+      change: "+8.2%",
+      trend: "up" as const,
+      icon: "Zap" as const,
+      color: "cyan" as const,
+    },
+    {
+      label: "CPU Usage",
+      value: "67%",
+      change: "-5.2%",
+      trend: "down" as const,
+      icon: "Cpu" as const,
+      color: "amber" as const,
+    },
+    {
+      label: "Memory",
+      value: "4.2 GB",
+      change: "+2.4%",
+      trend: "up" as const,
+      icon: "MemoryStick" as const,
+      color: "purple" as const,
+    },
   ],
 
-  /** Automation stats */
-  STATS: [
-    { label: "Active Tasks", value: "3", color: "green" as const },
-    { label: "Completed Today", value: "12", color: "cyan" as const },
-    { label: "Failed", value: "0", color: "red" as const },
-    { label: "Total Runtime", value: "4h 32m", color: "purple" as const },
+  /** Recent activity log */
+  ACTIVITY: [
+    {
+      id: "1",
+      user: "System",
+      action: "completed task",
+      target: "Database backup",
+      time: "2 min ago",
+      status: "success" as const,
+    },
+    {
+      id: "2",
+      user: "Scheduler",
+      action: "started",
+      target: "Log rotation",
+      time: "15 min ago",
+      status: "info" as const,
+    },
+    {
+      id: "3",
+      user: "Monitor",
+      action: "detected",
+      target: "High memory usage",
+      time: "1 hour ago",
+      status: "warning" as const,
+    },
+    {
+      id: "4",
+      user: "Auto-scaler",
+      action: "scaled",
+      target: "API servers to 4",
+      time: "3 hours ago",
+      status: "success" as const,
+    },
+    {
+      id: "5",
+      user: "Backup Service",
+      action: "failed",
+      target: "Snapshot creation",
+      time: "5 hours ago",
+      status: "error" as const,
+    },
+  ],
+
+  /** Active tasks */
+  TASKS: [
+    {
+      name: "Database Backup",
+      progress: 85,
+      status: "Running" as const,
+      nextRun: "In 15 min",
+      type: "Scheduled",
+    },
+    {
+      name: "Log Rotation",
+      progress: 60,
+      status: "Running" as const,
+      nextRun: "In 1 hour",
+      type: "Scheduled",
+    },
+    {
+      name: "Cache Cleanup",
+      progress: 100,
+      status: "Completed" as const,
+      nextRun: "Tomorrow",
+      type: "Daily",
+    },
+    {
+      name: "Health Check",
+      progress: 35,
+      status: "Running" as const,
+      nextRun: "In 5 min",
+      type: "Recurring",
+    },
+  ],
+
+  /** Chart data - weekly performance */
+  CHART_DATA: [
+    { day: "Mon", value: 65 },
+    { day: "Tue", value: 45 },
+    { day: "Wed", value: 75 },
+    { day: "Thu", value: 55 },
+    { day: "Fri", value: 85 },
+    { day: "Sat", value: 40 },
+    { day: "Sun", value: 70 },
   ],
 }
 
