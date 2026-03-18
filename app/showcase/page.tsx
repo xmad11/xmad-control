@@ -5,7 +5,6 @@
 
 "use client"
 
-import { WidgetCarousel } from "@/components/carousel/WidgetCarousel"
 import { GlassBadge } from "@/components/glass/glass-badge"
 import {
   GlassWidgetBase,
@@ -39,6 +38,7 @@ import {
   HourlyWeatherWidget,
 } from "@/components/widgets/weather-widget"
 import { WORLD_CLOCKS } from "@/config/dashboard"
+import { BackgroundBlobs } from "@/features/dashboard-ui/BackgroundBlobs"
 import {
   Activity,
   ArrowRight,
@@ -84,96 +84,72 @@ export default function ShowcasePage() {
   ]
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 -mt-[var(--header-total-height)]">
+    <div className="h-screen relative overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950">
       {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-cyan-950/20 via-transparent to-purple-950/10" />
-      <div
-        className="absolute inset-0 opacity-[0.02]"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
-          backgroundSize: "64px 64px",
-        }}
-      />
+      <BackgroundBlobs />
 
-      {/* Content */}
-      <div className="relative z-10 w-full overflow-y-auto">
-        {/* Hero Section */}
-        <section className="container mx-auto px-4 pt-20 pb-8">
-          <div className="w-full text-center">
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white mb-6">
-              <span className="block">XMAD Control</span>
-              <span className="block bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-                Component Showcase
-              </span>
-            </h1>
-            <p className="text-lg md:text-xl text-white/50 w-full mx-auto mb-10 leading-relaxed">
-              Explore our collection of liquid glass components and widgets for building beautiful
-              dashboards and control panels.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-cyan-500/80 via-blue-500/80 to-purple-500/80 backdrop-blur-xl border border-white/30 text-white rounded-xl hover:scale-105 active:scale-95 transition-all shadow-[0_4px_20px_rgba(59,130,246,0.4)]"
-              >
-                Go to Dashboard
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link
-                href="/docs"
-                className="inline-flex items-center gap-2 px-8 py-3 bg-transparent backdrop-blur-sm border-2 border-white/40 text-white rounded-xl hover:bg-white/10 hover:border-white/60 hover:scale-105 active:scale-95 transition-all"
-              >
-                <BookOpen className="w-4 h-4" />
-                View Docs
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Widget Showcase */}
-        <section className="container mx-auto px-4 pb-16 w-full">
-          <div className="text-center mb-6">
+      {/* Content Container - fills screen, content scrolls inside */}
+      <div className="relative z-10 h-full flex flex-col pt-16">
+        {/* Scrollable Content Area */}
+        <div className="flex-1 overflow-y-auto px-4 py-6 md:px-6 lg:px-8 pb-8">
+          {/* Hero Section - Compact */}
+          <div className="text-center mb-8">
             <GlassBadge variant="primary" className="mb-3">
               <Sparkles className="w-3 h-3 mr-1" />
               Interactive
             </GlassBadge>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">Widgets Collection</h2>
-            <p className="text-white/50 w-full mx-auto">
-              Beautiful glass-styled widgets for dashboards, apps, and more
+            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+              <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+                Component Showcase
+              </span>
+            </h1>
+            <p className="text-white/50 text-sm md:text-base max-w-lg mx-auto">
+              Glass-styled widgets for dashboards and control panels
             </p>
           </div>
 
-          {/* Calendar & Clock Widgets */}
-          <div className="mb-8">
-            <h3 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-4">
+          {/* ════════════════════════════════════════════════════════════════════════
+              WIDGET SECTIONS - Balanced grids
+              ════════════════════════════════════════════════════════════════════════ */}
+
+          {/* Calendar & Clock - Grouped by size */}
+          <section className="mb-8">
+            <h3 className="text-xs font-medium text-white/40 uppercase tracking-wider mb-4">
               Calendar & Time
             </h3>
-            {/* Small widgets row */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full mb-6 items-start">
+            {/* Row 1 - 4 small widgets */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 items-start">
               <CompactCalendarWidget />
-              <AnalogClockWidget size="lg" showNumbers={true} />
               <DigitalClockWidget showSeconds={false} />
               <StopwatchWidget />
+              <CompactCalendarWidget />
             </div>
-            {/* Medium widgets row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full mb-6 items-start">
+            {/* Row 2 - 4 small widgets */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 items-start">
+              <AnalogClockWidget size="sm" showNumbers={true} />
+              <DigitalClockWidget showSeconds={true} />
+              <StopwatchWidget />
+              <DigitalClockWidget showSeconds={false} />
+            </div>
+            {/* Row 3 - 3 medium widgets */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3 items-start">
               <CalendarWidget />
               <TimerWidget initialMinutes={5} />
+              <CalendarWidget />
+            </div>
+            {/* Row 4 - 2 large widgets */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-start">
               <WorldClockWidget clocks={WORLD_CLOCKS} />
+              <EventsCalendarWidget date={new Date()} events={sampleEvents} />
             </div>
-            {/* Large widget - full width */}
-            <div className="w-full">
-              <EventsCalendarWidget date={new Date()} events={sampleEvents} className="w-full" />
-            </div>
-          </div>
+          </section>
 
-          {/* Weather Widgets */}
-          <div className="mb-8">
-            <h3 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-4">
+          {/* Weather - 4 items per row, balanced */}
+          <section className="mb-8">
+            <h3 className="text-xs font-medium text-white/40 uppercase tracking-wider mb-4">
               Weather
             </h3>
-            {/* Small widgets row */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full mb-6 items-start">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 items-start">
               <CurrentWeatherWidget
                 location="San Francisco"
                 temperature={72}
@@ -184,64 +160,94 @@ export default function ShowcasePage() {
                 humidity={65}
                 windSpeed={12}
               />
-            </div>
-            {/* Large widgets row - 3 per row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full items-start">
+              <CurrentWeatherWidget
+                location="New York"
+                temperature={45}
+                feelsLike={42}
+                high={52}
+                low={38}
+                condition="cloudy"
+                humidity={78}
+                windSpeed={18}
+              />
               <ForecastWidget forecast={forecastData} />
               <HourlyWeatherWidget
                 hours={[
-                  { time: "1 AM", temperature: 22, icon: "sun" },
-                  { time: "2 AM", temperature: 21, icon: "cloud" },
-                  { time: "3 AM", temperature: 20, icon: "rain" },
-                  { time: "4 AM", temperature: 19, icon: "cloud" },
-                  { time: "5 AM", temperature: 18, icon: "sun" },
-                  { time: "6 AM", temperature: 20, icon: "snow" },
-                  { time: "7 AM", temperature: 22, icon: "sun" },
-                  { time: "8 AM", temperature: 24, icon: "cloud" },
-                  { time: "9 AM", temperature: 26, icon: "sun" },
+                  { time: "1 PM", temperature: 22, icon: "sun" },
+                  { time: "2 PM", temperature: 21, icon: "cloud" },
+                  { time: "3 PM", temperature: 20, icon: "rain" },
+                  { time: "4 PM", temperature: 19, icon: "cloud" },
                 ]}
               />
               <DetailedWeatherWidget
                 temperature={72}
                 condition="Partly Cloudy"
                 icon="cloud"
-                location="New York"
+                location="Chicago"
                 humidity={58}
                 windSpeed={15}
                 feelsLike={70}
               />
+              <DetailedWeatherWidget
+                temperature={85}
+                condition="Sunny"
+                icon="sun"
+                location="Miami"
+                humidity={72}
+                windSpeed={8}
+                feelsLike={88}
+              />
+              <CurrentWeatherWidget
+                location="Seattle"
+                temperature={58}
+                feelsLike={55}
+                high={62}
+                low={48}
+                condition="rainy"
+                humidity={85}
+                windSpeed={12}
+              />
+              <ForecastWidget
+                forecast={[
+                  { day: "Sat", high: 28, low: 22, condition: "sunny" as const },
+                  { day: "Sun", high: 26, low: 20, condition: "cloudy" as const },
+                ]}
+              />
             </div>
-          </div>
+          </section>
 
-          {/* Stock Widgets */}
-          <div className="mb-8">
-            <h3 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-4">
+          {/* Stock & Finance - Grouped by size */}
+          <section className="mb-8">
+            <h3 className="text-xs font-medium text-white/40 uppercase tracking-wider mb-4">
               Stock & Finance
             </h3>
-            {/* Small widgets row */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full mb-6 items-start">
+            {/* Row 1 - 4 small widgets */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 items-start">
               <StockTickerWidget symbol="AAPL" price={198.45} change={2.34} changePercent={1.19} />
-              <CompactStockWidget
-                symbol="GOOGL"
-                price={178.25}
-                change={-1.87}
-                changePercent={-1.04}
-              />
+              <CompactStockWidget symbol="GOOGL" price={178.25} change={-1.87} changePercent={-1.04} />
               <StockTickerWidget symbol="TSLA" price={245.8} change={5.62} changePercent={2.34} />
+              <CompactStockWidget symbol="MSFT" price={425.12} change={3.45} changePercent={0.82} />
             </div>
-            {/* Large widget - full width */}
-            <div className="w-full">
+            {/* Row 2 - 4 small widgets */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 items-start">
+              <StockTickerWidget symbol="NVDA" price={892.5} change={-8.25} changePercent={-0.92} />
+              <CompactStockWidget symbol="AMZN" price={185.75} change={2.18} changePercent={1.19} />
+              <StockTickerWidget symbol="META" price={505.3} change={7.85} changePercent={1.58} />
+              <CompactStockWidget symbol="NFLX" price={628.4} change={-4.12} changePercent={-0.65} />
+            </div>
+            {/* Row 3 - 1 large widget */}
+            <div className="grid grid-cols-1 gap-3 items-start">
               <MarketOverviewWidget indices={marketIndices} />
             </div>
-          </div>
+          </section>
 
-          {/* Stats Widgets */}
-          <div className="mb-8">
-            <h3 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-4">
+          {/* Stats & Metrics - Grouped by size */}
+          <section className="mb-8">
+            <h3 className="text-xs font-medium text-white/40 uppercase tracking-wider mb-4">
               Stats & Metrics
             </h3>
-            {/* All large widgets - 4 per row */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full items-start">
+            {/* Row 1 - 4 items */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 items-start">
               <StatCard
                 title="Revenue"
                 value="$124,500"
@@ -266,123 +272,159 @@ export default function ShowcasePage() {
               />
               <CircularProgressStat label="Completion" value={78} unit="%" glowColor="purple" />
             </div>
-          </div>
+            {/* Row 2 - 4 items */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 items-start">
+              <StatCard
+                title="Users"
+                value="24.5K"
+                change={{ value: 5.2, type: "increase" }}
+                icon={<TrendingUp className="w-5 h-5" />}
+                glowColor="cyan"
+              />
+              <MetricStat
+                label="Storage"
+                value={420}
+                max={500}
+                unit="GB"
+                icon={<Database className="w-4 h-4" />}
+                glowColor="amber"
+              />
+              <CircularProgressStat label="Progress" value={65} unit="%" glowColor="green" />
+              <MetricStat
+                label="Memory"
+                value={6.2}
+                max={8}
+                unit="GB"
+                icon={<Cpu className="w-4 h-4" />}
+                glowColor="purple"
+              />
+            </div>
+            {/* Row 3 - 4 items */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 items-start">
+              <StatCard
+                title="Orders"
+                value="1,847"
+                change={{ value: 8.3, type: "increase" }}
+                icon={<TrendingUp className="w-5 h-5" />}
+                glowColor="blue"
+              />
+              <MetricStat
+                label="CPU Load"
+                value={67}
+                max={100}
+                unit="%"
+                icon={<Cpu className="w-4 h-4" />}
+                glowColor="cyan"
+              />
+              <CircularProgressStat label="Tasks" value={42} unit="%" glowColor="amber" />
+              <MetricStat
+                label="API Calls"
+                value={8.5}
+                max={10}
+                unit="K/m"
+                icon={<Globe className="w-4 h-4" />}
+                glowColor="green"
+              />
+            </div>
+          </section>
 
-          {/* Dashboard Widgets */}
-          <div className="mb-8">
-            <h3 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-4">
+          {/* Dashboard System - Gauges and Status */}
+          <section className="mb-8">
+            <h3 className="text-xs font-medium text-white/40 uppercase tracking-wider mb-4">
               Dashboard System
             </h3>
-            <div className="mb-6">
-              <WidgetCarousel gap="sm" itemsPerView={{ base: 1, sm: 1, lg: 2, xl: 3 }}>
-                <MultiGaugeWidget
-                  title="System Resources"
-                  gauges={[
-                    { label: "RAM", value: mockStats.memory.percentage, unit: "%", color: "green" },
-                    { label: "CPU", value: mockStats.cpu, unit: "%", color: "blue" },
-                    { label: "Disk", value: mockStats.disk.percentage, unit: "%", color: "cyan" },
-                  ]}
-                  glowColor="green"
-                />
-                <MultiProgressWidget
-                  title="Usage"
-                  items={[
-                    {
-                      label: "RAM",
-                      value: mockStats.memory.used,
-                      max: mockStats.memory.total,
-                      unit: "GB",
-                      color: "green",
-                    },
-                    { label: "CPU Load", value: mockStats.cpu, unit: "%", color: "blue" },
-                    {
-                      label: "Disk",
-                      value: mockStats.disk.used,
-                      max: mockStats.disk.total,
-                      unit: "GB",
-                      color: "cyan",
-                    },
-                  ]}
-                  glowColor="green"
-                />
-                <GlassWidgetBase size="lg" width="md" glowColor="blue">
-                  <div className="text-sm text-white/60 mb-4 uppercase tracking-wider">
-                    System Forecast
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { label: "1h", high: 52, low: 38 },
-                      { label: "2h", high: 48, low: 35 },
-                      { label: "3h", high: 55, low: 40 },
-                    ].map((f) => (
-                      <div key={f.label} className="text-center p-2 rounded-lg bg-white/5">
-                        <div className="text-xs text-white/50 mb-1">{f.label}</div>
-                        <div className="text-white font-medium">{f.high}%</div>
-                        <div className="text-xs text-white/40">{f.low}%</div>
-                      </div>
-                    ))}
-                  </div>
-                </GlassWidgetBase>
-              </WidgetCarousel>
+            {/* Gauges Row - 3 items */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 items-start">
+              <MultiGaugeWidget
+                title="System Resources"
+                gauges={[
+                  { label: "RAM", value: mockStats.memory.percentage, unit: "%", color: "green" },
+                  { label: "CPU", value: mockStats.cpu, unit: "%", color: "blue" },
+                  { label: "Disk", value: mockStats.disk.percentage, unit: "%", color: "cyan" },
+                ]}
+                glowColor="green"
+              />
+              <MultiProgressWidget
+                title="Usage"
+                items={[
+                  { label: "RAM", value: mockStats.memory.used, max: mockStats.memory.total, unit: "GB", color: "green" },
+                  { label: "CPU Load", value: mockStats.cpu, unit: "%", color: "blue" },
+                  { label: "Disk", value: mockStats.disk.used, max: mockStats.disk.total, unit: "GB", color: "cyan" },
+                ]}
+                glowColor="green"
+              />
+              <GlassWidgetBase size="lg" width="md" glowColor="blue">
+                <div className="text-sm text-white/60 mb-4 uppercase tracking-wider">System Forecast</div>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { label: "1h", high: 52, low: 38 },
+                    { label: "2h", high: 48, low: 35 },
+                    { label: "3h", high: 55, low: 40 },
+                  ].map((f) => (
+                    <div key={f.label} className="text-center p-2 rounded-lg bg-white/5">
+                      <div className="text-xs text-white/50 mb-1">{f.label}</div>
+                      <div className="text-white font-medium">{f.high}%</div>
+                      <div className="text-xs text-white/40">{f.low}%</div>
+                    </div>
+                  ))}
+                </div>
+              </GlassWidgetBase>
             </div>
-            <div className="mb-6">
-              <WidgetCarousel gap="sm" itemsPerView={{ base: 1, sm: 2, lg: 3, xl: 4 }}>
-                <ServerStatusCard
-                  icon={Server}
-                  label="OpenClaw Gateway"
-                  status={mockServices.openclaw.running ? "online" : "offline"}
-                  detail={
-                    mockServices.openclaw.running ? `PID: ${mockServices.openclaw.pid}` : "Stopped"
-                  }
-                  glowColor="cyan"
-                />
-                <ServerStatusCard
-                  icon={Wifi}
-                  label="Tailscale VPN"
-                  status={mockServices.tailscale.connected ? "online" : "offline"}
-                  detail={
-                    mockServices.tailscale.connected ? mockServices.tailscale.ip : "Disconnected"
-                  }
-                  glowColor="purple"
-                />
-                <ServerStatusCard
-                  icon={Shield}
-                  label="Guardian"
-                  status="online"
-                  detail="Monitoring Active"
-                  glowColor="green"
-                />
-                <GlassWidgetBase size="md" width="sm" glowColor="amber">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Activity className="h-5 w-5 text-white/70" />
-                    <span className="text-white/60 text-sm">Health</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-white text-lg font-medium">98%</span>
-                    <span className="text-green-400 text-xs">Optimal</span>
-                  </div>
-                </GlassWidgetBase>
-              </WidgetCarousel>
+            {/* Status Row - 4 items */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 items-start">
+              <ServerStatusCard
+                icon={Server}
+                label="OpenClaw Gateway"
+                status={mockServices.openclaw.running ? "online" : "offline"}
+                detail={mockServices.openclaw.running ? `PID: ${mockServices.openclaw.pid}` : "Stopped"}
+                glowColor="cyan"
+              />
+              <ServerStatusCard
+                icon={Wifi}
+                label="Tailscale VPN"
+                status={mockServices.tailscale.connected ? "online" : "offline"}
+                detail={mockServices.tailscale.connected ? mockServices.tailscale.ip : "Disconnected"}
+                glowColor="purple"
+              />
+              <ServerStatusCard icon={Shield} label="Guardian" status="online" detail="Monitoring Active" glowColor="green" />
+              <GlassWidgetBase size="md" width="sm" glowColor="amber">
+                <div className="flex items-center gap-3 mb-3">
+                  <Activity className="h-5 w-5 text-white/70" />
+                  <span className="text-white/60 text-sm">Health</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-white text-lg font-medium">98%</span>
+                  <span className="text-green-400 text-xs">Optimal</span>
+                </div>
+              </GlassWidgetBase>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* Mini Stats Row - 4 items */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 items-start">
               <MiniStatWidget icon={Activity} label="Requests/min" value="1.2K" glowColor="cyan" />
               <MiniStatWidget icon={Database} label="Data In" value="45 MB" glowColor="green" />
               <MiniStatWidget icon={Cpu} label="Data Out" value="128 MB" glowColor="purple" />
               <MiniStatWidget icon={Server} label="Latency" value="12ms" glowColor="amber" />
             </div>
-          </div>
+          </section>
 
-          {/* View More */}
-          <div className="flex justify-center mt-6">
+          {/* Navigation Links */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Link
-              href="/docs"
-              className="inline-flex items-center gap-2 px-6 py-2 bg-transparent text-white/70 hover:bg-white/10 hover:text-white rounded-xl transition-all"
+              href="/"
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-cyan-500/80 via-blue-500/80 to-purple-500/80 backdrop-blur-xl border border-white/30 text-white text-sm rounded-xl hover:scale-105 active:scale-95 transition-all shadow-[0_4px_20px_rgba(59,130,246,0.4)]"
             >
-              View all widgets
+              Go to Dashboard
               <ArrowRight className="w-4 h-4" />
             </Link>
+            <Link
+              href="/docs"
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-transparent backdrop-blur-sm border border-white/30 text-white/70 text-sm rounded-xl hover:bg-white/10 hover:text-white hover:border-white/50 transition-all"
+            >
+              <BookOpen className="w-4 h-4" />
+              View Docs
+            </Link>
           </div>
-        </section>
+        </div>
       </div>
     </div>
   )
