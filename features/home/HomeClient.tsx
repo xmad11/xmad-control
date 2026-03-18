@@ -36,7 +36,7 @@ import { useAiDockController } from "@/hooks/useAiDockController"
 const CONTENT_BOTTOM_PADDING = WIDGET_LAYOUT.BOTTOM_PADDING // "pb-28"
 
 /** Top padding for content area to avoid header overlap */
-const CONTENT_TOP_PADDING = "pt-16"
+const CONTENT_TOP_PADDING = "pt-14"
 
 /** Animation durations from tokens */
 const ANIMATION = {
