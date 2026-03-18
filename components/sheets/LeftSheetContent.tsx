@@ -12,7 +12,6 @@ import {
   Brain,
   Cloud,
   Database,
-  HardDrive,
   Home,
   LayoutDashboard,
   MessageSquare,
@@ -52,9 +51,9 @@ export function LeftSheetContent({ onNavigate }: LeftSheetContentProps) {
       {/* Header */}
       <div className="border-b border-white/10 p-4 backdrop-blur-sm">
         <div className="flex items-center gap-3">
-          {/* Server Icon */}
+          {/* LayoutDashboard Icon */}
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--widget-cyan)]/20 border border-[var(--widget-cyan)]/30">
-            <HardDrive className="h-5 w-5 text-[var(--widget-cyan)]" />
+            <LayoutDashboard className="h-5 w-5 text-[var(--widget-cyan)]" />
           </div>
           <div>
             <p className="font-semibold text-white">XMAD</p>
