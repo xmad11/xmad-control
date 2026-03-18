@@ -1,6 +1,7 @@
 /* ══════════════════════════════════════════════════════════════════════════════════
    HOME CLIENT - XMAD Control Dashboard
    AI Dock State Machine + Glass Liquid Tabs + Unified Sheets
+   Header is now in layout (AppHeader) - this only renders content + sheets
    ══════════════════════════════════════════════════════════════════════════════════ */
 
 "use client"
@@ -18,14 +19,14 @@ import { aiDockTokens } from "@/design/tokens/ai-dock.tokens"
 import { SurfaceManager } from "@/runtime/SurfaceManager"
 import { DashboardDataContext, useSurfaceController } from "@/runtime/useSurfaceController"
 import { AnimatePresence, motion } from "framer-motion"
-import { Menu, MessageSquare, Mic, MicOff } from "lucide-react"
+import { MessageSquare, Mic, MicOff } from "lucide-react"
 import { useEffect } from "react"
 
 import { MiniWaveIndicator } from "@/components/ai-dock/MiniWaveIndicator"
-import { ErrorBoundary, SurfaceErrorBoundary } from "@/components/error-boundary"
+import { SurfaceErrorBoundary } from "@/components/error-boundary"
+import { useSheetContext } from "@/context/SheetContext"
 import { BackgroundBlobs } from "@/features/dashboard-ui/BackgroundBlobs"
 import { useAiDockController } from "@/hooks/useAiDockController"
-import { useSheetManager } from "@/hooks/useSheetManager"
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CONSTANTS FROM TOKENS
@@ -90,47 +91,6 @@ function VoiceToast({ show, message, type }: VoiceToastProps) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// HEADER COMPONENT - Glassy texture
-// ═══════════════════════════════════════════════════════════════════════════════
-
-interface HeaderProps {
-  onLogoClick: () => void
-  onMenuClick: () => void
-}
-
-function Header({ onLogoClick, onMenuClick }: HeaderProps) {
-  return (
-    <header className="fixed top-0 left-0 right-0 z-30 px-4 py-3">
-      <div className="flex items-center justify-between max-w-screen-xl mx-auto">
-        {/* Left - XMAD Logo (opens left sheet) */}
-        <button
-          type="button"
-          onClick={onLogoClick}
-          className="flex items-center gap-2 p-2 rounded-xl backdrop-blur-xl border border-white/15 transition-all hover:scale-[1.02] glass-header-button"
-          aria-label="Open navigation"
-        >
-          {/* XMAD Logo Icon - Glassy gradient */}
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white bg-gradient-cyan-purple glass-logo-icon">
-            X
-          </div>
-          <span className="text-white font-bold text-sm hidden sm:inline">XMAD</span>
-        </button>
-
-        {/* Right - Menu Button (opens right sheet) */}
-        <button
-          type="button"
-          onClick={onMenuClick}
-          className="p-2.5 rounded-xl backdrop-blur-xl border border-white/15 transition-all hover:scale-[1.02] glass-header-button"
-          aria-label="Open settings"
-        >
-          <Menu className="h-5 w-5 text-white" />
-        </button>
-      </div>
-    </header>
-  )
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -158,8 +118,8 @@ export function HomeClient() {
     ariaProps,
   } = useAiDockController()
 
-  // Sheet Manager - unified state for all sheet directions
-  const { activeSheet, openSheet, closeSheet, isSheetOpen } = useSheetManager()
+  // Sheet Context - global sheet state (shared with AppHeader in layout)
+  const { activeSheet, openSheet, closeSheet, isSheetOpen } = useSheetContext()
 
   // Wrap surface change to reset collapse timer
   const handleTabChange = (value: string) => {
@@ -188,11 +148,6 @@ export function HomeClient() {
           BACKGROUND
           ════════════════════════════════════════════════════════════════════════ */}
       <BackgroundBlobs />
-
-      {/* ════════════════════════════════════════════════════════════════════════
-          HEADER - XMAD Logo (left) + Menu (right)
-          ════════════════════════════════════════════════════════════════════════ */}
-      <Header onLogoClick={() => openSheet("left")} onMenuClick={() => openSheet("right")} />
 
       {/* ════════════════════════════════════════════════════════════════════════
           GLASS TABS CONTAINER
@@ -281,7 +236,7 @@ export function HomeClient() {
                 {...ariaProps}
                 className={`transition-all ease-out select-none touch-none ${
                   tabsExpanded || voiceMode ? "hidden" : "flex"
-                } relative p-3 rounded-xl backdrop-blur-xl border glass-tab-button glass-tab-button`}
+                } relative p-3 rounded-xl backdrop-blur-xl border glass-tab-button`}
               >
                 <div className="relative z-10 flex items-center justify-center">
                   {(() => {

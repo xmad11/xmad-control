@@ -1,19 +1,4 @@
 {
-  "generatedAt": "2026-03-18T13:21:09.201Z",
-  "exceptions": [
-    {
-      "id": "EX-001",
-      "component": "components/ai-dock/MiniWaveIndicator.tsx",
-      "type": "INLINE_STYLE",
-      "reason": "CSS animation properties require inline styles for dynamic keyframe values (animationName, animationDuration, animationDelay, transformOrigin)",
-      "status": "active"
-    },
-    {
-      "id": "EX-002",
-      "component": "components/ai-dock/MiniWaveIndicator.tsx",
-      "type": "HARDCODED_SPACING",
-      "reason": "Wave animation bars use fixed pixel dimensions for visual consistency across devices",
-      "status": "active"
-    }
-  ]
+  "generatedAt": "2026-03-18T15:21:22.307Z",
+  "exceptions": []
 }

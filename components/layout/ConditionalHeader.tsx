@@ -1,20 +1,11 @@
 /* ═══════════════════════════════════════════════════════════════════════════════
-   CONDITIONAL HEADER - Skips home page (has its own header in HomeClient)
-   Other pages: shows AppHeader with back button
+   CONDITIONAL HEADER - Unified header for all pages
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 "use client"
 
-import { usePathname } from "next/navigation"
 import { AppHeader } from "./Header"
 
 export function ConditionalHeader() {
-  const pathname = usePathname()
-
-  // Home page has its own header in HomeClient.tsx
-  if (pathname === "/") {
-    return null
-  }
-
   return <AppHeader />
 }

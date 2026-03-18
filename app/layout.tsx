@@ -3,6 +3,7 @@ import { ConditionalHeader } from "@/components/layout/ConditionalHeader"
 import Providers from "@/components/layout/Providers"
 import { SkipLink } from "@/components/layout/SkipLink"
 import { NavigationProvider } from "@/components/navigation/NavigationProvider"
+import { SheetProvider } from "@/context/SheetContext"
 import type { Metadata, Viewport } from "next"
 import { Toaster } from "sonner"
 
@@ -166,16 +167,19 @@ export default function RootLayout({
 
         {/* Global Providers (Theme, Language) */}
         <Providers>
-          {/* Navigation Provider (UI-only state) */}
-          <NavigationProvider>
-            {/* Header - conditionally rendered based on route */}
-            <ConditionalHeader />
+          {/* Sheet Provider - Global sheet state for header + pages */}
+          <SheetProvider>
+            {/* Navigation Provider (UI-only state) */}
+            <NavigationProvider>
+              {/* Header - conditionally rendered based on route */}
+              <ConditionalHeader />
 
-            {/* Page content */}
-            <main id="main-content" className="w-full pt-[var(--header-total-height)]">
-              {children}
-            </main>
-          </NavigationProvider>
+              {/* Page content */}
+              <main id="main-content" className="w-full pt-[var(--header-total-height)]">
+                {children}
+              </main>
+            </NavigationProvider>
+          </SheetProvider>
         </Providers>
 
         <Toaster
