@@ -331,23 +331,23 @@ export function HomeClient() {
           UNIFIED SHEETS - All 4 directions using GlassSheet
           ════════════════════════════════════════════════════════════════════════ */}
 
-      {/* LEFT SHEET - Navigation */}
+      {/* LEFT SHEET - Navigation (60% width) */}
       <GlassSheet open={isSheetOpen("left")} onOpenChange={(open) => !open && closeSheet()}>
-        <GlassSheetContent side="left" className="w-72 sm:max-w-sm p-0">
+        <GlassSheetContent side="left" className="w-[60vw] max-w-md p-0">
           <LeftSheetContent />
         </GlassSheetContent>
       </GlassSheet>
 
-      {/* RIGHT SHEET - Settings */}
+      {/* RIGHT SHEET - Settings (60% width) */}
       <GlassSheet open={isSheetOpen("right")} onOpenChange={(open) => !open && closeSheet()}>
-        <GlassSheetContent side="right" className="w-80 sm:max-w-sm p-0">
+        <GlassSheetContent side="right" className="w-[60vw] max-w-md p-0">
           <RightSheetContent />
         </GlassSheetContent>
       </GlassSheet>
 
-      {/* BOTTOM SHEET - Chat */}
+      {/* BOTTOM SHEET - Chat (60% height) */}
       <GlassSheet open={isSheetOpen("bottom")} onOpenChange={(open) => !open && closeSheet()}>
-        <GlassSheetContent side="bottom" className="h-[80vh] p-0 rounded-t-2xl">
+        <GlassSheetContent side="bottom" className="h-[60vh] p-0 rounded-t-2xl">
           <GlassSheetHeader className="sr-only">
             <GlassSheetTitle>AI Chat</GlassSheetTitle>
           </GlassSheetHeader>
