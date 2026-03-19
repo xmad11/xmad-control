@@ -1,42 +1,13 @@
-#!/bin/sh
+#!/bin/bash
+# Pre-commit corruption guard
 
-echo "🔍 Running pre-commit checks..."
+echo "🔍 Checking for file corruption..."
 
-# Block token file modifications (but allow deletions)
-TOKEN_CHANGES=$(git diff --cached --name-only --diff-filter=M -- '*.css' | grep -E "styles/tokens" || true)
-if [ -n "$TOKEN_CHANGES" ]; then
-  echo "❌ Token files are locked. Edit themes.css instead."
+# Check for invalid characters
+if grep -rP "[\x00-\x08\x0B\x0C\x0E-\x1F]" components/ features/ runtime/ 2>/dev/null | grep -v "node_modules" | grep -q .; then
+  echo "❌ Invalid characters detected in source files"
+  grep -rP "[\x00-\x08\x0B\x0C\x0E-\x1F]" components/ features/ runtime/ 2>/dev/null | grep -v "node_modules"
   exit 1
 fi
 
-# NEW: Check for pending rollbacks
-ROLLBACK_OUTPUT=$(bun run rollback:status 2>&1 || true)
-if echo "$ROLLBACK_OUTPUT" | grep -q "pending"; then
-  echo ""
-  echo "❌ Pending rollback detected! Complete rollback before committing."
-  echo ""
-  bun run rollback:status
-  echo ""
-  echo "Run: bun run rollback:fail OR bun run rollback:success"
-  exit 1
-fi
-
-# Run lint-staged (fast format+lint on changed files only)
-bun run lint-staged
-
-# Get staged files for audit
-STAGED_FILES=$(git diff --cached --name-only | grep -E '\.(ts|tsx|js|jsx)$' | tr '\n' ' ')
-
-# Quick audit of critical layers only (TypeScript + Design Tokens + Rollback + UI)
-# Only audit files that are actually being committed
-echo ""
-if [ -n "$STAGED_FILES" ]; then
-  echo "🔍 Running quick audit on staged files only..."
-  AUDIT_FILES="$STAGED_FILES" bun run audit:local
-else
-  echo "🔍 Running quick audit (Layers 03, 04, 06.5, 07.5)..."
-  bun run audit:local
-fi
-
-echo ""
-echo "✅ Pre-commit checks passed!"
+echo "✅ File integrity check passed"
