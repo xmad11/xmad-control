@@ -24,9 +24,7 @@ archive/
 *.md
 !README.md
 
-# Scripts not needed for production (keep generate-sw-version.ts for build)
-scripts/
-!scripts/generate-sw-version.ts
+# Coordinator not needed for production
 coordinator/
 
 # Backup directories
