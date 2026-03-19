@@ -8,7 +8,8 @@
     "dev": "bun scripts/env-guard.ts && bun run scripts/phase1-lock.ts",
     "dev:clean": "rm -rf .next && bun run dev",
     "// BUILDING": "Separated audit from build",
-    "build": "bun --bun next build",
+    "build": "bun run scripts/generate-sw-version.ts && bun --bun next build",
+    "build:fast": "bun --bun next build",
     "build:with-audit": "bun run audit:ci && bun --bun next build",
     "start": "bun --bun next start",
     "// LINTING & FORMATTING": "Enterprise Biome configuration",
@@ -67,7 +68,12 @@
     "dashboard:update": "bun run scripts/update-dashboard.js",
     "dashboard:open": "open dashboard/index.html",
     "clean:audit": "rm -rf .audit/*.log && echo 'Audit logs cleaned'",
-    "typecheck": "tsc --noEmit --incremental false"
+    "typecheck": "tsc --noEmit --incremental false",
+    "// SAFETY LAYER": "Dev Safety - run before commits & CI",
+    "verify": "bunx tsc --noEmit && bash scripts/check-corruption.sh",
+    "verify:full": "bun run verify && bun run lint",
+    "// SAFE COMMIT": "Use instead of git commit to avoid heredoc injection",
+    "commit": "bash scripts/safe-commit.sh"
   },
   "lint-staged": {
     "*.{ts,tsx}": ["biome check --write --diagnostic-level=error", "biome format --write"]
@@ -101,6 +107,7 @@
     "lucide-react": "^0.562.0",
     "mapbox-gl": "^3.20.0",
     "next": "16.1.6",
+    "playwright": "^1.58.2",
     "postcss": "^8.5.8",
     "react": "19",
     "react-dom": "19",

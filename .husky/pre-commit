@@ -1,13 +1,17 @@
 #!/bin/bash
-# Pre-commit corruption guard
+# ═══════════════════════════════════════════════════════════════════════════════
+# PRE-COMMIT HOOK - Corruption Guard
+# Prevents commits containing invisible characters that cause TS1128 errors
+# ═══════════════════════════════════════════════════════════════════════════════
 
-echo "🔍 Checking for file corruption..."
+echo "🔍 Running pre-commit corruption guard..."
 
-# Check for invalid characters
-if grep -rP "[\x00-\x08\x0B\x0C\x0E-\x1F]" components/ features/ runtime/ 2>/dev/null | grep -v "node_modules" | grep -q .; then
-  echo "❌ Invalid characters detected in source files"
-  grep -rP "[\x00-\x08\x0B\x0C\x0E-\x1F]" components/ features/ runtime/ 2>/dev/null | grep -v "node_modules"
-  exit 1
+# Run the enhanced corruption check
+bash scripts/check-corruption.sh
+
+# Also run lint-staged for staged files
+if command -v lint-staged &> /dev/null; then
+  bun run lint-staged
 fi
 
-echo "✅ File integrity check passed"
+echo "✅ Pre-commit checks passed"
