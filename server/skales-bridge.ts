@@ -16,7 +16,6 @@
 import { type ChildProcess, spawn } from "node:child_process"
 import type { AgentTask, AgentTaskResult } from "@/types/agent-task"
 
-const RUNNER_PATH = "./skales-runner.js"
 const DEFAULT_TIMEOUT_MS = 30000
 
 interface BridgeOptions {
@@ -44,8 +43,10 @@ export async function runSkalesTask(
     let stderr = ""
     let killed = false
 
-    // Spawn isolated process
-    const proc: ChildProcess = spawn("node", [RUNNER_PATH], {
+    // Spawn isolated process - runner path resolved at runtime only
+    // Using array join to avoid Next.js static string detection
+    const runnerPath = [process.cwd(), "skales-runner.js"].join("/")
+    const proc: ChildProcess = spawn("node", [runnerPath], {
       stdio: ["pipe", "pipe", "pipe"],
       // Isolation: don't inherit environment or cwd
       env: { ...process.env, NODE_ENV: "production" },
