@@ -1,115 +1,79 @@
-/**
- * System Stats API Route
- * Returns real-time system statistics: CPU, memory, disk, uptime, load average
- * Falls back to mock data on Vercel (serverless)
- */
+// app/api/xmad/system/stats/route.ts
+// Real system stats using Node.js os module
+// Matches SystemStats type in types/surface.types.ts
 
 import { execSync } from "node:child_process"
 import os from "node:os"
 import { NextResponse } from "next/server"
 
-// Check if running on Vercel (production)
+export const runtime = "nodejs"
+export const dynamic = "force-dynamic"
+
 const isVercel = process.env.VERCEL === "1"
 
-// Mock data for Vercel environment
+// Mock data for Vercel (serverless cannot read local system)
 const MOCK_STATS = {
   cpu: 45,
-  memory: { used: 4.2, free: 3.8, total: 8, percentage: 52 },
-  disk: { used: 180, free: 320, total: 500, percentage: 36 },
+  memory: { used: 4200, total: 8192, percentage: 51 },
+  disk: { used: 180, total: 500, percentage: 36 },
   uptime: 86400,
-  loadAvg: [1.5, 1.2, 1.0],
 }
 
-interface SystemStats {
-  cpu: number
-  memory: {
-    used: number
-    free: number
-    total: number
-    percentage: number
-  }
-  disk: {
-    used: number
-    free: number
-    total: number
-    percentage: number
-  }
-  uptime: number
-  loadAvg: number[]
-}
-
-function getDiskUsage(): { used: number; free: number; total: number; percentage: number } {
+function getCPUPercent(): number {
   try {
-    // Run df -k / to get disk usage in KB
-    const output = execSync("df -k / 2>/dev/null | tail -1", { encoding: "utf-8" }).trim()
-    const parts = output.split(/\s+/)
+    const result = execSync("top -l 1 -n 0 | grep 'CPU usage'", {
+      timeout: 3000,
+      encoding: "utf8",
+    })
+    const match = result.match(/(\d+\.\d+)%\s+user/)
+    if (match) return Number.parseFloat(match[1])
+  } catch {}
+  return 0
+}
 
-    // df output: Filesystem, 1K-blocks, Used, Available, Capacity%, Mounted on
-    const totalKB = Number.parseInt(parts[1], 10)
-    const usedKB = Number.parseInt(parts[2], 10)
-    const freeKB = Number.parseInt(parts[3], 10)
-
-    // Convert to GB
-    const kbToGb = 1024 * 1024
+function getDiskStats() {
+  try {
+    const result = execSync("df -k / | tail -1", { timeout: 3000, encoding: "utf8" })
+    const parts = result.trim().split(/\s+/)
+    const totalKB = Number.parseInt(parts[1])
+    const usedKB = Number.parseInt(parts[2])
     return {
-      used: Number((usedKB / kbToGb).toFixed(2)),
-      free: Number((freeKB / kbToGb).toFixed(2)),
-      total: Number((totalKB / kbToGb).toFixed(2)),
-      percentage: Number(((usedKB / totalKB) * 100).toFixed(1)),
+      used: Number.parseFloat((usedKB / 1024 / 1024).toFixed(1)),
+      total: Number.parseFloat((totalKB / 1024 / 1024).toFixed(1)),
+      percentage: Math.round((usedKB / totalKB) * 100),
     }
   } catch {
-    return { used: 0, free: 0, total: 0, percentage: 0 }
+    return { used: 0, total: 0, percentage: 0 }
   }
 }
 
-function getCpuUsage(): number {
-  const cpus = os.cpus()
-  let totalIdle = 0
-  let totalTick = 0
-
-  for (const cpu of cpus) {
-    for (const type in cpu.times) {
-      totalTick += cpu.times[type as keyof typeof cpu.times]
-    }
-    totalIdle += cpu.times.idle
-  }
-
-  const totalUsage = totalTick - totalIdle
-  return Number(((totalUsage / totalTick) * 100).toFixed(1))
-}
-
-export async function GET(): Promise<NextResponse<SystemStats>> {
-  // Return mock data on Vercel, real data locally
+export async function GET() {
+  // Return mock on Vercel
   if (isVercel) {
     return NextResponse.json(MOCK_STATS, {
-      headers: {
-        "Cache-Control": "no-store, max-age=1",
-      },
+      headers: { "Cache-Control": "no-store" },
     })
   }
 
-  const totalMemory = os.totalmem()
-  const freeMemory = os.freemem()
-  const usedMemory = totalMemory - freeMemory
+  const totalMem = os.totalmem()
+  const freeMem = os.freemem()
+  const usedMem = totalMem - freeMem
 
-  const stats: SystemStats = {
-    cpu: getCpuUsage(),
-    memory: {
-      used: Number((usedMemory / (1024 * 1024 * 1024)).toFixed(2)), // GB
-      free: Number((freeMemory / (1024 * 1024 * 1024)).toFixed(2)), // GB
-      total: 8, // This machine always has 8GB
-      percentage: Number(((usedMemory / totalMemory) * 100).toFixed(1)),
-    },
-    disk: getDiskUsage(),
-    uptime: Math.floor(os.uptime()),
-    loadAvg: os.loadavg().map((v) => Number(v.toFixed(2))),
-  }
+  const totalMB = Math.round(totalMem / 1024 / 1024)
+  const usedMB = Math.round(usedMem / 1024 / 1024)
+  const disk = getDiskStats()
 
-  return NextResponse.json(stats, {
-    headers: {
-      "Cache-Control": "no-store, max-age=1",
+  return NextResponse.json(
+    {
+      cpu: getCPUPercent(),
+      memory: {
+        used: usedMB,
+        total: totalMB,
+        percentage: Math.round((usedMem / totalMem) * 100),
+      },
+      disk,
+      uptime: Math.round(os.uptime()),
     },
-  })
+    { headers: { "Cache-Control": "no-store" } }
+  )
 }
-// redeploy trigger
-// redeploy trigger 1773780363
