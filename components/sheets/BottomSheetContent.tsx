@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════════════════════════
-   BOTTOM SHEET CONTENT - AI Chat with glassy texture
+   BOTTOM SHEET CONTENT - AI Chat with glassy texture and voice support
    ══════════════════════════════════════════════════════════════════════════════════ */
 
 "use client"
@@ -7,9 +7,10 @@
 import { GlassButton } from "@/components/glass/glass-button"
 import { GlassInput } from "@/components/glass/glass-input"
 import { aiDockTokens } from "@/design/tokens/ai-dock.tokens"
+import { useVoiceChat } from "@/hooks/useVoiceChat"
 import { cn } from "@/lib/utils"
 import DOMPurify from "dompurify"
-import { ArrowUpRight, MessageSquare, Mic, MicOff } from "lucide-react"
+import { ArrowUpRight, MessageSquare, Mic, MicOff, Volume2, VolumeX } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
@@ -83,9 +84,31 @@ export function BottomSheetContent() {
     },
   ])
   const [inputValue, setInputValue] = useState("")
-  const [isMicEnabled, setIsMicEnabled] = useState(false)
-  const [isListening, setIsListening] = useState(false)
+  const [ttsEnabled, setTtsEnabled] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Voice chat hook - connects to STT/TTS APIs
+  const {
+    isListening,
+    isRecording,
+    isSpeaking,
+    isSupported: voiceSupported,
+    startRecording,
+    stopRecording,
+    speak,
+    stopSpeaking,
+  } = useVoiceChat({
+    onTranscript: (text) => {
+      setInputValue(text)
+      // Auto-send after transcription
+      if (text.trim()) {
+        handleSendMessage(text)
+      }
+    },
+    onError: (error) => {
+      console.error("[VoiceChat]", error)
+    },
+  })
 
   // Auto-scroll
   // biome-ignore lint/correctness/useExhaustiveDependencies: only messages.length
@@ -94,45 +117,57 @@ export function BottomSheetContent() {
   }, [messages.length])
 
   // Send message
-  const handleSendMessage = useCallback(async (content: string) => {
-    if (!content.trim()) return
+  const handleSendMessage = useCallback(
+    async (content: string) => {
+      if (!content.trim()) return
 
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(),
-      role: "user",
-      content: content.trim(),
-      timestamp: new Date(),
-    }
-
-    setMessages((prev) => [...prev, userMessage])
-    setInputValue("")
-
-    try {
-      const response = await fetch("/api/xmad/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: content.trim() }),
-      })
-
-      const data = await response.json()
-
-      const aiResponse: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: data.success ? data.message : data.error || "AI service temporarily unavailable.",
+      const userMessage: ChatMessage = {
+        id: Date.now().toString(),
+        role: "user",
+        content: content.trim(),
         timestamp: new Date(),
       }
-      setMessages((prev) => [...prev, aiResponse])
-    } catch {
-      const aiResponse: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "AI service temporarily unavailable. Please try again.",
-        timestamp: new Date(),
+
+      setMessages((prev) => [...prev, userMessage])
+      setInputValue("")
+
+      try {
+        const response = await fetch("/api/xmad/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: content.trim() }),
+        })
+
+        const data = await response.json()
+
+        const aiContent = data.success
+          ? data.message
+          : data.error || "AI service temporarily unavailable."
+
+        const aiResponse: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: aiContent,
+          timestamp: new Date(),
+        }
+        setMessages((prev) => [...prev, aiResponse])
+
+        // Speak AI response if TTS is enabled
+        if (ttsEnabled && data.success) {
+          speak(aiContent)
+        }
+      } catch {
+        const aiResponse: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: "AI service temporarily unavailable. Please try again.",
+          timestamp: new Date(),
+        }
+        setMessages((prev) => [...prev, aiResponse])
       }
-      setMessages((prev) => [...prev, aiResponse])
-    }
-  }, [])
+    },
+    [ttsEnabled, speak]
+  )
 
   // Key press
   const handleKeyDown = useCallback(
@@ -145,11 +180,22 @@ export function BottomSheetContent() {
     [inputValue, handleSendMessage]
   )
 
-  // Toggle mic
+  // Toggle mic - start/stop recording
   const handleMicToggle = useCallback(() => {
-    setIsMicEnabled((prev) => !prev)
-    setIsListening((prev) => !prev)
-  }, [])
+    if (isRecording) {
+      stopRecording()
+    } else {
+      startRecording()
+    }
+  }, [isRecording, startRecording, stopRecording])
+
+  // Toggle TTS
+  const handleTtsToggle = useCallback(() => {
+    if (isSpeaking) {
+      stopSpeaking()
+    }
+    setTtsEnabled((prev) => !prev)
+  }, [isSpeaking, stopSpeaking])
 
   return (
     <div className="flex h-full flex-col bg-transparent">
@@ -195,33 +241,74 @@ export function BottomSheetContent() {
 
       {/* Control Bar */}
       <div className="p-4 border-t border-white/10 backdrop-blur-xl glass-inset-shadow">
+        {/* Voice Controls */}
         <div className="flex items-center justify-center gap-4 mb-3">
+          {/* Mic Button - STT */}
+          {voiceSupported && (
+            <button
+              type="button"
+              onClick={handleMicToggle}
+              disabled={isSpeaking}
+              className={cn(
+                "p-3 rounded-full transition-all backdrop-blur-sm border",
+                isRecording
+                  ? "bg-red-500/30 border-red-500/50 text-red-400 animate-pulse"
+                  : isListening
+                    ? "bg-cyan-glow/30 border-cyan-glow/50 text-cyan-glow cyan-glow-box"
+                    : "bg-white/10 border-white/20 text-white/60 hover:bg-white/15",
+                isSpeaking && "opacity-50 cursor-not-allowed"
+              )}
+              aria-label={isRecording ? "Stop recording" : "Start recording"}
+            >
+              {isRecording ? (
+                <div className="h-5 w-5 rounded-full bg-red-400" />
+              ) : (
+                <Mic className="h-5 w-5" />
+              )}
+            </button>
+          )}
+
+          {/* TTS Toggle */}
           <button
             type="button"
-            onClick={handleMicToggle}
+            onClick={handleTtsToggle}
             className={cn(
               "p-3 rounded-full transition-all backdrop-blur-sm border",
-              isMicEnabled
-                ? "bg-cyan-glow/30 border-cyan-glow/50 text-cyan-glow cyan-glow-box"
-                : "bg-white/10 border-white/20 text-white/60 hover:bg-white/15"
+              ttsEnabled
+                ? "bg-cyan-glow/20 border-cyan-glow/40 text-cyan-glow"
+                : "bg-white/10 border-white/20 text-white/40 hover:bg-white/15"
             )}
+            aria-label={ttsEnabled ? "Disable voice responses" : "Enable voice responses"}
           >
-            {isMicEnabled ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
+            {ttsEnabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
           </button>
+
+          {/* Speaking indicator */}
+          {isSpeaking && (
+            <button
+              type="button"
+              onClick={stopSpeaking}
+              className="p-3 rounded-full bg-cyan-glow/30 border-cyan-glow/50 text-cyan-glow animate-pulse"
+              aria-label="Stop speaking"
+            >
+              <Volume2 className="h-5 w-5" />
+            </button>
+          )}
         </div>
 
         {/* Text Input */}
         <div className="flex gap-2">
           <GlassInput
-            placeholder="Type a message..."
+            placeholder={isRecording ? "Listening..." : "Type a message..."}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
+            disabled={isRecording}
             className="flex-1"
           />
           <GlassButton
             onClick={() => handleSendMessage(inputValue)}
-            disabled={!inputValue.trim()}
+            disabled={!inputValue.trim() || isRecording}
             className="px-3"
           >
             <ArrowUpRight className="h-4 w-4" />
