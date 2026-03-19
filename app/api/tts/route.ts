@@ -31,10 +31,10 @@ interface TTSErrorResponse {
 
 /**
  * Get ElevenLabs API key from Keychain via environment
- * The key is loaded by scripts/load-secrets.sh
+ * The key is loaded by scripts/load-secrets.sh from Keychain service: elevenlabs/xmad
  */
 function getElevenLabsApiKey(): string | null {
-  // Check environment first (loaded by load-secrets.sh)
+  // Check environment first (loaded by load-secrets.sh from Keychain)
   const envKey = process.env.ELEVENLABS_API_KEY
   if (envKey) return envKey
 

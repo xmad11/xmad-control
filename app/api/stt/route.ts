@@ -23,14 +23,13 @@ interface STTResponse {
 
 /**
  * Get Groq API key from Keychain via environment
- * The key is loaded by scripts/load-secrets.sh
+ * The key is loaded by scripts/load-secrets.sh from Keychain service: SSOT_AI_GROQ
  */
 function getGroqApiKey(): string | null {
-  // Check environment first (loaded by load-secrets.sh)
+  // Check environment first (loaded by load-secrets.sh from Keychain)
   const envKey = process.env.GROQ_API_KEY
   if (envKey) return envKey
 
-  // Fallback to direct keychain read (macOS only)
   return null
 }
 
