@@ -8,7 +8,7 @@ export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
 const ZAI_BASE = "https://api.z.ai/api/anthropic/v1"
-const MODEL = "zai/glm-4.7"
+const MODEL = "glm-4.7"
 
 function getZaiKey(): string {
   return process.env.ZAI_API_KEY || process.env.SSOT_ZAI_KEY || ""
