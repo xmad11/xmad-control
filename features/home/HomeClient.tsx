@@ -106,7 +106,12 @@ export function HomeClient() {
     DashboardDataContext: DataContext,
   } = useSurfaceController()
 
+  // Sheet Context - global sheet state + voice state (shared with BottomSheetContent)
+  const { activeSheet, openSheet, closeSheet, isSheetOpen, startVoice, stopVoice } =
+    useSheetContext()
+
   // AI Dock Controller - owns tabsExpanded state and all dock interactions
+  // Sync voice state with SheetContext
   const {
     tabsExpanded,
     voiceMode,
@@ -117,10 +122,10 @@ export function HomeClient() {
     holdHandlers,
     keyboardHandlers,
     ariaProps,
-  } = useAiDockController()
-
-  // Sheet Context - global sheet state (shared with AppHeader in layout)
-  const { activeSheet, openSheet, closeSheet, isSheetOpen } = useSheetContext()
+  } = useAiDockController({
+    onVoiceStart: startVoice,
+    onVoiceStop: stopVoice,
+  })
 
   // Wrap surface change to coordinate with dock controller
   const handleTabChange = (value: string) => {
