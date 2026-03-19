@@ -23,7 +23,6 @@ export interface WidgetCarouselProps {
   }
 }
 
-// biome-ignore lint/correctness/noUnusedVariables: gap is used in gapPx calculation
 const WIDGET_GAP_SIZES = {
   none: 0,
   xs: 8,
@@ -38,6 +37,10 @@ export function WidgetCarousel({
   itemsPerView = { base: 1, sm: 2, lg: 3, xl: 4 },
 }: WidgetCarouselProps) {
   const [currentItemsPerView, setCurrentItemsPerView] = useState(itemsPerView.base ?? 1)
+  // Generate stable keys for carousel items
+  const [itemKeys] = useState(() =>
+    children.map((_, idx) => `carousel-${idx}-${Math.random().toString(36).slice(2, 9)}`)
+  )
 
   // Embla carousel with proper snap behavior
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -108,7 +111,7 @@ export function WidgetCarousel({
         <div className={cn("flex", gapClass)}>
           {React.Children.map(children, (child, index) => (
             <div
-              key={`carousel-item-${index}`}
+              key={itemKeys[index]}
               className="flex-shrink-0 flex-grow-0 min-w-0"
               style={{ width: itemWidthStyle }}
             >

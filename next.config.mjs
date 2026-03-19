@@ -16,10 +16,21 @@ const nextConfig = {
     root: path.resolve(__dirname),
   },
 
-  // Disable features that cause issues on mobile Safari
+  // Memory optimization for 8GB machines
   experimental: {
     viewTransition: false, // Prevents AbortError on mobile Safari
+    optimizePackageImports: [
+      "lucide-react",
+      "framer-motion",
+      "@radix-ui/react-tabs",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-slot",
+      "embla-carousel-react",
+    ],
   },
+
+  // Disable heavy source maps in production to save memory
+  productionBrowserSourceMaps: false,
 
   // PPR - Disabled cacheComponents due to refresh loops in development
   // cacheComponents: true,

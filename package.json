@@ -9,6 +9,7 @@
     "dev:clean": "rm -rf .next && bun run dev",
     "// BUILDING": "Separated audit from build",
     "build": "bun run scripts/generate-sw-version.ts && bun --bun next build",
+    "build:safe": "bash scripts/dev-safe-build.sh",
     "build:fast": "bun --bun next build",
     "build:with-audit": "bun run audit:ci && bun --bun next build",
     "start": "bun --bun next start",
