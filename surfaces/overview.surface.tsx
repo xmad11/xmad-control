@@ -13,25 +13,77 @@ import {
   MultiProgressWidget,
   ServerStatusCard,
 } from "@/components/widgets/base-widget"
+import { type ProcessInfo, TopProcessesCarousel } from "@/components/widgets/top-processes-widget"
 import { useDashboardData } from "@/runtime/useSurfaceController"
 import { Activity, Cpu, Database, Server, Shield, Wifi } from "lucide-react"
+import * as React from "react"
 
 export function OverviewSurface() {
   const { stats, services } = useDashboardData()
+  const [processesData, setProcessesData] = React.useState<{
+    memory: ProcessInfo[]
+    cpu: ProcessInfo[]
+  }>({ memory: [], cpu: [] })
+
+  // Fetch processes on mount and every 5 seconds
+  React.useEffect(() => {
+    const fetchProcesses = async () => {
+      try {
+        const res = await fetch("/api/xmad/system/processes")
+        if (res.ok) {
+          const data = await res.json()
+          setProcessesData({
+            memory: data.memory || [],
+            cpu: data.cpu || [],
+          })
+        }
+      } catch (err) {
+        console.error("Failed to fetch processes:", err)
+      }
+    }
+
+    fetchProcesses()
+    const interval = setInterval(fetchProcesses, 5000)
+    return () => clearInterval(interval)
+  }, [])
+
+  // Prepare gauge data with toggle values
+  const ramUsedGB = (stats?.memory.used ?? 4200) / 1024
+  const diskUsedTB = Number(((stats?.disk.used ?? 14) / 1024).toFixed(2))
+
+  const gaugeData = [
+    {
+      label: "RAM",
+      value: stats?.memory.percentage ?? 52,
+      unit: "%",
+      color: "green" as const,
+      actualValue: ramUsedGB,
+      actualUnit: "GB",
+    },
+    {
+      label: "CPU",
+      value: stats?.cpu ?? 45,
+      unit: "%",
+      color: "blue" as const,
+      actualValue: stats?.cpu ?? 45,
+      actualUnit: "%",
+    },
+    {
+      label: "Disk",
+      value: stats?.disk.percentage ?? 36,
+      unit: "%",
+      color: "cyan" as const,
+      actualValue: diskUsedTB,
+      actualUnit: "TB",
+    },
+  ]
 
   return (
     <>
-      {/* Row 1 - System Gauges (no titles) */}
+      {/* Row 1 - System Gauges (clickable to toggle %/actual) */}
       <div className="mb-4">
         <WidgetCarousel gap="sm" itemsPerView={{ base: 1, sm: 1, lg: 2, xl: 3 }}>
-          <MultiGaugeWidget
-            gauges={[
-              { label: "RAM", value: stats?.memory.percentage ?? 52, unit: "%", color: "green" },
-              { label: "CPU", value: stats?.cpu ?? 45, unit: "%", color: "blue" },
-              { label: "Disk", value: stats?.disk.percentage ?? 36, unit: "%", color: "cyan" },
-            ]}
-            glowColor="green"
-          />
+          <MultiGaugeWidget gauges={gaugeData} glowColor="green" />
           <MultiProgressWidget
             items={[
               {
@@ -44,8 +96,8 @@ export function OverviewSurface() {
               { label: "CPU Load", value: stats?.cpu ?? 45, unit: "%", color: "blue" },
               {
                 label: "Disk",
-                value: stats?.disk.used ?? 180,
-                max: stats?.disk.total ?? 500,
+                value: stats?.disk.used ?? 14,
+                max: stats?.disk.total ?? 931,
                 unit: "GB",
                 color: "cyan",
               },
@@ -70,7 +122,15 @@ export function OverviewSurface() {
         </WidgetCarousel>
       </div>
 
-      {/* Row 2 - Server Status */}
+      {/* Row 2 - Top Processes (scroll to toggle Memory/CPU) */}
+      <div className="mb-4">
+        <TopProcessesCarousel
+          memoryProcesses={processesData.memory}
+          cpuProcesses={processesData.cpu}
+        />
+      </div>
+
+      {/* Row 3 - Server Status */}
       <div className="mb-4">
         <WidgetCarousel gap="sm" itemsPerView={{ base: 1, sm: 2, lg: 3, xl: 4 }}>
           <ServerStatusCard
@@ -113,55 +173,12 @@ export function OverviewSurface() {
         </WidgetCarousel>
       </div>
 
-      {/* Row 3 - Mini Stats */}
+      {/* Row 4 - Mini Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <MiniStatWidget icon={Activity} label="Requests/min" value="1.2K" glowColor="cyan" />
         <MiniStatWidget icon={Database} label="Data In" value="45 MB" glowColor="green" />
         <MiniStatWidget icon={Cpu} label="Data Out" value="128 MB" glowColor="purple" />
         <MiniStatWidget icon={Server} label="Latency" value="12ms" glowColor="amber" />
-      </div>
-
-      {/* Row 4 - Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {[
-          {
-            symbol: "CPU",
-            name: "Processor Load",
-            price: stats?.cpu ?? 45,
-            change: 2.34,
-            glow: "cyan" as const,
-          },
-          {
-            symbol: "RAM",
-            name: "Memory Usage",
-            price: stats?.memory.percentage ?? 52,
-            change: -1.5,
-            glow: "purple" as const,
-          },
-          {
-            symbol: "DISK",
-            name: "Storage Used",
-            price: stats?.disk.percentage ?? 36,
-            change: 0.3,
-            glow: "green" as const,
-          },
-        ].map((stock) => (
-          <GlassWidgetBase key={stock.symbol} size="md" width="full" glowColor={stock.glow}>
-            <div className="flex items-center justify-between mb-2">
-              <div>
-                <div className="text-white font-bold">{stock.symbol}</div>
-                <div className="text-white/40 text-xs">{stock.name}</div>
-              </div>
-              <div className="text-right">
-                <div className="text-white text-lg font-medium">{stock.price.toFixed(1)}%</div>
-                <div className={`text-xs ${stock.change >= 0 ? "text-green-400" : "text-red-400"}`}>
-                  {stock.change >= 0 ? "+" : ""}
-                  {stock.change.toFixed(2)}%
-                </div>
-              </div>
-            </div>
-          </GlassWidgetBase>
-        ))}
       </div>
     </>
   )
