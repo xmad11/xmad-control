@@ -13,7 +13,7 @@ import {
   MultiProgressWidget,
   ServerStatusCard,
 } from "@/components/widgets/base-widget"
-import { type ProcessInfo, TopProcessesCarousel } from "@/components/widgets/top-processes-widget"
+import { type ProcessInfo, TopProcessesWidget } from "@/components/widgets/top-processes-widget"
 import { useDashboardData } from "@/runtime/useSurfaceController"
 import { Activity, Cpu, Database, Server, Shield, Wifi } from "lucide-react"
 import * as React from "react"
@@ -37,8 +37,8 @@ export function OverviewSurface() {
             cpu: data.cpu || [],
           })
         }
-      } catch (err) {
-        console.error("Failed to fetch processes:", err)
+      } catch {
+        // Silently fail - use existing data
       }
     }
 
@@ -105,16 +105,13 @@ export function OverviewSurface() {
             glowColor="green"
           />
           <GlassWidgetBase size="md" width="md" glowColor="blue">
+            <div className="text-white/60 text-sm mb-3">System Trend</div>
             <div className="grid grid-cols-3 gap-2">
-              {[
-                { label: "1h", high: 52, low: 38 },
-                { label: "2h", high: 48, low: 35 },
-                { label: "3h", high: 55, low: 40 },
-              ].map((f) => (
-                <div key={f.label} className="text-center p-2 rounded-lg bg-white/5">
-                  <div className="text-xs text-white/50 mb-1">{f.label}</div>
-                  <div className="text-white font-medium">{f.high}%</div>
-                  <div className="text-xs text-white/40">{f.low}%</div>
+              {["1h", "2h", "3h"].map((label) => (
+                <div key={label} className="text-center p-2 rounded-lg bg-white/5">
+                  <div className="text-xs text-white/50 mb-1">{label}</div>
+                  <div className="text-white font-medium">—</div>
+                  <div className="text-xs text-white/40">—</div>
                 </div>
               ))}
             </div>
@@ -124,10 +121,10 @@ export function OverviewSurface() {
 
       {/* Row 2 - Top Processes (scroll to toggle Memory/CPU) */}
       <div className="mb-4">
-        <TopProcessesCarousel
-          memoryProcesses={processesData.memory}
-          cpuProcesses={processesData.cpu}
-        />
+        <WidgetCarousel gap="sm" itemsPerView={{ base: 1, sm: 1, lg: 2 }}>
+          <TopProcessesWidget type="memory" processes={processesData.memory} />
+          <TopProcessesWidget type="cpu" processes={processesData.cpu} />
+        </WidgetCarousel>
       </div>
 
       {/* Row 3 - Server Status */}
