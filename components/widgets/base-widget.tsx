@@ -89,6 +89,8 @@ interface GaugeItem {
   value: number
   unit?: string
   color?: GlowColor
+  actualValue?: number
+  actualUnit?: string
 }
 
 interface MultiGaugeWidgetProps {
@@ -450,15 +452,37 @@ export function GaugeWidget({
   unit = "%",
   color = "cyan",
   className = "",
-}: GaugeWidgetProps) {
+  actualValue,
+  actualUnit,
+  onClick,
+}: GaugeWidgetProps & {
+  actualValue?: number
+  actualUnit?: string
+  onClick?: () => void
+}) {
+  const [showActual, setShowActual] = React.useState(false)
   const circumference = 2 * Math.PI * 40
   const targetOffset = circumference - (value / 100) * circumference
 
+  const handleClick = () => {
+    setShowActual(!showActual)
+    onClick?.()
+  }
+
+  const displayValue = showActual && actualValue !== undefined ? actualValue : value
+  const displayUnit = showActual && actualUnit ? actualUnit : unit
+
   return (
-    <div className={`flex flex-col items-center ${className}`}>
+    <div
+      className={`flex flex-col items-center cursor-pointer select-none ${className}`}
+      onClick={handleClick}
+      onKeyDown={(e) => e.key === "Enter" && handleClick()}
+      role="button"
+      tabIndex={0}
+    >
       <div className="relative">
         <svg className="w-24 h-24 transform -rotate-90" role="img" aria-label={label}>
-          <title>{label}</title>
+          <title>{label} - Click to toggle view</title>
           <circle
             cx="48"
             cy="48"
@@ -482,25 +506,25 @@ export function GaugeWidget({
             className={gaugeColors[color]}
           />
         </svg>
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
           <motion.span
             className="text-white font-bold"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1, scale: [0.5, 1.1, 1] }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            key={displayValue}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
           >
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 1.2 }}
-            >
-              {value}
-            </motion.span>
-            {unit}
+            {typeof displayValue === "number"
+              ? displayValue.toFixed(displayValue % 1 === 0 ? 0 : 1)
+              : displayValue}
+            <span className="text-white/40 text-sm">{displayUnit}</span>
           </motion.span>
         </div>
       </div>
       <span className="text-white/60 text-xs mt-2">{label}</span>
+      {actualValue !== undefined && (
+        <span className="text-white/30 text-[10px] mt-0.5">click to toggle</span>
+      )}
     </div>
   )
 }
@@ -521,7 +545,12 @@ export function MultiGaugeWidget({
       {title && <div className="text-sm text-white/60 mb-4 uppercase tracking-wider">{title}</div>}
       <div className="flex justify-around">
         {gauges.map((gauge) => (
-          <GaugeWidget key={gauge.label} {...gauge} />
+          <GaugeWidget
+            key={gauge.label}
+            {...gauge}
+            actualValue={gauge.actualValue}
+            actualUnit={gauge.actualUnit}
+          />
         ))}
       </div>
     </GlassWidgetBase>

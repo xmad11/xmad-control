@@ -1,160 +1,133 @@
-/* ═══════════════════════════════════════════════════════════════════════════════
-   CHAT API ROUTE — XMAD Dashboard
-   Handles AI chat messages through OpenClaw gateway
-   ═══════════════════════════════════════════════════════════════════════════════ */
+// app/api/xmad/chat/route.ts
+// Calls z.ai GLM-4.7 directly via Anthropic-compatible API
+// OpenClaw is WhatsApp-only — this is the dashboard chat endpoint
 
 import { type NextRequest, NextResponse } from "next/server"
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════════════════════════════════════════
+export const runtime = "nodejs"
+export const dynamic = "force-dynamic"
 
-const isVercel = process.env.VERCEL === "1"
-const OPENCLAW_GATEWAY = process.env.OPENCLAW_GATEWAY_URL || "http://127.0.0.1:18789"
+const ZAI_BASE = "https://api.z.ai/api/anthropic/v1"
+const MODEL = "glm-4.7"
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// TYPES
-// ═══════════════════════════════════════════════════════════════════════════════
+function getZaiKey(): string {
+  return process.env.ZAI_API_KEY || process.env.SSOT_ZAI_KEY || ""
+}
+
+interface ChatMessage {
+  role: "user" | "assistant" | "system"
+  content: string
+}
 
 interface ChatRequest {
   message: string
   sessionId?: string
   context?: Record<string, unknown>
+  history?: ChatMessage[]
+  stream?: boolean
 }
 
-interface OpenClawResponse {
-  success: boolean
-  response?: string
-  error?: string
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// POST HANDLER
-// ═══════════════════════════════════════════════════════════════════════════════
+const NOVA_SYSTEM_PROMPT = `You are Nova, Ahmad's AI assistant managing the XMAD platform.
+You are the Super Agent for the XMAD Control Center dashboard.
+Be direct, concise, and technical. Ahmad prefers no filler words.
+You manage: system monitoring, service control, tenant creation, automation, backups, and agent orchestration.
+Current stack: Next.js 16, Bun, Tailwind 4, TypeScript. Two projects: xmad-control (super admin dashboard) + platform-monorepo (multi-tenant factory).`
 
 export async function POST(request: NextRequest) {
-  // On Vercel, return mock response (serverless cannot reach local OpenClaw)
-  if (isVercel) {
-    try {
-      const body: ChatRequest = await request.json()
-      return NextResponse.json({
-        success: true,
-        message: `Chat is available when connected to xmad gateway. On Vercel, AI features require the self-hosted dashboard. Your message was: "${body.message?.slice(0, 50) || ""}"`,
-        note: "Connect via Tailscale to your self-hosted dashboard for full AI features.",
-      })
-    } catch {
-      return NextResponse.json({
-        success: false,
-        error: "Invalid request",
-      }, { status: 400 })
-    }
+  const apiKey = getZaiKey()
+
+  if (!apiKey) {
+    return NextResponse.json(
+      { success: false, error: "ZAI_API_KEY not configured. Add to Keychain as z.ai/openclaw." },
+      { status: 503 }
+    )
+  }
+
+  let body: ChatRequest
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ success: false, error: "Invalid JSON body" }, { status: 400 })
+  }
+
+  const { message, history = [], stream = false } = body
+
+  if (!message || typeof message !== "string" || message.trim().length === 0) {
+    return NextResponse.json({ success: false, error: "Message is required" }, { status: 400 })
+  }
+
+  if (message.length > 10000) {
+    return NextResponse.json(
+      { success: false, error: "Message too long (max 10000 chars)" },
+      { status: 400 }
+    )
+  }
+
+  const messages: ChatMessage[] = [...history.slice(-10), { role: "user", content: message.trim() }]
+
+  const payload = {
+    model: MODEL,
+    max_tokens: 2048,
+    system: NOVA_SYSTEM_PROMPT,
+    messages,
+    stream,
   }
 
   try {
-    // Parse request body
-    const body: ChatRequest = await request.json()
-    const { message, sessionId = "dashboard-session", context = {} } = body
-
-    // Validate input
-    if (!message || typeof message !== "string" || message.trim().length === 0) {
-      return NextResponse.json({ success: false, error: "Invalid message" }, { status: 400 })
-    }
-
-    // Forward to OpenClaw Gateway
-    const gatewayUrl = `${OPENCLAW_GATEWAY}/api/chat`
-
-    const gatewayResponse = await fetch(gatewayUrl, {
+    const response = await fetch(`${ZAI_BASE}/messages`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
       },
-      body: JSON.stringify({
-        message: message.trim(),
-        sessionId,
-        context,
-        source: "dashboard",
-      }),
-      // Add timeout to prevent hanging
-      signal: AbortSignal.timeout(30000), // 30 second timeout
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(60000),
     })
 
-    if (!gatewayResponse.ok) {
-      console.error(`OpenClaw gateway error: ${gatewayResponse.status}`)
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error("[chat] z.ai error:", response.status, errorText)
       return NextResponse.json(
-        {
-          success: false,
-          error: "AI service temporarily unavailable.",
-        },
-        { status: 503 }
+        { success: false, error: `AI service error: ${response.status}` },
+        { status: 502 }
       )
     }
 
-    const data: OpenClawResponse = await gatewayResponse.json()
-
-    if (!data.success || !data.response) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "AI service temporarily unavailable.",
+    if (stream && response.body) {
+      return new NextResponse(response.body, {
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          Connection: "keep-alive",
         },
-        { status: 500 }
-      )
+      })
     }
 
-    // Return successful response
+    const data = await response.json()
+    const text = data?.content?.[0]?.text ?? data?.completion ?? "No response"
+
     return NextResponse.json({
       success: true,
-      message: data.response,
+      message: text,
+      model: MODEL,
+      usage: data?.usage,
     })
   } catch (error) {
-    // Handle timeout errors
     if (error instanceof Error && error.name === "AbortError") {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "AI service temporarily unavailable.",
-        },
-        { status: 504 }
-      )
+      return NextResponse.json({ success: false, error: "Request timeout (60s)" }, { status: 504 })
     }
-
-    // Handle other errors - never expose internal errors
-    console.error("Chat API error:", error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: "AI service temporarily unavailable.",
-      },
-      { status: 500 }
-    )
+    console.error("[chat] Error:", error)
+    return NextResponse.json({ success: false, error: "AI service unavailable" }, { status: 500 })
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// OPTIONS HANDLER (for CORS)
-// ═══════════════════════════════════════════════════════════════════════════════
-
-const ALLOWED_ORIGINS = [
-  "http://localhost:3333",
-  "http://127.0.0.1:3333",
-  "http://localhost:3000",
-  "http://127.0.0.1:3000",
-  // Add production URL when deployed
-  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "",
-].filter(Boolean)
-
-function getAllowedOrigin(request: NextRequest): string {
-  const origin = request.headers.get("origin") || ""
-  return ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0] || ""
-}
-
-export async function OPTIONS(request: NextRequest) {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      "Access-Control-Allow-Origin": getAllowedOrigin(request),
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
+export async function GET() {
+  const key = getZaiKey()
+  return NextResponse.json({
+    ok: true,
+    configured: !!key,
+    model: MODEL,
+    endpoint: ZAI_BASE,
   })
 }
