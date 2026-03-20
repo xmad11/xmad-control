@@ -1,6 +1,6 @@
 // app/api/xmad/services/route.ts
-// Service status — matches ServiceStatus type in surface.types.ts exactly:
-// { openclaw: { running, pid, memoryUsage }, tailscale: { connected, ip } }
+// Fetches real service status from bridge or local check
+// Matches ServiceStatus shape expected by useSurfaceController
 
 import { execSync } from "node:child_process"
 import { NextResponse } from "next/server"
@@ -8,94 +8,115 @@ import { NextResponse } from "next/server"
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
-function checkPort(port: number): { alive: boolean; pid?: number } {
+const BRIDGE_URL = process.env.XMAD_BRIDGE_URL
+const IS_VERCEL = process.env.VERCEL === "1"
+
+async function fetchFromBridge() {
+  if (!BRIDGE_URL) return null
   try {
-    const result = execSync(`lsof -i :${port} -sTCP:LISTEN -n -P 2>/dev/null | tail -1`, {
+    const res = await fetch(`${BRIDGE_URL}/status`, {
+      signal: AbortSignal.timeout(3000),
+      cache: "no-store",
+    })
+    if (res.ok) {
+      const data = await res.json()
+      // Bridge status.json has openclaw and mode - build services shape
+      return {
+        openclaw: {
+          running: data.openclaw?.running ?? false,
+          pid: data.openclaw?.pid ?? null,
+          memoryUsage: data.openclaw?.memoryMB ?? 0,
+        },
+        tailscale: {
+          connected: true, // if bridge is reachable via Tailscale, it's connected
+          ip: BRIDGE_URL.match(/(\d+\.\d+\.\d+\.\d+)/)?.[1] ?? null,
+        },
+        mode: data.mode ?? "eco",
+        _source: "bridge",
+      }
+    }
+  } catch {}
+  return null
+}
+
+function getLocalServices() {
+  let openclawRunning = false
+  let openclawPid: number | null = null
+  let tailscaleConnected = false
+  let tailscaleIp: string | null = null
+
+  try {
+    const r = execSync("lsof -i :18789 -sTCP:LISTEN -n -P 2>/dev/null | tail -1", {
       timeout: 2000,
       encoding: "utf8",
     })
-    if (result.trim()) {
-      const pid = Number.parseInt(result.trim().split(/\s+/)[1])
-      return { alive: true, pid: Number.isNaN(pid) ? undefined : pid }
+    if (r.trim()) {
+      openclawRunning = true
+      openclawPid = Number.parseInt(r.trim().split(/\s+/)[1]) || null
     }
-    return { alive: false }
-  } catch {
-    return { alive: false }
+  } catch {}
+
+  try {
+    const r = execSync("tailscale status --json 2>/dev/null", { timeout: 3000, encoding: "utf8" })
+    const d = JSON.parse(r)
+    if (d?.Self?.Online) {
+      tailscaleConnected = true
+      tailscaleIp = d.Self.TailscaleIPs?.[0] ?? null
+    }
+  } catch {}
+
+  return {
+    openclaw: { running: openclawRunning, pid: openclawPid, memoryUsage: 0 },
+    tailscale: { connected: tailscaleConnected, ip: tailscaleIp },
+    mode: "local",
+    _source: "local",
   }
 }
 
-function getProcessMemoryMB(pid: number): number {
-  try {
-    const result = execSync(`ps -p ${pid} -o rss= 2>/dev/null`, {
-      timeout: 1000,
-      encoding: "utf8",
-    })
-    const kb = Number.parseInt(result.trim())
-    return Number.isNaN(kb) ? 0 : Math.round(kb / 1024)
-  } catch {
-    return 0
-  }
-}
-
-async function checkOpenClaw() {
-  try {
-    const res = await fetch("http://127.0.0.1:18789/health", {
-      signal: AbortSignal.timeout(3000),
-    })
-    if (res.ok) {
-      const port = checkPort(18789)
-      const memoryUsage = port.pid ? getProcessMemoryMB(port.pid) : 0
-      return {
-        running: true,
-        pid: port.pid ?? null,
-        memoryUsage,
-        port: 18789,
-      }
-    }
-  } catch {}
-  return { running: false, pid: null, memoryUsage: 0, port: 18789 }
-}
-
-function getTailscale() {
-  try {
-    const result = execSync("tailscale status --json 2>/dev/null", {
-      timeout: 3000,
-      encoding: "utf8",
-    })
-    const data = JSON.parse(result)
-    const self = data?.Self
-    if (self?.Online) {
-      return {
-        connected: true,
-        ip: self.TailscaleIPs?.[0] ?? null,
-        hostname: self.HostName ?? null,
-        peers: Object.keys(data?.Peer || {}).length,
-      }
-    }
-  } catch {}
-  return { connected: false, ip: null, hostname: null, peers: 0 }
+const MOCK_SERVICES = {
+  openclaw: { running: false, pid: null, memoryUsage: 0 },
+  tailscale: { connected: false, ip: null },
+  mode: "mock",
+  _source: "mock",
 }
 
 export async function GET() {
-  const [openclaw, tailscale] = await Promise.all([
-    checkOpenClaw(),
-    Promise.resolve(getTailscale()),
-  ])
+  const bridgeData = await fetchFromBridge()
+  if (bridgeData) {
+    return NextResponse.json(bridgeData, { headers: { "Cache-Control": "no-store" } })
+  }
 
-  // Shape matches ServiceStatus type in surface.types.ts exactly
-  return NextResponse.json(
-    {
-      openclaw,
-      tailscale,
-    },
-    { headers: { "Cache-Control": "no-store" } }
-  )
+  if (IS_VERCEL) {
+    return NextResponse.json(MOCK_SERVICES, { headers: { "Cache-Control": "no-store" } })
+  }
+
+  return NextResponse.json(getLocalServices(), { headers: { "Cache-Control": "no-store" } })
 }
 
 export async function POST(request: Request) {
-  const { service, action } = await request.json()
+  const { action } = await request.json()
 
-  if (service === "openclaw" && action === "start") {
+  // Forward control actions to bridge
+  if (
+    BRIDGE_URL &&
+    (action === "start_openclaw" || action === "stop_openclaw" || action === "restart_openclaw")
+  ) {
+    try {
+      const res = await fetch(BRIDGE_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+        signal: AbortSignal.timeout(5000),
+      })
+      const data = await res.json()
+      return NextResponse.json(data)
+    } catch {
+      return NextResponse.json({ ok: false, error: "Bridge unreachable" }, { status: 503 })
+    }
+  }
+
+  // Local fallback for start action
+  if (action === "start_openclaw" && !IS_VERCEL) {
     try {
       execSync(
         "launchctl load -w ~/Library/LaunchAgents/ai.openclaw.gateway.plist 2>/dev/null || bash ~/xmad-control/openclaw/scripts/start-ssot.sh &",
