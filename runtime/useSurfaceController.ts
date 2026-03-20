@@ -262,8 +262,16 @@ export function useSurfaceController() {
     // Set up polling for live stats (only when visible)
     const interval = setInterval(fetchStats, TIMING.STATS_POLL_INTERVAL)
 
+    // Ping bridge to keep eco mode active while dashboard is open
+    const pingBridge = () => {
+      fetch("/api/xmad/bridge/ping", { method: "POST" }).catch(() => {})
+    }
+    pingBridge() // Ping immediately on mount
+    const pingInterval = setInterval(pingBridge, 30_000) // Every 30 seconds
+
     return () => {
       clearInterval(interval)
+      clearInterval(pingInterval)
       // Cancel any pending requests
       if (abortControllerRef.current) {
         abortControllerRef.current.abort()
