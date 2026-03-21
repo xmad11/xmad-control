@@ -1,8 +1,8 @@
-/* ═══════════════════════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════════════════════════
    USE VOICE CHAT - Continuous conversation mode
    Flow: start → listen → STT → AI → TTS → listen again (loop)
    Stop: explicit stop or error
-   ═══════════════════════════════════════════════════════════════════════════════ */
+   ═══════════════════════════════════════════════════════════════════════════════════════════ */
 
 "use client"
 
@@ -69,6 +69,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
   const streamRef = useRef<MediaStream | null>(null)
   const ttsEnabledRef = useRef(ttsEnabled)
   const continuousRef = useRef(continuous)
+  const mimeTypeRef = useRef<string>("") // Store current MIME type for iOS Safari
   ttsEnabledRef.current = ttsEnabled
   continuousRef.current = continuous
 
@@ -82,6 +83,8 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       console.error("[VoiceChat]", msg)
       setError(msg)
       setPhase("error")
+      // Debug: show error in transcript so we can see it on mobile
+      setTranscript(`Error: ${msg}`)
       onError?.(msg)
       // Auto-recover to idle after 2s
       setTimeout(() => {
@@ -93,7 +96,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     [onError]
   )
 
-  // ── TTS: speak text ────────────────────────────────────────────────────────
+  // ── TTS: speak text ────────────────────────────────────────────────────────────────────────────
   const speak = useCallback(async (text: string) => {
     if (!text.trim()) return
     isSpeakingRef.current = true
@@ -142,7 +145,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     isSpeakingRef.current = false
   }, [])
 
-  // ── AI: get response ───────────────────────────────────────────────────────
+  // ── AI: get response ───────────────────────────────────────────────────────────────────────
   const getAIResponse = useCallback(async (userText: string): Promise<string> => {
     setPhase("thinking")
     const res = await fetch("/api/xmad/chat", {
@@ -153,25 +156,38 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     if (!res.ok) throw new Error(`AI error: ${res.status}`)
     const data = await res.json()
     if (!data.success) throw new Error(data.error || "AI failed")
+    console.log("[Voice] AI response:", JSON.stringify((data.message as string)?.slice(0, 50)))
     return data.message as string
   }, [])
 
-  // ── STT: transcribe blob ───────────────────────────────────────────────────
+  // ── STT: transcribe blob ─────────────────────────────────────────────────────────────────
   const transcribeBlob = useCallback(
     async (blob: Blob): Promise<string> => {
       setPhase("processing")
       const form = new FormData()
-      form.append("audio", blob, "recording.webm")
+      // Use correct extension and MIME type for iOS Safari
+      const ext = mimeTypeRef.current.includes("mp4")
+        ? "mp4"
+        : mimeTypeRef.current.includes("ogg")
+          ? "ogg"
+          : "webm"
+      const fileType = mimeTypeRef.current || "audio/webm"
+      form.append(
+        "audio",
+        new File([blob], `recording.${ext}`, { type: fileType }),
+        `recording.${ext}`
+      )
       form.append("language", language)
       const res = await fetch("/api/stt", { method: "POST", body: form })
       const data = await res.json()
       if (!data.ok) throw new Error(data.error || "STT failed")
+      console.log("[Voice] Transcript:", JSON.stringify(data.text))
       return (data.text || "").trim()
     },
     [language]
   )
 
-  // ── Core: single record + process cycle ───────────────────────────────────
+  // ── Core: single record + process cycle ─────────────────────────────────────────────
   const doOneRecordCycle = useCallback(async () => {
     if (!isActiveRef.current) return
 
@@ -192,9 +208,27 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       return
     }
 
-    const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-      ? "audio/webm;codecs=opus"
-      : "audio/webm"
+    // iOS Safari MIME type support - try multiple formats
+    const mimeType = (() => {
+      const types = [
+        "audio/webm;codecs=opus",
+        "audio/webm",
+        "audio/mp4",
+        "audio/ogg;codecs=opus",
+        "audio/ogg",
+      ]
+      return types.find((t) => MediaRecorder.isTypeSupported(t)) || ""
+    })()
+
+    if (!mimeType) {
+      handleError("No supported audio format on this device")
+      isActiveRef.current = false
+      return
+    }
+
+    // Store MIME type for later use in transcribeBlob
+    mimeTypeRef.current = mimeType
+    console.log("[Voice] Using MIME type:", mimeType)
 
     const recorder = new MediaRecorder(stream, { mimeType })
     mediaRecorderRef.current = recorder
@@ -214,6 +248,8 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     if (!isActiveRef.current) return
 
     const blob = new Blob(audioChunksRef.current, { type: mimeType })
+    console.log("[Voice] Blob size:", blob.size, "bytes")
+
     if (blob.size < 1000) {
       // Too short — no speech detected, restart loop
       if (continuousRef.current && isActiveRef.current) {
@@ -266,7 +302,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     }
   }, [transcribeBlob, getAIResponse, speak, handleError, onTranscript, onAIResponse])
 
-  // ── Public API ─────────────────────────────────────────────────────────────
+  // ── Public API ─────────────────────────────────────────────────────────────────────────
 
   /** Start a continuous voice session - loops automatically */
   const startSession = useCallback(async () => {
