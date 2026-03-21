@@ -1,6 +1,7 @@
 /* ════════════════════════════════════════════════════════════════════════════════════
    BOTTOM SHEET CONTENT - AI Chat with glassy texture and voice support
    Voice is now controlled by SheetContext (global voice state)
+   Continuous conversation mode - AI responses auto-added to chat
    ════════════════════════════════════════════════════════════════════════════════════ */
 
 "use client"
@@ -10,7 +11,7 @@ import { GlassInput } from "@/components/glass/glass-input"
 import { useSheetContext } from "@/context/SheetContext"
 import { cn } from "@/lib/utils"
 import DOMPurify from "dompurify"
-import { ArrowUpRight, MessageSquare, Mic, Volume2, VolumeX } from "lucide-react"
+import { ArrowUpRight, Brain, MessageSquare, Mic, Volume2, VolumeX } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
@@ -90,6 +91,7 @@ export function BottomSheetContent() {
     speak,
     stopSpeaking,
     registerTranscriptHandler,
+    registerAIResponseHandler,
     clearTranscript,
   } = useSheetContext()
 
@@ -107,14 +109,31 @@ export function BottomSheetContent() {
   // Register transcript handler - called when voice recording produces transcript
   useEffect(() => {
     registerTranscriptHandler((text: string) => {
-      setInputValue(text)
-      // Auto-send after transcription
-      if (text.trim()) {
-        handleSendMessage(text)
-        clearTranscript()
+      // User transcript - add as user message
+      // Note: The AI call is already happening in useVoiceChat
+      const userMsg: ChatMessage = {
+        id: `user-${Date.now()}`,
+        role: "user",
+        content: text,
+        timestamp: new Date(),
       }
+      setMessages((prev) => [...prev, userMsg])
+      clearTranscript()
     })
   }, [registerTranscriptHandler, clearTranscript])
+
+  // Register AI response handler - called when AI responds in continuous mode
+  useEffect(() => {
+    registerAIResponseHandler((text: string) => {
+      const aiMsg: ChatMessage = {
+        id: `ai-${Date.now()}`,
+        role: "assistant",
+        content: text,
+        timestamp: new Date(),
+      }
+      setMessages((prev) => [...prev, aiMsg])
+    })
+  }, [registerAIResponseHandler])
 
   // Auto-scroll
   // biome-ignore lint/correctness/useExhaustiveDependencies: only messages.length
@@ -122,7 +141,7 @@ export function BottomSheetContent() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages.length])
 
-  // Send message
+  // Send message (manual text input)
   const handleSendMessage = useCallback(
     async (content: string) => {
       if (!content.trim()) return
@@ -186,14 +205,14 @@ export function BottomSheetContent() {
     [inputValue, handleSendMessage]
   )
 
-  // Toggle mic - start/stop recording
+  // Toggle mic - start/stop continuous voice session
   const handleMicToggle = useCallback(() => {
-    if (voiceState.isRecording) {
+    if (voiceState.isActive) {
       stopVoice()
     } else {
       startVoice()
     }
-  }, [voiceState.isRecording, startVoice, stopVoice])
+  }, [voiceState.isActive, startVoice, stopVoice])
 
   // Toggle TTS
   const handleTtsToggle = useCallback(() => {
@@ -202,6 +221,24 @@ export function BottomSheetContent() {
     }
     toggleTts()
   }, [voiceState.isSpeaking, stopSpeaking, toggleTts])
+
+  // Get status text based on phase
+  const getStatusText = () => {
+    switch (voiceState.phase) {
+      case "listening":
+        return "Listening..."
+      case "processing":
+        return "Processing speech..."
+      case "thinking":
+        return "AI thinking..."
+      case "speaking":
+        return "Speaking..."
+      case "error":
+        return "Error - retrying..."
+      default:
+        return "Voice active"
+    }
+  }
 
   return (
     <div className="flex h-full flex-col bg-transparent">
@@ -213,7 +250,7 @@ export function BottomSheetContent() {
           </div>
           <div>
             <h3 className="text-white font-semibold">AI Assistant</h3>
-            <p className="text-white/50 text-sm">Voice-enabled chat</p>
+            <p className="text-white/50 text-sm">Continuous voice chat</p>
           </div>
         </div>
 
@@ -279,25 +316,21 @@ export function BottomSheetContent() {
       {/* Input Bar - Mic next to input */}
       <div className="p-4 border-t border-white/10 backdrop-blur-xl glass-inset-shadow">
         <div className="flex items-center gap-2">
-          {/* Mic Button - STT (next to input) */}
+          {/* Mic Button - Continuous voice session toggle */}
           <button
             type="button"
             onClick={handleMicToggle}
             disabled={voiceState.isSpeaking}
             className={cn(
               "flex-shrink-0 p-3 rounded-xl transition-all backdrop-blur-sm border",
-              voiceState.isRecording
-                ? "bg-red-500/30 border-red-500/50 text-red-400"
-                : voiceState.isActive
-                  ? "bg-cyan-glow/30 border-cyan-glow/50 text-cyan-glow cyan-glow-box"
-                  : "bg-white/10 border-white/20 text-white/60 hover:bg-white/15",
+              voiceState.isActive
+                ? "bg-cyan-glow/30 border-cyan-glow/50 text-cyan-glow cyan-glow-box"
+                : "bg-white/10 border-white/20 text-white/60 hover:bg-white/15",
               voiceState.isSpeaking && "opacity-50 cursor-not-allowed"
             )}
-            aria-label={voiceState.isRecording ? "Stop recording" : "Start recording"}
+            aria-label={voiceState.isActive ? "Stop voice session" : "Start voice session"}
           >
-            {voiceState.isRecording ? (
-              <InlineWaveIndicator active size="md" />
-            ) : voiceState.isActive ? (
+            {voiceState.isActive ? (
               <InlineWaveIndicator active size="md" />
             ) : (
               <Mic className="h-5 w-5" />
@@ -306,24 +339,18 @@ export function BottomSheetContent() {
 
           {/* Text Input */}
           <GlassInput
-            placeholder={
-              voiceState.isRecording
-                ? "Listening..."
-                : voiceState.isActive
-                  ? "Voice active..."
-                  : "Type a message..."
-            }
+            placeholder={voiceState.isActive ? getStatusText() : "Type a message..."}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            disabled={voiceState.isRecording}
+            disabled={voiceState.isActive && voiceState.phase === "listening"}
             className="flex-1"
           />
 
           {/* Send Button */}
           <GlassButton
             onClick={() => handleSendMessage(inputValue)}
-            disabled={!inputValue.trim() || voiceState.isRecording}
+            disabled={!inputValue.trim() || voiceState.isActive}
             className="flex-shrink-0 px-3"
           >
             <ArrowUpRight className="h-4 w-4" />
@@ -333,16 +360,34 @@ export function BottomSheetContent() {
         {/* Voice status */}
         {voiceState.isActive && (
           <div className="flex items-center justify-center gap-2 mt-2 text-xs text-white/50">
-            {voiceState.isRecording && (
+            {voiceState.phase === "listening" && (
               <>
                 <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
-                <span>Recording...</span>
+                <span>{getStatusText()}</span>
               </>
             )}
-            {!voiceState.isRecording && voiceState.isActive && (
+            {voiceState.phase === "processing" && (
+              <>
+                <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
+                <span>{getStatusText()}</span>
+              </>
+            )}
+            {voiceState.phase === "thinking" && (
+              <>
+                <Brain className="w-3 h-3 animate-pulse" />
+                <span>{getStatusText()}</span>
+              </>
+            )}
+            {voiceState.phase === "speaking" && (
+              <>
+                <Volume2 className="w-3 h-3 animate-pulse" />
+                <span>{getStatusText()}</span>
+              </>
+            )}
+            {voiceState.phase === "idle" && voiceState.isActive && (
               <>
                 <span className="w-2 h-2 rounded-full bg-cyan-glow" />
-                <span>Voice active</span>
+                <span>Voice active - tap mic to stop</span>
               </>
             )}
           </div>

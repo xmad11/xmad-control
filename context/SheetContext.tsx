@@ -1,14 +1,15 @@
 /* ═══════════════════════════════════════════════════════════════════════════════
    SHEET CONTEXT - Global sheet state + voice state for AppHeader + HomeClient
    Now includes useVoiceChat hook for global voice control
+   Continuous conversation mode - auto-listen after each AI response
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 "use client"
 
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react"
+import { createContext, useCallback, useContext, useRef, useState } from "react"
 import type { ReactNode } from "react"
 
-import { useVoiceChat } from "@/hooks/useVoiceChat"
+import { type VoicePhase, useVoiceChat } from "@/hooks/useVoiceChat"
 
 export type SheetDirection = "top" | "bottom" | "left" | "right"
 
@@ -23,6 +24,8 @@ interface VoiceState {
   isSpeaking: boolean
   /** TTS is enabled for responses */
   ttsEnabled: boolean
+  /** Current phase of voice interaction */
+  phase: VoicePhase
 }
 
 interface SheetContextValue {
@@ -30,7 +33,7 @@ interface SheetContextValue {
   activeSheet: SheetDirection | null
   /** Open a specific sheet direction */
   openSheet: (direction: SheetDirection) => void
-  /** Close the currently active sheet */
+  /** Close the currently open sheet */
   closeSheet: () => void
   /** Toggle a specific sheet direction */
   toggleSheet: (direction: SheetDirection) => boolean
@@ -58,6 +61,8 @@ interface SheetContextValue {
   stopSpeaking: () => void
   /** Register a callback to be called when transcript is ready */
   registerTranscriptHandler: (handler: (text: string) => void) => void
+  /** Register a callback for AI responses */
+  registerAIResponseHandler: (handler: (text: string) => void) => void
   /** Last transcript text (for components to react to) */
   lastTranscript: string | null
   /** Clear the last transcript */
@@ -72,6 +77,7 @@ const initialVoiceState: VoiceState = {
   isListening: false,
   isSpeaking: false,
   ttsEnabled: true,
+  phase: "idle",
 }
 
 export function SheetProvider({ children }: { children: ReactNode }) {
@@ -79,27 +85,44 @@ export function SheetProvider({ children }: { children: ReactNode }) {
   const [voiceState, setVoiceState] = useState<VoiceState>(initialVoiceState)
   const [lastTranscript, setLastTranscript] = useState<string | null>(null)
   const transcriptHandlerRef = useRef<((text: string) => void) | null>(null)
+  const aiResponseHandlerRef = useRef<((text: string) => void) | null>(null)
 
   // Voice chat hook - integrated at context level for global access
-  const { isRecording, isSpeaking, startRecording, stopRecording, speak, stopSpeaking } =
-    useVoiceChat({
-      onTranscript: (text) => {
-        // Store the transcript
-        setLastTranscript(text)
-        // Call registered handler if exists
-        if (transcriptHandlerRef.current) {
-          transcriptHandlerRef.current(text)
-        }
-      },
-      onError: (error) => {
-        console.error("[VoiceChat Error]", error)
-        setVoiceState((prev) => ({
-          ...prev,
-          isRecording: false,
-          isListening: false,
-        }))
-      },
-    })
+  const {
+    phase: voicePhase,
+    isRecording,
+    isSpeaking,
+    startSession,
+    stopSession,
+    speak,
+    stopSpeaking,
+  } = useVoiceChat({
+    onTranscript: (text) => {
+      // Store the transcript
+      setLastTranscript(text)
+      // Call registered handler if exists
+      if (transcriptHandlerRef.current) {
+        transcriptHandlerRef.current(text)
+      }
+    },
+    onAIResponse: (text) => {
+      // Call registered AI response handler
+      if (aiResponseHandlerRef.current) {
+        aiResponseHandlerRef.current(text)
+      }
+    },
+    onError: (error) => {
+      console.error("[VoiceChat Error]", error)
+      setVoiceState((prev) => ({
+        ...prev,
+        isRecording: false,
+        isListening: false,
+        phase: "error",
+      }))
+    },
+    ttsEnabled: voiceState.ttsEnabled,
+    continuous: true, // Enable continuous conversation mode
+  })
 
   const openSheet = useCallback((direction: SheetDirection) => {
     setActiveSheet(direction)
@@ -124,17 +147,23 @@ export function SheetProvider({ children }: { children: ReactNode }) {
     [activeSheet]
   )
 
-  // Voice actions
+  // Voice actions - use continuous session
   const startVoice = useCallback(() => {
     setVoiceState((prev) => ({ ...prev, isActive: true }))
-    startRecording()
-  }, [startRecording])
+    startSession()
+  }, [startSession])
 
   const stopVoice = useCallback(() => {
-    setVoiceState((prev) => ({ ...prev, isActive: false, isRecording: false, isListening: false }))
-    stopRecording()
+    setVoiceState((prev) => ({
+      ...prev,
+      isActive: false,
+      isRecording: false,
+      isListening: false,
+      phase: "idle",
+    }))
+    stopSession()
     stopSpeaking()
-  }, [stopRecording, stopSpeaking])
+  }, [stopSession, stopSpeaking])
 
   const setVoiceRecording = useCallback((recording: boolean) => {
     setVoiceState((prev) => ({
@@ -164,27 +193,41 @@ export function SheetProvider({ children }: { children: ReactNode }) {
     transcriptHandlerRef.current = handler
   }, [])
 
+  const registerAIResponseHandler = useCallback((handler: (text: string) => void) => {
+    aiResponseHandlerRef.current = handler
+  }, [])
+
   const clearTranscript = useCallback(() => {
     setLastTranscript(null)
   }, [])
 
   // Sync hook states to context state
-  useEffect(() => {
-    setVoiceState((prev) => ({ ...prev, isRecording, isSpeaking }))
-  }, [isRecording, isSpeaking])
+  // Note: isRecording is derived from phase in the hook
+  const syncStateRef = useRef({ isRecording, isSpeaking, voicePhase })
+  syncStateRef.current = { isRecording, isSpeaking, voicePhase }
 
-  // Set listening state based on recording (transcription in progress)
-  useEffect(() => {
-    if (!isRecording && voiceState.isRecording) {
-      // Recording just stopped - transcription in progress
-      setVoiceState((prev) => ({ ...prev, isListening: true }))
-      // Clear listening after a delay (fallback - real clear happens on transcript)
-      const timer = setTimeout(() => {
-        setVoiceState((prev) => ({ ...prev, isListening: false }))
-      }, 5000)
-      return () => clearTimeout(timer)
-    }
-  }, [isRecording, voiceState.isRecording])
+  // Use a stable callback to sync state
+  const syncVoiceState = useCallback(() => {
+    const { isRecording: rec, isSpeaking: spk, voicePhase: ph } = syncStateRef.current
+    setVoiceState((prev) => ({
+      ...prev,
+      isRecording: rec,
+      isSpeaking: spk,
+      phase: ph,
+      // Derive isListening from phase
+      isListening: ph === "processing" || ph === "thinking",
+    }))
+  }, [])
+
+  // Sync when recording/speaking/phase changes
+  if (
+    voiceState.isRecording !== isRecording ||
+    voiceState.isSpeaking !== isSpeaking ||
+    voiceState.phase !== voicePhase
+  ) {
+    // Queue state update
+    setTimeout(syncVoiceState, 0)
+  }
 
   return (
     <SheetContext.Provider
@@ -204,6 +247,7 @@ export function SheetProvider({ children }: { children: ReactNode }) {
         speak,
         stopSpeaking,
         registerTranscriptHandler,
+        registerAIResponseHandler,
         lastTranscript,
         clearTranscript,
       }}
