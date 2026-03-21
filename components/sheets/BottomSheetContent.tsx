@@ -1,17 +1,16 @@
-/* ══════════════════════════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════════════════════════════════
    BOTTOM SHEET CONTENT - AI Chat with glassy texture and voice support
-   Voice state is shared via SheetContext with HomeClient
-   ══════════════════════════════════════════════════════════════════════════════════ */
+   Voice is now controlled by SheetContext (global voice state)
+   ════════════════════════════════════════════════════════════════════════════════════ */
 
 "use client"
 
 import { GlassButton } from "@/components/glass/glass-button"
 import { GlassInput } from "@/components/glass/glass-input"
 import { useSheetContext } from "@/context/SheetContext"
-import { useVoiceChat } from "@/hooks/useVoiceChat"
 import { cn } from "@/lib/utils"
 import DOMPurify from "dompurify"
-import { ArrowUpRight, MessageSquare, Mic, MicOff, Volume2, VolumeX } from "lucide-react"
+import { ArrowUpRight, MessageSquare, Mic, Volume2, VolumeX } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
@@ -20,15 +19,20 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function InlineWaveIndicator({ active, size = "sm" }: { active: boolean; size?: "sm" | "md" }) {
-  const barCount = 4
   const barHeight = size === "sm" ? "h-3" : "h-5"
   const barWidth = size === "sm" ? "w-0.5" : "w-1"
+  const bars = [
+    { id: "bar-1", delay: "0ms" },
+    { id: "bar-2", delay: "75ms" },
+    { id: "bar-3", delay: "150ms" },
+    { id: "bar-4", delay: "225ms" },
+  ]
 
   return (
     <div className={cn("flex items-end justify-center gap-0.5", size === "sm" ? "h-4" : "h-6")}>
-      {Array.from({ length: barCount }).map((_, i) => (
+      {bars.map((bar) => (
         <span
-          key={i}
+          key={bar.id}
           className={cn(
             "rounded-full transition-all duration-150",
             barHeight,
@@ -36,7 +40,7 @@ function InlineWaveIndicator({ active, size = "sm" }: { active: boolean; size?: 
             active ? "bg-cyan-glow animate-pulse" : "bg-white/50"
           )}
           style={{
-            animationDelay: `${i * 75}ms`,
+            animationDelay: bar.delay,
             transform: active ? `scaleY(${0.5 + Math.random() * 0.5})` : "scaleY(1)",
           }}
         />
@@ -77,9 +81,17 @@ export interface ChatMessage {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export function BottomSheetContent() {
-  // Shared voice state from context (synced with HomeClient collapsed tab)
-  const { voiceState, setVoiceRecording, setVoiceListening, setVoiceSpeaking, toggleTts } =
-    useSheetContext()
+  // Voice state and actions from context (shared with HomeClient collapsed tab)
+  const {
+    voiceState,
+    startVoice,
+    stopVoice,
+    toggleTts,
+    speak,
+    stopSpeaking,
+    registerTranscriptHandler,
+    clearTranscript,
+  } = useSheetContext()
 
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -92,38 +104,17 @@ export function BottomSheetContent() {
   const [inputValue, setInputValue] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Voice chat hook - connects to STT/TTS APIs
-  const {
-    isRecording,
-    isSpeaking,
-    isSupported: voiceSupported,
-    startRecording,
-    stopRecording,
-    speak,
-    stopSpeaking,
-  } = useVoiceChat({
-    onTranscript: (text) => {
+  // Register transcript handler - called when voice recording produces transcript
+  useEffect(() => {
+    registerTranscriptHandler((text: string) => {
       setInputValue(text)
       // Auto-send after transcription
       if (text.trim()) {
         handleSendMessage(text)
+        clearTranscript()
       }
-    },
-    onError: (error) => {
-      console.error("[VoiceChat]", error)
-      setVoiceRecording(false)
-      setVoiceListening(false)
-    },
-  })
-
-  // Sync local recording state to context
-  useEffect(() => {
-    setVoiceRecording(isRecording)
-  }, [isRecording, setVoiceRecording])
-
-  useEffect(() => {
-    setVoiceSpeaking(isSpeaking)
-  }, [isSpeaking, setVoiceSpeaking])
+    })
+  }, [registerTranscriptHandler, clearTranscript])
 
   // Auto-scroll
   // biome-ignore lint/correctness/useExhaustiveDependencies: only messages.length
@@ -197,22 +188,20 @@ export function BottomSheetContent() {
 
   // Toggle mic - start/stop recording
   const handleMicToggle = useCallback(() => {
-    if (isRecording) {
-      stopRecording()
-      setVoiceListening(false)
+    if (voiceState.isRecording) {
+      stopVoice()
     } else {
-      setVoiceListening(true)
-      startRecording()
+      startVoice()
     }
-  }, [isRecording, startRecording, stopRecording, setVoiceListening])
+  }, [voiceState.isRecording, startVoice, stopVoice])
 
   // Toggle TTS
   const handleTtsToggle = useCallback(() => {
-    if (isSpeaking) {
+    if (voiceState.isSpeaking) {
       stopSpeaking()
     }
     toggleTts()
-  }, [isSpeaking, stopSpeaking, toggleTts])
+  }, [voiceState.isSpeaking, stopSpeaking, toggleTts])
 
   return (
     <div className="flex h-full flex-col bg-transparent">
@@ -252,7 +241,7 @@ export function BottomSheetContent() {
           </button>
 
           {/* Speaking indicator */}
-          {isSpeaking && (
+          {voiceState.isSpeaking && (
             <button
               type="button"
               onClick={stopSpeaking}
@@ -291,36 +280,34 @@ export function BottomSheetContent() {
       <div className="p-4 border-t border-white/10 backdrop-blur-xl glass-inset-shadow">
         <div className="flex items-center gap-2">
           {/* Mic Button - STT (next to input) */}
-          {voiceSupported && (
-            <button
-              type="button"
-              onClick={handleMicToggle}
-              disabled={isSpeaking}
-              className={cn(
-                "flex-shrink-0 p-3 rounded-xl transition-all backdrop-blur-sm border",
-                isRecording
-                  ? "bg-red-500/30 border-red-500/50 text-red-400"
-                  : voiceState.isActive
-                    ? "bg-cyan-glow/30 border-cyan-glow/50 text-cyan-glow cyan-glow-box"
-                    : "bg-white/10 border-white/20 text-white/60 hover:bg-white/15",
-                isSpeaking && "opacity-50 cursor-not-allowed"
-              )}
-              aria-label={isRecording ? "Stop recording" : "Start recording"}
-            >
-              {isRecording ? (
-                <InlineWaveIndicator active size="md" />
-              ) : voiceState.isActive ? (
-                <InlineWaveIndicator active size="md" />
-              ) : (
-                <Mic className="h-5 w-5" />
-              )}
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={handleMicToggle}
+            disabled={voiceState.isSpeaking}
+            className={cn(
+              "flex-shrink-0 p-3 rounded-xl transition-all backdrop-blur-sm border",
+              voiceState.isRecording
+                ? "bg-red-500/30 border-red-500/50 text-red-400"
+                : voiceState.isActive
+                  ? "bg-cyan-glow/30 border-cyan-glow/50 text-cyan-glow cyan-glow-box"
+                  : "bg-white/10 border-white/20 text-white/60 hover:bg-white/15",
+              voiceState.isSpeaking && "opacity-50 cursor-not-allowed"
+            )}
+            aria-label={voiceState.isRecording ? "Stop recording" : "Start recording"}
+          >
+            {voiceState.isRecording ? (
+              <InlineWaveIndicator active size="md" />
+            ) : voiceState.isActive ? (
+              <InlineWaveIndicator active size="md" />
+            ) : (
+              <Mic className="h-5 w-5" />
+            )}
+          </button>
 
           {/* Text Input */}
           <GlassInput
             placeholder={
-              isRecording
+              voiceState.isRecording
                 ? "Listening..."
                 : voiceState.isActive
                   ? "Voice active..."
@@ -329,14 +316,14 @@ export function BottomSheetContent() {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            disabled={isRecording}
+            disabled={voiceState.isRecording}
             className="flex-1"
           />
 
           {/* Send Button */}
           <GlassButton
             onClick={() => handleSendMessage(inputValue)}
-            disabled={!inputValue.trim() || isRecording}
+            disabled={!inputValue.trim() || voiceState.isRecording}
             className="flex-shrink-0 px-3"
           >
             <ArrowUpRight className="h-4 w-4" />
@@ -346,13 +333,13 @@ export function BottomSheetContent() {
         {/* Voice status */}
         {voiceState.isActive && (
           <div className="flex items-center justify-center gap-2 mt-2 text-xs text-white/50">
-            {isRecording && (
+            {voiceState.isRecording && (
               <>
                 <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
                 <span>Recording...</span>
               </>
             )}
-            {!isRecording && voiceState.isActive && (
+            {!voiceState.isRecording && voiceState.isActive && (
               <>
                 <span className="w-2 h-2 rounded-full bg-cyan-glow" />
                 <span>Voice active</span>
