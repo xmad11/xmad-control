@@ -3,7 +3,7 @@
 /* ═══════════════════════════════════════════════════════════════════════════════
    SKALES DEMO PAGE
    Landing page design inspired by skales.app
-   Integrates with existing theme system (light/dark/warm + accent colors)
+   Uses CSS tokens from themes.css - lime brand colors
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 import { Footer } from "@/components/layout/Footer"
@@ -15,14 +15,24 @@ import Link from "next/link"
 // FEATURE CARDS DATA
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const features = [
+interface Feature {
+  icon: React.ComponentType<{ className?: string }>
+  title: string
+  description: string
+  badge?: string
+  accent: AccentColor
+}
+
+type AccentColor = "primary" | "secondary" | "light" | "dark"
+
+const features: Feature[] = [
   {
     icon: Bot,
     title: "Desktop Buddy",
     description:
       "A floating mascot lives on your desktop. Click it to ask anything, or ask it to DO something.",
     badge: "NEW 5.0",
-    accent: "cyan",
+    accent: "primary",
   },
   {
     icon: Brain,
@@ -30,7 +40,7 @@ const features = [
     description:
       "Set a goal and walk away. Autopilot runs a Deep-Dive Interview, builds a Master Plan, self-corrects.",
     badge: "NEW 5.0",
-    accent: "purple",
+    accent: "secondary",
   },
   {
     icon: Mic,
@@ -38,44 +48,51 @@ const features = [
     description:
       "Full-duplex voice interface with Whisper transcription and ElevenLabs TTS playback.",
     badge: "NEW 5.0",
-    accent: "blue",
+    accent: "light",
   },
   {
     icon: Sparkles,
     title: "Custom Skills",
     description: "Describe a skill in plain English and generate it. Hot-reload without restart.",
     badge: "NEW 5.0",
-    accent: "pink",
+    accent: "dark",
   },
   {
     icon: Cpu,
     title: "Lio AI - Code Builder",
     description:
       "Plan, scaffold, run and debug entire projects from chat. Lio writes files and fixes its own errors.",
-    accent: "emerald",
+    accent: "primary",
   },
   {
     icon: Globe,
     title: "Browser Control",
     description:
       "Automate any website with a real Chromium browser. Fill forms, scrape pages, take screenshots.",
-    accent: "azure",
+    accent: "secondary",
   },
   {
     icon: Mail,
     title: "Gmail Integration",
     description: "Read, compose, reply, search, and manage emails via IMAP/SMTP with safety gates.",
-    accent: "rose",
+    accent: "light",
   },
   {
     icon: Calendar,
     title: "Google Calendar",
     description: "Check your schedule, create events, get reminders. Full read/write via OAuth.",
-    accent: "amber",
+    accent: "dark",
   },
 ]
 
-const testimonials = [
+interface Testimonial {
+  id: string
+  quote: string
+  author: string
+  source: string
+}
+
+const testimonials: Testimonial[] = [
   {
     id: "clippy",
     quote: "This was what Clippy was supposed to be, maybe Bonzibuddy.",
@@ -97,20 +114,14 @@ const testimonials = [
 ]
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// ACCENT COLOR MAPPING
+// ACCENT COLOR MAPPING - Uses CSS tokens
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const accentColors: Record<string, string> = {
-  cyan: "var(--glow-cyan)",
-  purple: "var(--glow-purple)",
-  blue: "var(--glow-blue)",
-  pink: "var(--glow-pink)",
-  green: "var(--glow-green)",
-  emerald: "var(--color-accent-emerald)",
-  azure: "var(--color-accent-azure)",
-  rose: "var(--color-accent-rose)",
-  amber: "var(--color-accent-amber)",
-  lavender: "var(--color-accent-lavender)",
+const accentTokens: Record<AccentColor, string> = {
+  primary: "var(--lime-primary)",
+  secondary: "var(--lime-secondary)",
+  light: "var(--lime-light)",
+  dark: "var(--lime-dark)",
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -122,36 +133,36 @@ function HeroSection() {
     <section className="relative min-h-[600px] flex items-center justify-center overflow-hidden">
       {/* Animated background blobs */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-[var(--glow-cyan)] opacity-20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute top-1/2 -right-40 w-80 h-80 bg-[var(--glow-purple)] opacity-20 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute -bottom-40 left-1/3 w-72 h-72 bg-[var(--glow-pink)] opacity-15 rounded-full blur-3xl animate-pulse delay-500" />
+        <div className="absolute -top-40 -left-40 w-96 h-96 bg-[var(--lime-primary)] opacity-20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-1/2 -right-40 w-80 h-80 bg-[var(--lime-secondary)] opacity-20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -bottom-40 left-1/3 w-72 h-72 bg-[var(--lime-light)] opacity-15 rounded-full blur-3xl animate-pulse" />
       </div>
 
       {/* Hero gradient overlay */}
-      <div className="absolute inset-0 bg-[var(--hero-gradient)]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[var(--lime-primary)]/10 via-transparent to-transparent" />
 
-      {/* Content */}
-      <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+      {/* Content - Full width with responsive padding */}
+      <div className="relative z-10 text-center w-full px-[var(--page-padding-x)] md:px-16 lg:px-24">
         {/* Version badge */}
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--fg-10)] border border-[var(--fg-20)] mb-6">
           <span className="text-sm font-medium text-[var(--fg-70)]">v7.0.0</span>
-          <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent-emerald)] text-white font-medium">
+          <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--lime-primary)] text-white font-medium">
             The Foundation
           </span>
         </div>
 
         {/* Main headline */}
-        <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-          <span className="bg-gradient-to-r from-[var(--glow-cyan)] via-[var(--glow-purple)] to-[var(--glow-pink)] bg-clip-text text-transparent">
+        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
+          <span className="bg-gradient-to-r from-[var(--lime-primary)] via-[var(--lime-secondary)] to-[var(--lime-light)] bg-clip-text text-transparent">
             The Foundation
           </span>
         </h1>
 
-        <p className="text-xl md:text-2xl text-[var(--fg-70)] mb-4 max-w-2xl mx-auto">
+        <p className="text-xl md:text-2xl lg:text-3xl text-[var(--fg-70)] mb-4 w-full md:w-4/5 lg:w-3/4 mx-auto">
           Your always-on desktop AI companion for Windows, macOS & Linux.
         </p>
 
-        <p className="text-base text-[var(--text-secondary)] mb-8 max-w-xl mx-auto">
+        <p className="text-base md:text-lg text-[var(--text-secondary)] mb-8 w-full md:w-3/4 lg:w-2/3 mx-auto">
           No Node. No Docker. Zero setup. A floating buddy, autonomous Autopilot, voice chat, custom
           skills - all local. In seconds.
         </p>
@@ -160,16 +171,16 @@ function HeroSection() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             href="#features"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 bg-gradient-to-r from-[var(--glow-cyan)] to-[var(--glow-purple)] text-white hover:shadow-lg hover:shadow-[var(--glow-cyan)]/25 hover:scale-105"
+            className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-medium transition-all duration-300 bg-gradient-to-r from-[var(--lime-primary)] to-[var(--lime-secondary)] text-white hover:shadow-lg hover:shadow-[var(--lime-primary)]/25 hover:scale-105"
           >
             Get Started
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-5 h-5" />
           </Link>
           <Link
             href="https://github.com/skalesapp/skales"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 bg-[var(--fg-10)] border border-[var(--fg-20)] text-[var(--fg)] hover:bg-[var(--fg-20)] hover:border-[var(--fg-30)]"
+            className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-medium transition-all duration-300 bg-[var(--fg-10)] border border-[var(--fg-20)] text-[var(--fg)] hover:bg-[var(--fg-20)] hover:border-[var(--fg-30)]"
           >
             View on GitHub
           </Link>
@@ -179,9 +190,9 @@ function HeroSection() {
   )
 }
 
-function FeatureCard({ feature }: { feature: (typeof features)[0] }) {
+function FeatureCard({ feature }: { feature: Feature }) {
   const Icon = feature.icon
-  const accentColor = accentColors[feature.accent] || accentColors.cyan
+  const accentColor = accentTokens[feature.accent]
 
   return (
     <div
@@ -207,11 +218,12 @@ function FeatureCard({ feature }: { feature: (typeof features)[0] }) {
           <div
             className="p-3 rounded-xl"
             style={{
-              background: `linear-gradient(135deg, ${accentColor}20, ${accentColor}10)`,
-              border: `1px solid ${accentColor}30`,
+              background: `linear-gradient(135deg, color-mix(in srgb, ${accentColor} 20%, transparent), color-mix(in srgb, ${accentColor} 10%, transparent))`,
+              border: `1px solid color-mix(in srgb, ${accentColor} 30%, transparent)`,
+              color: accentColor,
             }}
           >
-            <Icon className="w-6 h-6" style={{ color: accentColor }} />
+            <Icon className="w-6 h-6" />
           </div>
           {feature.badge && (
             <span
@@ -237,20 +249,20 @@ function FeatureCard({ feature }: { feature: (typeof features)[0] }) {
 
 function FeaturesSection() {
   return (
-    <section id="features" className="py-20 px-4">
-      <div className="max-w-6xl mx-auto">
+    <section id="features" className="py-20 px-[var(--page-padding-x)] md:px-16 lg:px-24">
+      <div className="w-full">
         {/* Section header */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[var(--fg)]">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-[var(--fg)]">
             Everything your AI buddy needs. Built in.
           </h2>
-          <p className="text-lg text-[var(--text-secondary)] max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-[var(--text-secondary)] w-full md:w-3/4 lg:w-1/2 mx-auto">
             A complete toolkit for desktop AI automation, all running locally on your machine.
           </p>
         </div>
 
-        {/* Feature grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Feature grid - Full width */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((feature) => (
             <FeatureCard key={feature.title} feature={feature} />
           ))}
@@ -260,12 +272,12 @@ function FeaturesSection() {
   )
 }
 
-function TestimonialCard({ testimonial }: { testimonial: (typeof testimonials)[0] }) {
+function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
   return (
     <div className="p-6 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--fg-10)]">
-      <p className="text-[var(--fg)] mb-4 italic">"{testimonial.quote}"</p>
+      <p className="text-[var(--fg)] mb-4 italic">&quot;{testimonial.quote}&quot;</p>
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--glow-cyan)] to-[var(--glow-purple)] flex items-center justify-center text-white font-bold text-sm">
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--lime-primary)] to-[var(--lime-secondary)] flex items-center justify-center text-white font-bold text-sm">
           {testimonial.author.charAt(0).toUpperCase()}
         </div>
         <div>
@@ -279,11 +291,11 @@ function TestimonialCard({ testimonial }: { testimonial: (typeof testimonials)[0
 
 function TestimonialsSection() {
   return (
-    <section className="py-20 px-4 bg-[var(--bg-secondary)]">
-      <div className="max-w-6xl mx-auto">
+    <section className="py-20 px-[var(--page-padding-x)] md:px-16 lg:px-24 bg-[var(--bg-secondary)]">
+      <div className="w-full">
         {/* Section header */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[var(--fg)]">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-[var(--fg)]">
             What the community says
           </h2>
         </div>
@@ -299,16 +311,32 @@ function TestimonialsSection() {
   )
 }
 
+interface ComparisonRow {
+  id: string
+  feature: string
+  skales: string
+  others: string
+}
+
+const comparisonData: ComparisonRow[] = [
+  { id: "setup", feature: "Setup Time", skales: "30 seconds", others: "3+ hours" },
+  { id: "docker", feature: "Docker Required", skales: "No", others: "Yes" },
+  { id: "desktop", feature: "Desktop App", skales: "Native", others: "Web only" },
+  { id: "voice", feature: "Voice Interface", skales: "Full-duplex", others: "Basic" },
+  { id: "local", feature: "Local & Private", skales: "100%", others: "Varies" },
+  { id: "skills", feature: "Custom Skills", skales: "Unlimited", others: "Limited" },
+]
+
 function ComparisonSection() {
   return (
-    <section className="py-20 px-4">
-      <div className="max-w-4xl mx-auto">
+    <section className="py-20 px-[var(--page-padding-x)] md:px-16 lg:px-24">
+      <div className="w-full lg:w-4/5 mx-auto">
         {/* Section header */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[var(--fg)]">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-[var(--fg)]">
             We hate complex setups. So we killed them.
           </h2>
-          <p className="text-lg text-[var(--text-secondary)]">
+          <p className="text-lg md:text-xl text-[var(--text-secondary)]">
             How Skales compares to the rest of the AI agent landscape.
           </p>
         </div>
@@ -321,7 +349,7 @@ function ComparisonSection() {
                 <th className="px-6 py-4 text-left text-sm font-semibold text-[var(--fg)]">
                   Feature
                 </th>
-                <th className="px-6 py-4 text-center text-sm font-semibold text-[var(--glow-cyan)]">
+                <th className="px-6 py-4 text-center text-sm font-semibold text-[var(--lime-primary)]">
                   Skales
                 </th>
                 <th className="px-6 py-4 text-center text-sm font-medium text-[var(--text-secondary)]">
@@ -330,17 +358,10 @@ function ComparisonSection() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--fg-10)]">
-              {[
-                { id: "setup", feature: "Setup Time", skales: "30 seconds", others: "3+ hours" },
-                { id: "docker", feature: "Docker Required", skales: "No", others: "Yes" },
-                { id: "desktop", feature: "Desktop App", skales: "Native", others: "Web only" },
-                { id: "voice", feature: "Voice Interface", skales: "Full-duplex", others: "Basic" },
-                { id: "local", feature: "Local & Private", skales: "100%", others: "Varies" },
-                { id: "skills", feature: "Custom Skills", skales: "Unlimited", others: "Limited" },
-              ].map((row) => (
+              {comparisonData.map((row) => (
                 <tr key={row.id} className="hover:bg-[var(--fg-5)] transition-colors">
                   <td className="px-6 py-4 text-sm text-[var(--fg)]">{row.feature}</td>
-                  <td className="px-6 py-4 text-center text-sm font-medium text-[var(--glow-cyan)]">
+                  <td className="px-6 py-4 text-center text-sm font-medium text-[var(--lime-primary)]">
                     {row.skales}
                   </td>
                   <td className="px-6 py-4 text-center text-sm text-[var(--text-tertiary)]">
@@ -358,11 +379,11 @@ function ComparisonSection() {
 
 function CTASection() {
   return (
-    <section className="py-20 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="relative rounded-3xl overflow-hidden p-12 text-center">
+    <section className="py-20 px-[var(--page-padding-x)] md:px-16 lg:px-24">
+      <div className="w-full lg:w-4/5 mx-auto">
+        <div className="relative rounded-3xl overflow-hidden p-12 md:p-16 text-center">
           {/* Gradient background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[var(--glow-cyan)] via-[var(--glow-purple)] to-[var(--glow-pink)] opacity-90" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[var(--lime-primary)] via-[var(--lime-secondary)] to-[var(--lime-dark)] opacity-90" />
 
           {/* Pattern overlay */}
           <div
@@ -374,10 +395,10 @@ function CTASection() {
 
           {/* Content */}
           <div className="relative z-10">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
               Ready to get started?
             </h2>
-            <p className="text-lg text-white/80 mb-8 max-w-xl mx-auto">
+            <p className="text-lg md:text-xl text-white/80 mb-8 w-full md:w-3/4 lg:w-1/2 mx-auto">
               Free for personal use. Source available under BSL-1.1. No Docker. No Node. Zero setup.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

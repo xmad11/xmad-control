@@ -1,6 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════════════════
    MEMORY SURFACE - XMAD Control Dashboard
    Memory monitoring with RAM stats and top processes
+   Two widgets: 1-5 and 6-10, each with Memory/CPU tabs
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 "use client"
@@ -143,12 +144,22 @@ export function MemorySurface() {
         </WidgetCarousel>
       </div>
 
-      {/* Row 3 - Top Processes */}
+      {/* Row 3 - Top Processes 1-5 */}
       <div className="mb-4">
-        <WidgetCarousel gap="sm" itemsPerView={{ base: 1, sm: 1, lg: 2 }}>
-          <TopProcessesWidget type="memory" processes={processesData.memory} />
-          <TopProcessesWidget type="cpu" processes={processesData.cpu} />
-        </WidgetCarousel>
+        <TopProcessesWidget
+          memoryProcesses={processesData.memory}
+          cpuProcesses={processesData.cpu}
+          offset={0}
+        />
+      </div>
+
+      {/* Row 4 - Top Processes 6-10 */}
+      <div className="mb-4">
+        <TopProcessesWidget
+          memoryProcesses={processesData.memory}
+          cpuProcesses={processesData.cpu}
+          offset={5}
+        />
       </div>
     </>
   )

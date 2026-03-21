@@ -1,6 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════════════════
    Top Processes Widget - Shows top memory/CPU consuming processes
-   With tabs for Usage view and Process Management view
+   With Memory/CPU tabs, both showing manage-style with kill/restart
+   Supports offset for showing processes 6-10 in second widget
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 "use client"
@@ -9,23 +10,25 @@ import { GlassWidgetBase } from "@/components/widgets/base-widget"
 import { cn } from "@/lib/utils"
 import { Cpu, MemoryStick, RefreshCw, Skull } from "lucide-react"
 import * as React from "react"
+import { createPortal } from "react-dom"
 
 export interface ProcessInfo {
   name: string
   pid: number
   usage: number // MB for memory, % for CPU
-  cpu?: number // CPU percentage (for memory tab)
-  memory?: number // Memory MB (for CPU tab)
+  cpu?: number // CPU percentage (for memory processes)
+  memory?: number // Memory MB (for CPU processes)
   details?: string
 }
 
 interface TopProcessesWidgetProps {
-  processes: ProcessInfo[]
-  type: "memory" | "cpu"
+  memoryProcesses: ProcessInfo[]
+  cpuProcesses: ProcessInfo[]
+  offset?: number // Start index (0 for 1-5, 5 for 6-10)
   className?: string
 }
 
-// Confirmation Popup Component
+// Confirmation Popup Component - uses portal for proper positioning
 function ConfirmPopup({
   isOpen,
   processName,
@@ -39,27 +42,58 @@ function ConfirmPopup({
   onConfirm: () => void
   onCancel: () => void
 }) {
-  if (!isOpen) return null
+  const [mounted, setMounted] = React.useState(false)
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-slate-900/95 border border-white/20 rounded-xl p-6 max-w-sm w-full mx-4 shadow-2xl">
-        <div className="flex items-center gap-3 mb-4">
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!isOpen || !mounted) return null
+
+  const content = (
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center"
+      style={{
+        backgroundColor: "rgba(0, 0, 0, 0.7)",
+        padding: "1rem",
+        boxSizing: "border-box",
+      }}
+      onClick={onCancel}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") onCancel()
+      }}
+      role="button"
+      tabIndex={0}
+    >
+      <div
+        className="bg-slate-900 border border-white/20 rounded-2xl p-6 shadow-2xl"
+        style={{
+          width: "100%",
+          maxWidth: "28rem",
+          marginLeft: "auto",
+          marginRight: "auto",
+        }}
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+      >
+        <div className="flex items-center gap-4 mb-4">
           <div
             className={cn(
-              "w-10 h-10 rounded-full flex items-center justify-center",
+              "w-12 h-12 rounded-full flex items-center justify-center shrink-0",
               action === "kill" ? "bg-red-500/20" : "bg-amber-500/20"
             )}
           >
             <Skull
-              className={cn("w-5 h-5", action === "kill" ? "text-red-400" : "text-amber-400")}
+              className={cn("w-6 h-6", action === "kill" ? "text-red-400" : "text-amber-400")}
             />
           </div>
-          <div>
-            <h3 className="text-white font-medium">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-white text-lg font-medium">
               Confirm {action === "kill" ? "Kill" : "Restart"}
             </h3>
-            <p className="text-white/50 text-sm">{processName}</p>
+            <p className="text-white/50 text-sm truncate">{processName}</p>
           </div>
         </div>
 
@@ -73,7 +107,7 @@ function ConfirmPopup({
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 px-4 py-2 rounded-lg bg-white/10 text-white/70 hover:bg-white/15 transition-colors text-sm"
+            className="flex-1 px-4 py-3 rounded-xl bg-white/10 text-white/70 hover:bg-white/15 transition-colors text-sm font-medium"
           >
             Cancel
           </button>
@@ -81,7 +115,7 @@ function ConfirmPopup({
             type="button"
             onClick={onConfirm}
             className={cn(
-              "flex-1 px-4 py-2 rounded-lg transition-colors text-sm font-medium",
+              "flex-1 px-4 py-3 rounded-xl transition-colors text-sm font-medium",
               action === "kill"
                 ? "bg-red-500/20 text-red-400 hover:bg-red-500/30"
                 : "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
@@ -93,6 +127,8 @@ function ConfirmPopup({
       </div>
     </div>
   )
+
+  return createPortal(content, document.body)
 }
 
 // Process Item with action buttons
@@ -100,47 +136,45 @@ function ProcessItem({
   process,
   index,
   type,
-  showActions,
   onKill,
   onRestart,
 }: {
   process: ProcessInfo
   index: number
   type: "memory" | "cpu"
-  showActions: boolean
   onKill: () => void
   onRestart: () => void
 }) {
   const maxUsage = type === "memory" ? 500 : 100 // 500MB max or 100% CPU
   const usagePercent = Math.min((process.usage / maxUsage) * 100, 100)
 
-  // RAM progress bar color matches gauge (green gradient)
+  // Progress bar color - green for both
   const progressColor = "bg-gradient-to-r from-emerald-400 to-green-400"
 
   return (
-    <div className="flex items-center justify-between p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
-      <div className="flex items-center gap-2 flex-1 min-w-0">
-        <span className="text-white/40 text-xs w-4 tabular-nums">{index + 1}</span>
+    <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        <span className="text-white/50 text-sm font-medium w-6 tabular-nums">{index + 1}</span>
         <div className="flex-1 min-w-0">
-          <div className="text-white/80 text-sm truncate">{process.name}</div>
-          <div className="flex items-center gap-2 text-white/40 text-xs">
+          <div className="text-white/90 text-sm font-medium truncate">{process.name}</div>
+          <div className="flex items-center gap-3 text-white/40 text-xs mt-0.5">
             <span>PID: {process.pid}</span>
             {type === "memory" && process.cpu !== undefined && (
-              <span className="text-cyan-400/60">CPU: {process.cpu.toFixed(1)}%</span>
+              <span className="text-cyan-400/70">CPU: {process.cpu.toFixed(1)}%</span>
             )}
             {type === "cpu" && process.memory !== undefined && (
-              <span className="text-green-400/60">RAM: {process.memory}MB</span>
+              <span className="text-green-400/70">RAM: {process.memory}MB</span>
             )}
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 shrink-0">
-        <div className="flex flex-col items-end gap-1">
-          <span className="text-white tabular-nums text-sm">
+      <div className="flex items-center gap-3 shrink-0">
+        <div className="flex flex-col items-end gap-1.5">
+          <span className="text-white tabular-nums text-sm font-medium">
             {type === "memory" ? `${Math.round(process.usage)} MB` : `${process.usage.toFixed(1)}%`}
           </span>
-          <div className="w-20 h-1.5 bg-white/10 rounded-full overflow-hidden">
+          <div className="w-24 h-2 bg-white/10 rounded-full overflow-hidden">
             <div
               className={cn("h-full rounded-full transition-all", progressColor)}
               style={{ width: `${usagePercent}%` }}
@@ -148,33 +182,36 @@ function ProcessItem({
           </div>
         </div>
 
-        {showActions && (
-          <div className="flex items-center gap-1 ml-2">
-            <button
-              type="button"
-              onClick={onRestart}
-              className="p-1.5 rounded-lg bg-amber-500/10 text-amber-400/60 hover:bg-amber-500/20 hover:text-amber-400 transition-colors"
-              title="Restart process"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-            </button>
-            <button
-              type="button"
-              onClick={onKill}
-              className="p-1.5 rounded-lg bg-red-500/10 text-red-400/60 hover:bg-red-500/20 hover:text-red-400 transition-colors"
-              title="Kill process"
-            >
-              <Skull className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={onRestart}
+            className="p-2 rounded-xl bg-amber-500/10 text-amber-400/70 hover:bg-amber-500/20 hover:text-amber-400 transition-colors"
+            title="Restart process"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={onKill}
+            className="p-2 rounded-xl bg-red-500/10 text-red-400/70 hover:bg-red-500/20 hover:text-red-400 transition-colors"
+            title="Kill process"
+          >
+            <Skull className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </div>
   )
 }
 
-function TopProcessesWidget({ processes, type, className }: TopProcessesWidgetProps) {
-  const [activeTab, setActiveTab] = React.useState<"usage" | "manage">("usage")
+function TopProcessesWidget({
+  memoryProcesses,
+  cpuProcesses,
+  offset = 0,
+  className,
+}: TopProcessesWidgetProps) {
+  const [activeTab, setActiveTab] = React.useState<"memory" | "cpu">("memory")
   const [confirmPopup, setConfirmPopup] = React.useState<{
     isOpen: boolean
     process: ProcessInfo | null
@@ -193,7 +230,6 @@ function TopProcessesWidget({ processes, type, className }: TopProcessesWidgetPr
     if (!confirmPopup.process) return
 
     try {
-      // Call API to kill/restart process
       const res = await fetch("/api/xmad/system/processes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -204,7 +240,6 @@ function TopProcessesWidget({ processes, type, className }: TopProcessesWidgetPr
       })
 
       if (res.ok) {
-        // Process action completed
         console.log(`Process ${confirmPopup.process.pid} ${confirmPopup.action}ed`)
       }
     } catch (err) {
@@ -218,62 +253,67 @@ function TopProcessesWidget({ processes, type, className }: TopProcessesWidgetPr
     setConfirmPopup({ isOpen: false, process: null, action: "kill" })
   }
 
-  const Icon = type === "memory" ? MemoryStick : Cpu
-  const glowColor = "green" // Match RAM gauge color
+  // Get current processes based on active tab
+  const currentProcesses = activeTab === "memory" ? memoryProcesses : cpuProcesses
+  const displayProcesses = currentProcesses.slice(offset, offset + 5)
+
+  // Calculate rank display (1-5 or 6-10)
+  const rankStart = offset + 1
+  const rankEnd = offset + 5
 
   return (
     <>
-      <GlassWidgetBase className={className} size="md" width="md" glowColor={glowColor}>
-        {/* Tabs */}
-        <div className="flex items-center justify-center gap-1 mb-4">
+      <GlassWidgetBase className={className} size="md" width="md" glowColor="green">
+        {/* Tabs - Memory | CPU */}
+        <div className="flex items-center justify-center gap-2 mb-4">
           <button
             type="button"
-            onClick={() => setActiveTab("usage")}
+            onClick={() => setActiveTab("memory")}
             className={cn(
-              "px-4 py-1.5 rounded-full text-sm transition-all",
-              activeTab === "usage"
-                ? "bg-green-500/20 text-green-400"
+              "flex items-center gap-2 px-5 py-2 rounded-full text-sm font-medium transition-all",
+              activeTab === "memory"
+                ? "bg-green-500/20 text-green-400 ring-1 ring-green-500/30"
                 : "bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/70"
             )}
           >
-            <Icon className="w-3.5 h-3.5 inline mr-1.5" />
-            Usage
+            <MemoryStick className="w-4 h-4" />
+            Memory
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab("manage")}
+            onClick={() => setActiveTab("cpu")}
             className={cn(
-              "px-4 py-1.5 rounded-full text-sm transition-all",
-              activeTab === "manage"
-                ? "bg-amber-500/20 text-amber-400"
+              "flex items-center gap-2 px-5 py-2 rounded-full text-sm font-medium transition-all",
+              activeTab === "cpu"
+                ? "bg-cyan-500/20 text-cyan-400 ring-1 ring-cyan-500/30"
                 : "bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/70"
             )}
           >
-            <RefreshCw className="w-3.5 h-3.5 inline mr-1.5" />
-            Manage
+            <Cpu className="w-4 h-4" />
+            CPU
           </button>
+        </div>
+
+        {/* Rank indicator */}
+        <div className="text-center text-white/30 text-xs mb-3">
+          Processes #{rankStart} - #{rankEnd}
         </div>
 
         {/* Process List */}
         <div className="space-y-2">
-          {processes.length > 0 ? (
-            processes
-              .slice(0, 5)
-              .map((process, i) => (
-                <ProcessItem
-                  key={`${process.pid}-${i}`}
-                  process={process}
-                  index={i}
-                  type={type}
-                  showActions={activeTab === "manage"}
-                  onKill={() => handleKill(process)}
-                  onRestart={() => handleRestart(process)}
-                />
-              ))
+          {displayProcesses.length > 0 ? (
+            displayProcesses.map((process, i) => (
+              <ProcessItem
+                key={`${process.pid}-${i}`}
+                process={process}
+                index={offset + i}
+                type={activeTab}
+                onKill={() => handleKill(process)}
+                onRestart={() => handleRestart(process)}
+              />
+            ))
           ) : (
-            <div className="text-center py-6 text-white/40 text-sm">
-              {activeTab === "usage" ? "Loading processes..." : "No processes to manage"}
-            </div>
+            <div className="text-center py-8 text-white/40 text-sm">No processes available</div>
           )}
         </div>
       </GlassWidgetBase>
