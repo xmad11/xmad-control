@@ -61,6 +61,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
   const recordTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const loopTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const isActiveRef = useRef(false) // Ref for async callback checks
+  const loopRunningRef = useRef(false) // Guard against parallel loop execution
 
   // Option refs
   const ttsEnabledRef = useRef(ttsEnabled)
@@ -136,39 +137,74 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       console.warn("[Voice] ElevenLabs failed, using browser TTS")
     }
 
-    // Browser SpeechSynthesis fallback - free, works on all devices
+    // Unlock iOS audio output by playing a silent sound first
+    try {
+      const silentCtx = new AudioContext()
+      const buf = silentCtx.createBuffer(1, 1, 22050)
+      const src = silentCtx.createBufferSource()
+      src.buffer = buf
+      src.connect(silentCtx.destination)
+      src.start(0)
+      await new Promise((r) => setTimeout(r, 100))
+      silentCtx.close()
+    } catch {}
+
+    // Browser SpeechSynthesis fallback
     await new Promise<void>((resolve) => {
       if (!window.speechSynthesis) {
+        console.warn("[Voice] speechSynthesis not available")
         resolve()
         return
       }
-
-      // Cancel any ongoing speech
       window.speechSynthesis.cancel()
 
-      const utterance = new SpeechSynthesisUtterance(text.slice(0, 4000))
-      utterance.rate = 1.0
-      utterance.pitch = 1.0
-      utterance.volume = 1.0
+      // Wait for voices to load (required on some browsers)
+      const doSpeak = () => {
+        const utterance = new SpeechSynthesisUtterance(text.slice(0, 4000))
+        utterance.rate = 1.0
+        utterance.pitch = 1.0
+        utterance.volume = 1.0
+        utterance.lang = "en-US"
 
-      // Try to find a good English voice
+        const voices = window.speechSynthesis.getVoices()
+        const preferred =
+          voices.find(
+            (v) =>
+              v.lang.startsWith("en") &&
+              (v.name.includes("Samantha") ||
+                v.name.includes("Google US") ||
+                v.name.includes("Aaron") ||
+                v.name.includes("Natural"))
+          ) || voices.find((v) => v.lang.startsWith("en"))
+        if (preferred) utterance.voice = preferred
+
+        console.log(
+          "[Voice] Browser TTS voices available:",
+          voices.length,
+          "using:",
+          preferred?.name ?? "default"
+        )
+
+        utterance.onend = () => setTimeout(resolve, 800)
+        utterance.onerror = (e) => {
+          console.warn("[Voice] SpeechSynthesis error:", e.error)
+          resolve()
+        }
+        window.speechSynthesis.speak(utterance)
+        console.log("[Voice] Browser TTS speaking:", text.slice(0, 30))
+
+        // Failsafe
+        setTimeout(resolve, 35000)
+      }
+
       const voices = window.speechSynthesis.getVoices()
-      const preferred =
-        voices.find(
-          (v) =>
-            v.lang.startsWith("en") &&
-            (v.name.includes("Samantha") || v.name.includes("Google") || v.name.includes("Natural"))
-        ) ||
-        voices.find((v) => v.lang.startsWith("en")) ||
-        voices[0]
-      if (preferred) utterance.voice = preferred
-
-      utterance.onend = () => setTimeout(resolve, 800)
-      utterance.onerror = () => resolve()
-      window.speechSynthesis.speak(utterance)
-
-      // Failsafe timeout (30s max)
-      setTimeout(resolve, 30000)
+      if (voices.length > 0) {
+        doSpeak()
+      } else {
+        window.speechSynthesis.onvoiceschanged = () => doSpeak()
+        // If voices never load, speak anyway after 500ms
+        setTimeout(doSpeak, 500)
+      }
     })
   }, [])
 
@@ -352,9 +388,17 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
 
   // ── Continuous session loop (uses ref for isActive check) ────────────────────────────────
   const runContinuousLoop = useCallback(async () => {
+    // Guard against parallel execution
+    if (loopRunningRef.current) {
+      console.log("[Voice] Loop: already running, skipping")
+      return
+    }
+    loopRunningRef.current = true
+
     // Use ref, not state - avoids stale closure
     if (!isActiveRef.current) {
       console.log("[Voice] Loop: not active, returning")
+      loopRunningRef.current = false
       return
     }
 
@@ -389,23 +433,31 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       streamRef.current.getTracks().forEach((t) => t.stop())
     }
 
-    if (!isActiveRef.current) return
+    if (!isActiveRef.current) {
+      loopRunningRef.current = false
+      return
+    }
 
     // Process the recording
     console.log("[Voice] Loop: processing recording...")
     await processRecording()
 
-    if (!isActiveRef.current) return
+    if (!isActiveRef.current) {
+      loopRunningRef.current = false
+      return
+    }
 
     // Continue loop after delay if continuous mode
     if (continuousRef.current && isActiveRef.current) {
       console.log("[Voice] Loop: scheduling next cycle in 500ms...")
       loopTimeoutRef.current = setTimeout(() => {
+        loopRunningRef.current = false
         if (isActiveRef.current) {
           runContinuousLoop()
         }
       }, 500)
     } else {
+      loopRunningRef.current = false
       setPhase("idle")
     }
   }, [startRecording, processRecording])
@@ -434,6 +486,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     console.log("[Voice] Session stopping...")
     // Set ref first
     isActiveRef.current = false
+    loopRunningRef.current = false
     // Then state
     setIsActive(false)
 
