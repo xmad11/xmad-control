@@ -190,6 +190,12 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
           console.warn("[Voice] SpeechSynthesis error:", e.error)
           resolve()
         }
+        // Unlock media audio channel on iOS
+        const unlock = new Audio(
+          "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="
+        )
+        unlock.volume = 0.01
+        unlock.play().catch(() => {})
         window.speechSynthesis.speak(utterance)
         console.log("[Voice] Browser TTS speaking:", text.slice(0, 30))
 
