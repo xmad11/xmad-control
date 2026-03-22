@@ -97,11 +97,12 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     }, 3000)
   }, [])
 
-  // ── TTS (uses Audio element for iOS Safari compatibility) ──────────────────────
+  // ── TTS (ElevenLabs with browser SpeechSynthesis fallback) ──────────────────────
   const speak = useCallback(async (text: string) => {
     if (!text.trim()) return
     setPhase("speaking")
 
+    // Try ElevenLabs first, fall back to browser SpeechSynthesis
     try {
       const res = await fetch("/api/tts", {
         method: "POST",
@@ -109,38 +110,75 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
         body: JSON.stringify({ text: text.slice(0, 4000) }),
       })
 
-      if (!res.ok) throw new Error(`TTS error: ${res.status}`)
-
-      const blob = await res.blob()
-      const url = URL.createObjectURL(blob)
-
-      await new Promise<void>((resolve, reject) => {
-        const audio = new Audio(url)
-        currentAudioRef.current = audio
-        audio.onended = () => {
-          URL.revokeObjectURL(url)
-          currentAudioRef.current = null
-          resolve()
-        }
-        audio.onerror = (e) => {
-          URL.revokeObjectURL(url)
-          currentAudioRef.current = null
-          reject(new Error(`Audio playback failed: ${JSON.stringify(e)}`))
-        }
-        // iOS Safari requires play() to be called from user gesture context
-        // but since we're in a continuous loop started by user, it should work
-        audio.play().catch(reject)
-      })
-    } catch (err) {
-      console.warn("[Voice] TTS failed:", err instanceof Error ? err.message : JSON.stringify(err))
-      // TTS failure is non-fatal - conversation continues
+      if (res.ok) {
+        const blob = await res.blob()
+        const url = URL.createObjectURL(blob)
+        await new Promise<void>((resolve) => {
+          const audio = new Audio(url)
+          currentAudioRef.current = audio
+          audio.onended = () => {
+            URL.revokeObjectURL(url)
+            currentAudioRef.current = null
+            resolve()
+          }
+          audio.onerror = () => {
+            URL.revokeObjectURL(url)
+            currentAudioRef.current = null
+            resolve()
+          }
+          audio.play().catch(() => resolve())
+        })
+        return
+      }
+      // Fall through to browser TTS if ElevenLabs fails
+      console.warn("[Voice] ElevenLabs unavailable, using browser TTS")
+    } catch {
+      console.warn("[Voice] ElevenLabs failed, using browser TTS")
     }
+
+    // Browser SpeechSynthesis fallback - free, works on all devices
+    await new Promise<void>((resolve) => {
+      if (!window.speechSynthesis) {
+        resolve()
+        return
+      }
+
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel()
+
+      const utterance = new SpeechSynthesisUtterance(text.slice(0, 4000))
+      utterance.rate = 1.0
+      utterance.pitch = 1.0
+      utterance.volume = 1.0
+
+      // Try to find a good English voice
+      const voices = window.speechSynthesis.getVoices()
+      const preferred =
+        voices.find(
+          (v) =>
+            v.lang.startsWith("en") &&
+            (v.name.includes("Samantha") || v.name.includes("Google") || v.name.includes("Natural"))
+        ) ||
+        voices.find((v) => v.lang.startsWith("en")) ||
+        voices[0]
+      if (preferred) utterance.voice = preferred
+
+      utterance.onend = () => resolve()
+      utterance.onerror = () => resolve()
+      window.speechSynthesis.speak(utterance)
+
+      // Failsafe timeout (30s max)
+      setTimeout(resolve, 30000)
+    })
   }, [])
 
   const stopSpeaking = useCallback(() => {
     if (currentAudioRef.current) {
       currentAudioRef.current.pause()
       currentAudioRef.current = null
+    }
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.cancel()
     }
   }, [])
 
