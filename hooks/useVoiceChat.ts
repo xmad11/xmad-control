@@ -1,8 +1,8 @@
-/* ═══════════════════════════════════════════════════════════════════════════════
-   USE VOICE CHAT - Continuous conversation mode
-   Flow: tap to start → speak → auto-stop → STT → AI → TTS → listen again
-   Stop: tap again to end session
-   ═══════════════════════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════════════════════════════════
+ * USE VOICE CHAT - Continuous conversation mode
+ * Flow: tap to start → speak → auto-stop → STT → AI → TTS → listen again
+ * Stop: tap again to end session
+ * ═══════════════════════════════════════════════════════════════════════════════════════ */
 
 "use client"
 
@@ -15,7 +15,6 @@ export interface UseVoiceChatOptions {
   onAIResponse?: (text: string) => void
   ttsEnabled?: boolean
   continuous?: boolean
-  /** Max recording time in ms before auto-stop */
   maxRecordTime?: number
 }
 
@@ -45,7 +44,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     language = "en",
     ttsEnabled = false,
     continuous = true,
-    maxRecordTime = 15000, // 15 seconds max recording
+    maxRecordTime = 15000,
   } = options
 
   const [phase, setPhase] = useState<VoicePhase>("idle")
@@ -53,7 +52,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
   const [transcript, setTranscript] = useState("")
   const [isActive, setIsActive] = useState(false)
 
-  // Refs
+  // Refs - all refs for stable access in async callbacks
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
   const audioContextRef = useRef<AudioContext | null>(null)
@@ -62,8 +61,9 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
   const mimeTypeRef = useRef<string>("")
   const recordTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const loopTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const isActiveRef = useRef(false) // Ref for async callback checks
 
-  // Option refs for stable callbacks
+  // Option refs
   const ttsEnabledRef = useRef(ttsEnabled)
   const continuousRef = useRef(continuous)
   const onTranscriptRef = useRef(onTranscript)
@@ -82,13 +82,18 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     !!window.MediaRecorder
 
   const handleError = useCallback((msg: string) => {
-    console.error("[VoiceChat]", msg)
+    console.error("[VoiceChat Error]", msg)
     setError(msg)
     setPhase("error")
     setTranscript(`Error: ${msg}`)
     onErrorRef.current?.(msg)
+    // Auto-recover after 3s
     setTimeout(() => {
-      setPhase("idle")
+      if (isActiveRef.current) {
+        setPhase("listening")
+      } else {
+        setPhase("idle")
+      }
       setError(null)
     }, 3000)
   }, [])
@@ -125,7 +130,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
         source.start(0)
       })
     } catch (err) {
-      console.warn("[VoiceChat] TTS failed:", err)
+      console.warn("[Voice] TTS failed:", err)
     } finally {
       currentSourceRef.current = null
     }
@@ -153,7 +158,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     return data.message as string
   }, [])
 
-  // ── STT ────────────────────────────────────────────────────────────────────────
+  // ── STT ────────────────────────────────────────────────────────────────────────────────
   const transcribeBlob = useCallback(
     async (blob: Blob): Promise<string> => {
       setPhase("processing")
@@ -301,26 +306,34 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     }
   }, [])
 
-  // ── Continuous session loop ───────────────────────────────────────────────────
+  // ── Continuous session loop (uses ref for isActive check) ────────────────────────────────
   const runContinuousLoop = useCallback(async () => {
-    if (!isActive) return
+    // Use ref, not state - avoids stale closure
+    if (!isActiveRef.current) {
+      console.log("[Voice] Loop: not active, returning")
+      return
+    }
 
+    console.log("[Voice] Loop: starting recording...")
     await startRecording()
 
-    // Wait for recording to stop
+    // Wait for recording to stop (either timeout or manual)
     await new Promise<void>((resolve) => {
       const checkStopped = () => {
         if (mediaRecorderRef.current?.state !== "recording") {
+          console.log("[Voice] Loop: recording stopped detected")
           resolve()
         } else {
           setTimeout(checkStopped, 100)
         }
       }
+
       // Also resolve when recorder.onstop fires
-      const originalOnStop = mediaRecorderRef.current?.onstop
-      if (mediaRecorderRef.current) {
-        mediaRecorderRef.current.onstop = (e) => {
-          originalOnStop?.(e)
+      const recorder = mediaRecorderRef.current
+      if (recorder) {
+        const originalOnStop = recorder.onstop
+        recorder.onstop = (e: Event) => {
+          if (originalOnStop) originalOnStop.call(recorder, e)
           resolve()
         }
       }
@@ -332,22 +345,26 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       streamRef.current.getTracks().forEach((t) => t.stop())
     }
 
-    if (!isActive) return
+    if (!isActiveRef.current) return
 
     // Process the recording
+    console.log("[Voice] Loop: processing recording...")
     await processRecording()
 
-    if (!isActive) return
+    if (!isActiveRef.current) return
 
-    // Continue loop after delay
-    if (continuousRef.current) {
+    // Continue loop after delay if continuous mode
+    if (continuousRef.current && isActiveRef.current) {
+      console.log("[Voice] Loop: scheduling next cycle in 500ms...")
       loopTimeoutRef.current = setTimeout(() => {
-        if (isActive) runContinuousLoop()
+        if (isActiveRef.current) {
+          runContinuousLoop()
+        }
       }, 500)
     } else {
       setPhase("idle")
     }
-  }, [isActive, startRecording, processRecording])
+  }, [startRecording, processRecording])
 
   // ── Session controls ──────────────────────────────────────────────────────────
   const startSession = useCallback(async () => {
@@ -355,8 +372,11 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       handleError("Voice not supported")
       return
     }
-    if (isActive) return
+    if (isActiveRef.current) return // Already running
 
+    // Set ref FIRST (for immediate use in loop)
+    isActiveRef.current = true
+    // Then set state (for UI)
     setIsActive(true)
     setError(null)
     setTranscript("")
@@ -364,10 +384,13 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
 
     // Start the loop
     runContinuousLoop()
-  }, [isSupported, isActive, handleError, runContinuousLoop])
+  }, [isSupported, handleError, runContinuousLoop])
 
   const stopSession = useCallback(() => {
     console.log("[Voice] Session stopping...")
+    // Set ref first
+    isActiveRef.current = false
+    // Then state
     setIsActive(false)
 
     // Clear timeouts
