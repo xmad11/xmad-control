@@ -208,8 +208,11 @@ export function useAiDockController({
     setDockState("sheet")
     setShowIndicator(false)
     if (indicatorTimerRef.current) clearTimeout(indicatorTimerRef.current)
-    // Clear transition after animation completes
-    setTimeout(() => setIsTransitioning(false), aiDockTokens.motion.sheetEnter)
+    // Clear transition after animation completes (store ref for cleanup)
+    indicatorTimerRef.current = setTimeout(
+      () => setIsTransitioning(false),
+      aiDockTokens.motion.sheetEnter
+    )
   }, [])
 
   const closeSheet = useCallback(() => {
@@ -217,8 +220,12 @@ export function useAiDockController({
     setIsSheetOpen(false)
     setDockState("idle")
     setShowIndicator(false)
-    // Clear transition after animation completes
-    setTimeout(() => setIsTransitioning(false), aiDockTokens.motion.sheetExit)
+    // Clear transition after animation completes (store ref for cleanup)
+    if (indicatorTimerRef.current) clearTimeout(indicatorTimerRef.current)
+    indicatorTimerRef.current = setTimeout(
+      () => setIsTransitioning(false),
+      aiDockTokens.motion.sheetExit
+    )
   }, [])
 
   // Clear hold timer helper

@@ -248,6 +248,13 @@ export function SheetProvider({ children }: { children: ReactNode }) {
     }))
   }, [isRecording, isSpeaking, voicePhase, liveTokens, userTranscript])
 
+  // Cleanup voice session on unmount
+  useEffect(() => {
+    return () => {
+      stopSession()
+    }
+  }, [stopSession])
+
   return (
     <SheetContext.Provider
       value={{

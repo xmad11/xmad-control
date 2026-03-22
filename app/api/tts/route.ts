@@ -83,10 +83,14 @@ export async function POST(req: Request) {
       return await callDeepgram(text, voiceId || DEFAULT_DEEPGRAM_VOICE, deepgramKey)
     }
 
-    // Auto: Try Deepgram first, then ElevenLabs
+    // Auto: Try Deepgram first, then ElevenLabs (with fallback)
     if (deepgramKey) {
-      const result = await callDeepgram(text, voiceId || DEFAULT_DEEPGRAM_VOICE, deepgramKey)
-      return result
+      try {
+        return await callDeepgram(text, voiceId || DEFAULT_DEEPGRAM_VOICE, deepgramKey)
+      } catch (e) {
+        console.error("[TTS] Deepgram failed, trying ElevenLabs fallback:", e)
+        // Fall through to ElevenLabs
+      }
     }
 
     if (elevenLabsKey) {

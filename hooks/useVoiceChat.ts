@@ -132,6 +132,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
   const loopRunningRef = useRef(false)
   const audioContextRef = useRef<AudioContext | null>(null)
   const silenceDetectorRef = useRef<{ stop: () => void } | null>(null)
+  const isRecordingRef = useRef(false)
 
   // Streaming TTS queue refs
   const ttsQueueRef = useRef<string[]>([])
@@ -699,7 +700,14 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       if (e.data.size > 0) audioChunksRef.current.push(e.data)
     }
 
+    // Set onstop handler BEFORE recorder.start() to avoid race condition
+    recorder.onstop = () => {
+      console.log("[Voice] Recorder onstop fired")
+      isRecordingRef.current = false
+    }
+
     recorder.start(100) // Collect chunks every 100ms
+    isRecordingRef.current = true
     setPhase("listening")
     console.log("[Voice] Recording started")
 
@@ -732,6 +740,8 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       clearTimeout(recordTimeoutRef.current)
       recordTimeoutRef.current = null
     }
+
+    isRecordingRef.current = false
 
     if (mediaRecorderRef.current?.state === "recording") {
       mediaRecorderRef.current.stop()
@@ -912,7 +922,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
   return {
     phase,
     isActive,
-    isRecording: phase === "listening",
+    isRecording: phase === "listening" || isRecordingRef.current,
     isSpeaking: phase === "speaking",
     isSupported,
     error,

@@ -120,6 +120,8 @@ export function BottomSheetContent() {
       setMessages((prev) => [...prev, userMsg])
       clearTranscript()
     })
+    // Cleanup: unregister handler on unmount
+    return () => registerTranscriptHandler(() => {})
   }, [registerTranscriptHandler, clearTranscript])
 
   // Register AI response handler - called when AI responds in continuous mode
@@ -133,6 +135,8 @@ export function BottomSheetContent() {
       }
       setMessages((prev) => [...prev, aiMsg])
     })
+    // Cleanup: unregister handler on unmount
+    return () => registerAIResponseHandler(() => {})
   }, [registerAIResponseHandler])
 
   // Auto-scroll

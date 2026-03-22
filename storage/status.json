@@ -1,31 +1,12 @@
 {
-  "ts": "2026-03-16T13:20:24Z",
-  "system": {
-    "free_kb": 4513996,
-    "load_avg": 2.95,
-    "swap_delta": 0,
-    "cooldown": 0,
-    "uptime_seconds": 74986
+  "cpu": 8.0,
+  "memory": {
+    "used": 4280,
+    "total": 8192,
+    "percentage": 52
   },
-  "services": {
-    "openclaw": { "status": "offline", "pid": "", "memory_mb": "0" },
-    "watchdog": { "status": "offline" },
-    "bridge": { "status": "online" }
-  },
-  "ai_state": "RUNNING",
-  "top_processes": [
-    {
-      "name": "/System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mds_stores",
-      "mem": "578.5",
-      "cpu": "0.4"
-    },
-    { "name": "/Users/ahmadabdullah/.local/bin/claude", "mem": "524.883", "cpu": "0.0" },
-    { "name": "/Users/ahmadabdullah/.local/bin/claude", "mem": "481.328", "cpu": "2.8" },
-    { "name": "/Users/ahmadabdullah/.local/bin/claude", "mem": "469.113", "cpu": "0.0" },
-    {
-      "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
-      "mem": "67.4961",
-      "cpu": "0.7"
-    }
-  ]
+  "disk": { "percentage": 3 },
+  "openclaw": { "running": false },
+  "mode": "eco",
+  "timestamp": 1774205463
 }

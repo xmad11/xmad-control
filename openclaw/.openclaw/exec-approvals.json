@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "socket": {
+    "path": "/Users/ahmadabdullah/xmad-control/openclaw/.openclaw/exec-approvals.sock",
+    "token": "pLbNdakVjpAWsDFK-jFy4WH4k9kTgU0-"
+  },
+  "defaults": {},
+  "agents": {}
+}
