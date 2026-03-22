@@ -51,6 +51,43 @@ class Handler(BaseHTTPRequestHandler):
         elif self.path == "/health":
             self.send_json({"ok": True, "bridge": "live"})
 
+        elif self.path == "/processes":
+            try:
+                # Top 5 by memory
+                mem_out = subprocess.check_output(
+                    ["ps", "aux", "-m"], timeout=5, text=True
+                ).strip().split("\n")[1:6]
+                # Top 5 by CPU
+                cpu_out = subprocess.check_output(
+                    ["ps", "aux", "-r"], timeout=5, text=True
+                ).strip().split("\n")[1:6]
+
+                def parse_ps(lines):
+                    result = []
+                    for line in lines:
+                        parts = line.split(None, 10)
+                        if len(parts) < 11:
+                            continue
+                        name = parts[10].split("/")[-1][:30]
+                        if name.startswith("(") or name == "":
+                            continue
+                        result.append({
+                            "pid": int(parts[1]),
+                            "name": name,
+                            "cpu": float(parts[2]),
+                            "memory": round(int(parts[5]) / 1024),
+                            "user": parts[0]
+                        })
+                    return result
+
+                self.send_json({
+                    "memory": parse_ps(mem_out),
+                    "cpu": parse_ps(cpu_out),
+                    "_source": "bridge"
+                })
+            except Exception as e:
+                self.send_json({"error": str(e), "memory": [], "cpu": []}, 503)
+
         else:
             self.send_json({"error": "not_found"}, 404)
 
@@ -96,6 +133,27 @@ class Handler(BaseHTTPRequestHandler):
             )])
             state["mode"] = "active"
             self.send_json({"ok": True, "action": "openclaw_restarting"})
+
+        elif action == "kill_process":
+            pid = body.get("pid")
+            name = body.get("name", "")
+            # Safety: never kill system-critical processes
+            protected = ["kernel", "launchd", "WindowServer", "tailscaled",
+                        "sshd", "python3", "bridge", "master"]
+            if not pid:
+                self.send_json({"error": "no pid"}, 400)
+                return
+            if any(p in str(name) for p in protected):
+                self.send_json({"error": f"protected process: {name}"}, 403)
+                return
+            try:
+                import signal as sig_module
+                os.kill(int(pid), sig_module.SIGTERM)
+                state["last_activity"] = int(time.time())
+                self.send_json({"ok": True, "action": f"killed {pid}"})
+            except Exception as e:
+                self.send_json({"error": str(e)}, 500)
+                return
 
         else:
             self.send_json({"error": f"unknown action: {action}"}, 400)

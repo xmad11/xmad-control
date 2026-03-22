@@ -119,6 +119,20 @@ const MOCK_PROCESSES = {
 }
 
 export async function GET() {
+  // Try bridge first for real process data
+  if (BRIDGE_URL) {
+    try {
+      const res = await fetch(`${BRIDGE_URL}/processes`, {
+        signal: AbortSignal.timeout(3000),
+        cache: "no-store",
+      })
+      if (res.ok) {
+        const data = await res.json()
+        return NextResponse.json(data, { headers: { "Cache-Control": "no-store" } })
+      }
+    } catch {}
+  }
+
   const bridgeData = await fetchFromBridge()
   if (bridgeData) {
     return NextResponse.json(
@@ -144,4 +158,24 @@ export async function GET() {
       headers: { "Cache-Control": "no-store" },
     }
   )
+}
+
+export async function POST(request: Request) {
+  const BRIDGE_URL = process.env.XMAD_BRIDGE_URL
+  if (!BRIDGE_URL) {
+    return NextResponse.json({ ok: false, error: "Bridge not configured" }, { status: 503 })
+  }
+
+  try {
+    const body = await request.json()
+    const res = await fetch(BRIDGE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "kill_process", ...body }),
+      signal: AbortSignal.timeout(5000),
+    })
+    return NextResponse.json(await res.json(), { status: res.status })
+  } catch (err) {
+    return NextResponse.json({ ok: false, error: String(err) }, { status: 500 })
+  }
 }
