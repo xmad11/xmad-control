@@ -117,7 +117,7 @@ export function VoiceOverlay({
               <div className="flex flex-col gap-0.5">
                 {displayLines.map((line, idx) => (
                   <div
-                    key={`${idx}-${line.slice(0, 10)}`}
+                    key={`line-${idx}`}
                     className={cn(
                       "text-sm text-white/90 leading-tight",
                       idx === displayLines.length - 1 && "animate-pulse-subtle"

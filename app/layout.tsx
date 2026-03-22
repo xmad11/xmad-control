@@ -1,4 +1,5 @@
 import "../styles/globals.css"
+import { SurfaceErrorBoundary } from "@/components/error-boundary"
 import { ConditionalHeader } from "@/components/layout/ConditionalHeader"
 import Providers from "@/components/layout/Providers"
 import { SkipLink } from "@/components/layout/SkipLink"
@@ -168,20 +169,23 @@ export default function RootLayout({
 
         {/* Global Providers (Theme, Language) */}
         <Providers>
-          {/* Sheet Provider - Global sheet state for header + pages */}
-          <SheetProvider>
-            {/* Navigation Provider (UI-only state) */}
-            <NavigationProvider>
-              {/* Header - conditionally rendered based on route */}
-              <ConditionalHeader />
+          {/* Error boundary around voice/sheet components */}
+          <SurfaceErrorBoundary surfaceId="voice-provider">
+            {/* Sheet Provider - Global sheet state for header + pages */}
+            <SheetProvider>
+              {/* Navigation Provider (UI-only state) */}
+              <NavigationProvider>
+                {/* Header - conditionally rendered based on route */}
+                <ConditionalHeader />
 
-              {/* Page content */}
-              <main id="main-content" className="w-full">
-                {children}
-              </main>
-            </NavigationProvider>
-            <VoiceDebug />
-          </SheetProvider>
+                {/* Page content */}
+                <main id="main-content" className="w-full">
+                  {children}
+                </main>
+              </NavigationProvider>
+              <VoiceDebug />
+            </SheetProvider>
+          </SurfaceErrorBoundary>
         </Providers>
 
         <Toaster

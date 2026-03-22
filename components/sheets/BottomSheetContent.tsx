@@ -331,6 +331,7 @@ export function BottomSheetContent() {
             disabled={voiceState.isSpeaking}
             className={cn(
               "flex-shrink-0 p-3 rounded-xl transition-all backdrop-blur-sm border",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50",
               voiceState.isActive
                 ? "bg-cyan-glow/30 border-cyan-glow/50 text-cyan-glow cyan-glow-box"
                 : "bg-white/10 border-white/20 text-white/60 hover:bg-white/15",
@@ -359,7 +360,7 @@ export function BottomSheetContent() {
           <GlassButton
             onClick={() => handleSendMessage(inputValue)}
             disabled={!inputValue.trim() || voiceState.isActive}
-            className="flex-shrink-0 px-3"
+            className="flex-shrink-0 px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50"
           >
             <ArrowUpRight className="h-4 w-4" />
           </GlassButton>

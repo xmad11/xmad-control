@@ -255,7 +255,7 @@ export function HomeClient() {
                 {...keyboardHandlers}
                 {...ariaProps}
                 style={{ touchAction: "manipulation" }}
-                className={`transition-all ease-out select-none touch-none ${
+                className={`transition-all ease-out select-none touch-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50 ${
                   tabsExpanded || voiceMode ? "hidden" : "flex"
                 } relative p-3 rounded-xl backdrop-blur-xl border glass-tab-button`}
               >
