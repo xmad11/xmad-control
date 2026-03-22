@@ -1,7 +1,7 @@
 /* ════════════════════════════════════════════════════════════════════════════════════════
- * USE VOICE CHAT - Continuous conversation mode
- * Flow: tap to start → speak → auto-stop → STT → AI → TTS → listen again
- * Stop: tap again to end session
+ * USE VOICE CHAT - SSOT Ultra-Low Latency Voice System
+ * Flow: tap to start → speak → auto-detect silence → STT → streaming AI → streaming TTS
+ * Features: Live transcript, interruptible TTS, continuous mode, hold mode support
  * ═══════════════════════════════════════════════════════════════════════════════════════ */
 
 "use client"
@@ -16,8 +16,10 @@ export interface UseVoiceChatOptions {
   onToken?: (token: string) => void // Live transcript callback
   ttsEnabled?: boolean
   continuous?: boolean
-  maxRecordTime?: number
+  maxRecordTime?: number // MAX time, not forced wait
   voice?: string // TTS voice selection
+  silenceDetection?: boolean // Auto-stop on silence
+  silenceThreshold?: number // ms of silence before auto-stop
 }
 
 export type VoicePhase = "idle" | "listening" | "processing" | "thinking" | "speaking" | "error"
@@ -38,6 +40,55 @@ export interface UseVoiceChatReturn {
   stopSpeaking: () => void
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════════════
+// VOICE ACTIVITY DETECTION (Silence Detection)
+// ═══════════════════════════════════════════════════════════════════════════════════════
+
+function createSilenceDetector(
+  stream: MediaStream,
+  onSilence: () => void,
+  threshold = 1500 // ms of silence
+): { stop: () => void } {
+  const audioContext = new AudioContext()
+  const analyser = audioContext.createAnalyser()
+  const source = audioContext.createMediaStreamSource(stream)
+  source.connect(analyser)
+  analyser.fftSize = 512
+
+  const dataArray = new Uint8Array(analyser.frequencyBinCount)
+  let silenceStart: number | null = null
+  let running = true
+
+  const check = () => {
+    if (!running) return
+    analyser.getByteFrequencyData(dataArray)
+    const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length
+
+    // Threshold: below 10 is considered silence
+    if (avg < 10) {
+      if (!silenceStart) {
+        silenceStart = Date.now()
+      } else if (Date.now() - silenceStart > threshold) {
+        onSilence()
+        running = false
+        audioContext.close()
+        return
+      }
+    } else {
+      silenceStart = null
+    }
+    requestAnimationFrame(check)
+  }
+  requestAnimationFrame(check)
+
+  return {
+    stop: () => {
+      running = false
+      audioContext.close()
+    },
+  }
+}
+
 export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatReturn {
   const {
     onTranscript,
@@ -47,8 +98,10 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     language = "en",
     ttsEnabled = true,
     continuous = true,
-    maxRecordTime = 15000,
-    voice = "aura-asteria-en", // Default Deepgram voice
+    maxRecordTime = 30000, // MAX 30s, but auto-stop on silence
+    voice = "aura-asteria-en",
+    silenceDetection = true, // Enable by default for ultra-low latency
+    silenceThreshold = 1500, // 1.5s of silence
   } = options
 
   const [phase, setPhase] = useState<VoicePhase>("idle")
@@ -61,16 +114,17 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
   const audioChunksRef = useRef<Blob[]>([])
   const streamRef = useRef<MediaStream | null>(null)
   const mimeTypeRef = useRef<string>("")
-  const recordTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const loopTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const isActiveRef = useRef(false) // Ref for async callback checks
-  const loopRunningRef = useRef(false) // Guard against parallel loop execution
-  const audioContextRef = useRef<AudioContext | null>(null) // Pre-unlocked for iOS
+  const recordTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const loopTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isActiveRef = useRef(false)
+  const loopRunningRef = useRef(false)
+  const audioContextRef = useRef<AudioContext | null>(null)
+  const silenceDetectorRef = useRef<{ stop: () => void } | null>(null)
 
   // Streaming TTS queue refs
-  const ttsQueueRef = useRef<string[]>([]) // Sentences queued for TTS
-  const isProcessingQueueRef = useRef(false) // Guard against parallel queue processing
-  const currentSourceRef = useRef<AudioBufferSourceNode | null>(null) // Current audio source for cancellation
+  const ttsQueueRef = useRef<string[]>([])
+  const isProcessingQueueRef = useRef(false)
+  const currentSourceRef = useRef<AudioBufferSourceNode | null>(null)
 
   // Option refs
   const ttsEnabledRef = useRef(ttsEnabled)
@@ -100,7 +154,6 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     setPhase("error")
     setTranscript(`Error: ${msg}`)
     onErrorRef.current?.(msg)
-    // Auto-recover after 3s
     setTimeout(() => {
       if (isActiveRef.current) {
         setPhase("listening")
@@ -585,6 +638,9 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((t) => t.stop())
     }
+    if (silenceDetectorRef.current) {
+      silenceDetectorRef.current.stop()
+    }
 
     let stream: MediaStream
     try {
@@ -602,7 +658,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       return
     }
 
-    // Find supported MIME type
+    // Find supported MIME type (iOS Safari compatibility)
     const mimeType = (() => {
       const types = [
         "audio/webm;codecs=opus",
@@ -631,18 +687,32 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       if (e.data.size > 0) audioChunksRef.current.push(e.data)
     }
 
-    recorder.start(100)
+    recorder.start(100) // Collect chunks every 100ms
     setPhase("listening")
     console.log("[Voice] Recording started")
 
-    // Auto-stop after maxRecordTime
+    // Start silence detection for ultra-low latency (auto-stop when user stops talking)
+    if (silenceDetection) {
+      silenceDetectorRef.current = createSilenceDetector(
+        stream,
+        () => {
+          if (mediaRecorderRef.current?.state === "recording") {
+            console.log("[Voice] Silence detected, auto-stopping")
+            mediaRecorderRef.current.stop()
+          }
+        },
+        silenceThreshold
+      )
+    }
+
+    // Fallback: Auto-stop after maxRecordTime (safety net, not forced wait)
     recordTimeoutRef.current = setTimeout(() => {
       if (mediaRecorderRef.current?.state === "recording") {
-        console.log("[Voice] Auto-stop after timeout")
+        console.log("[Voice] Max time reached, auto-stopping")
         mediaRecorderRef.current.stop()
       }
     }, maxRecordTime)
-  }, [isSupported, handleError, maxRecordTime])
+  }, [isSupported, handleError, maxRecordTime, silenceDetection, silenceThreshold])
 
   // ── Stop recording ────────────────────────────────────────────────────────────
   const stopRecording = useCallback(() => {
@@ -794,6 +864,12 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     if (loopTimeoutRef.current) {
       clearTimeout(loopTimeoutRef.current)
       loopTimeoutRef.current = null
+    }
+
+    // Stop silence detector
+    if (silenceDetectorRef.current) {
+      silenceDetectorRef.current.stop()
+      silenceDetectorRef.current = null
     }
 
     // Stop recorder
