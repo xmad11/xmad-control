@@ -119,7 +119,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
           audio.onended = () => {
             URL.revokeObjectURL(url)
             currentAudioRef.current = null
-            resolve()
+            setTimeout(resolve, 800)
           }
           audio.onerror = () => {
             URL.revokeObjectURL(url)
@@ -163,7 +163,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
         voices[0]
       if (preferred) utterance.voice = preferred
 
-      utterance.onend = () => resolve()
+      utterance.onend = () => setTimeout(resolve, 800)
       utterance.onerror = () => resolve()
       window.speechSynthesis.speak(utterance)
 
@@ -282,7 +282,12 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     let stream: MediaStream
     try {
       stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 16000 },
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          sampleRate: 16000,
+        },
       })
       streamRef.current = stream
     } catch {
