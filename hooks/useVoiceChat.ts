@@ -240,8 +240,8 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
         // Parse SSE format: "data: {...}\n\n" or "event: ...\ndata: {...}\n\n"
         const lines = chunk.split("\n")
         for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const data = line.slice(6).trim()
+          if (line.startsWith("data:")) {
+            const data = line.startsWith("data: ") ? line.slice(6).trim() : line.slice(5).trim()
             if (data === "[DONE]" || !data) continue
 
             try {
