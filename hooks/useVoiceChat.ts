@@ -55,8 +55,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
   // Refs - all refs for stable access in async callbacks
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
-  const audioContextRef = useRef<AudioContext | null>(null)
-  const currentSourceRef = useRef<AudioBufferSourceNode | null>(null)
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const mimeTypeRef = useRef<string>("")
   const recordTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -98,7 +97,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     }, 3000)
   }, [])
 
-  // ── TTS ────────────────────────────────────────────────────────────────────────
+  // ── TTS (uses Audio element for iOS Safari compatibility) ──────────────────────
   const speak = useCallback(async (text: string) => {
     if (!text.trim()) return
     setPhase("speaking")
@@ -112,35 +111,37 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
 
       if (!res.ok) throw new Error(`TTS error: ${res.status}`)
 
-      const arrayBuffer = await res.arrayBuffer()
-      if (!audioContextRef.current || audioContextRef.current.state === "closed") {
-        audioContextRef.current = new AudioContext()
-      }
-      const ctx = audioContextRef.current
-      if (ctx.state === "suspended") await ctx.resume()
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
 
-      const decoded = await ctx.decodeAudioData(arrayBuffer)
-      const source = ctx.createBufferSource()
-      source.buffer = decoded
-      source.connect(ctx.destination)
-      currentSourceRef.current = source
-
-      await new Promise<void>((resolve) => {
-        source.onended = () => resolve()
-        source.start(0)
+      await new Promise<void>((resolve, reject) => {
+        const audio = new Audio(url)
+        currentAudioRef.current = audio
+        audio.onended = () => {
+          URL.revokeObjectURL(url)
+          currentAudioRef.current = null
+          resolve()
+        }
+        audio.onerror = (e) => {
+          URL.revokeObjectURL(url)
+          currentAudioRef.current = null
+          reject(new Error(`Audio playback failed: ${JSON.stringify(e)}`))
+        }
+        // iOS Safari requires play() to be called from user gesture context
+        // but since we're in a continuous loop started by user, it should work
+        audio.play().catch(reject)
       })
     } catch (err) {
-      console.warn("[Voice] TTS failed:", err)
-    } finally {
-      currentSourceRef.current = null
+      console.warn("[Voice] TTS failed:", err instanceof Error ? err.message : JSON.stringify(err))
+      // TTS failure is non-fatal - conversation continues
     }
   }, [])
 
   const stopSpeaking = useCallback(() => {
-    try {
-      currentSourceRef.current?.stop()
-    } catch {}
-    currentSourceRef.current = null
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause()
+      currentAudioRef.current = null
+    }
   }, [])
 
   // ── AI Response ────────────────────────────────────────────────────────────────

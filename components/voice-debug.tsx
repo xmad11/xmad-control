@@ -108,6 +108,25 @@ export function VoiceDebug() {
         <div style={{ display: "flex", gap: 8 }}>
           <button
             type="button"
+            onClick={() => {
+              const text = logs.join("\n")
+              if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).catch(() => {})
+              }
+            }}
+            style={{
+              color: "#0ff",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontSize: 10,
+              padding: "2px 6px",
+            }}
+          >
+            COPY
+          </button>
+          <button
+            type="button"
             onClick={() => setLogs([])}
             style={{
               color: "#f00",
