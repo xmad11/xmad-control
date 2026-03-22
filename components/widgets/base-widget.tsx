@@ -522,9 +522,6 @@ export function GaugeWidget({
         </div>
       </div>
       <span className="text-white/60 text-xs mt-2">{label}</span>
-      {actualValue !== undefined && (
-        <span className="text-white/30 text-[10px] mt-0.5">click to toggle</span>
-      )}
     </div>
   )
 }
