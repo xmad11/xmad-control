@@ -304,10 +304,22 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
 
     onAIResponseRef.current?.(aiText)
 
+    // Stop mic before TTS to prevent echo
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop()
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop())
+    }
+    console.log("[Voice] Mic stopped for TTS")
+
     console.log("[TTS] ttsEnabled:", ttsEnabledRef.current)
     if (ttsEnabledRef.current) {
       await speak(aiText)
     }
+
+    // Small delay to ensure audio finishes cleanly
+    await new Promise((r) => setTimeout(r, 200))
   }, [transcribeBlob, getAIResponse, speak, handleError])
 
   // ── Start recording ───────────────────────────────────────────────────────────
