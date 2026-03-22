@@ -1,8 +1,8 @@
-/* ═══════════════════════════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════════════════════
    USE VOICE CHAT - Continuous conversation mode
-   Flow: start → listen → STT → AI → TTS → listen again (loop)
-   Stop: explicit stop or error
-   ═══════════════════════════════════════════════════════════════════════════════════════════ */
+   Flow: tap to start → speak → auto-stop → STT → AI → TTS → listen again
+   Stop: tap again to end session
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
 "use client"
 
@@ -12,33 +12,26 @@ export interface UseVoiceChatOptions {
   onTranscript?: (text: string) => void
   onError?: (error: string) => void
   language?: string
-  /** Called when AI response is received - use to add message to chat */
   onAIResponse?: (text: string) => void
-  /** Whether to auto-speak AI responses via TTS */
   ttsEnabled?: boolean
-  /** Whether to auto-restart listening after each AI response (continuous mode) */
   continuous?: boolean
+  /** Max recording time in ms before auto-stop */
+  maxRecordTime?: number
 }
 
-export type VoicePhase =
-  | "idle" // Not active
-  | "listening" // Recording audio
-  | "processing" // STT in progress
-  | "thinking" // AI request in progress
-  | "speaking" // TTS playing
-  | "error" // Error state
+export type VoicePhase = "idle" | "listening" | "processing" | "thinking" | "speaking" | "error"
 
 export interface UseVoiceChatReturn {
   phase: VoicePhase
-  isActive: boolean // Is voice session running at all
-  isRecording: boolean // Currently capturing audio
-  isSpeaking: boolean // Currently playing TTS
+  isActive: boolean
+  isRecording: boolean
+  isSpeaking: boolean
   isSupported: boolean
   error: string | null
-  transcript: string // Last user transcript
-  startSession: () => Promise<void> // Start continuous voice session
-  stopSession: () => void // Stop everything
-  startRecording: () => Promise<void> // Single record (for manual control)
+  transcript: string
+  startSession: () => Promise<void>
+  stopSession: () => void
+  startRecording: () => Promise<void>
   stopRecording: () => void
   speak: (text: string) => Promise<void>
   stopSpeaking: () => void
@@ -52,54 +45,57 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     language = "en",
     ttsEnabled = false,
     continuous = true,
+    maxRecordTime = 15000, // 15 seconds max recording
   } = options
 
   const [phase, setPhase] = useState<VoicePhase>("idle")
   const [error, setError] = useState<string | null>(null)
   const [transcript, setTranscript] = useState("")
+  const [isActive, setIsActive] = useState(false)
 
-  // Refs — never stale in callbacks
+  // Refs
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
   const audioContextRef = useRef<AudioContext | null>(null)
   const currentSourceRef = useRef<AudioBufferSourceNode | null>(null)
-  const isActiveRef = useRef(false) // Is session running
-  const isSpeakingRef = useRef(false)
-  const isRecordingRef = useRef(false)
   const streamRef = useRef<MediaStream | null>(null)
+  const mimeTypeRef = useRef<string>("")
+  const recordTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const loopTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Option refs for stable callbacks
   const ttsEnabledRef = useRef(ttsEnabled)
   const continuousRef = useRef(continuous)
-  const mimeTypeRef = useRef<string>("") // Store current MIME type for iOS Safari
+  const onTranscriptRef = useRef(onTranscript)
+  const onAIResponseRef = useRef(onAIResponse)
+  const onErrorRef = useRef(onError)
+
   ttsEnabledRef.current = ttsEnabled
   continuousRef.current = continuous
+  onTranscriptRef.current = onTranscript
+  onAIResponseRef.current = onAIResponse
+  onErrorRef.current = onError
 
   const isSupported =
     typeof window !== "undefined" &&
     !!navigator.mediaDevices?.getUserMedia &&
     !!window.MediaRecorder
 
-  const handleError = useCallback(
-    (msg: string) => {
-      console.error("[VoiceChat]", msg)
-      setError(msg)
-      setPhase("error")
-      // Debug: show error in transcript so we can see it on mobile
-      setTranscript(`Error: ${msg}`)
-      onError?.(msg)
-      // Auto-recover to idle after 2s
-      setTimeout(() => {
-        if (isActiveRef.current) setPhase("listening")
-        else setPhase("idle")
-        setError(null)
-      }, 2000)
-    },
-    [onError]
-  )
+  const handleError = useCallback((msg: string) => {
+    console.error("[VoiceChat]", msg)
+    setError(msg)
+    setPhase("error")
+    setTranscript(`Error: ${msg}`)
+    onErrorRef.current?.(msg)
+    setTimeout(() => {
+      setPhase("idle")
+      setError(null)
+    }, 3000)
+  }, [])
 
-  // ── TTS: speak text ────────────────────────────────────────────────────────────────────────────
+  // ── TTS ────────────────────────────────────────────────────────────────────────
   const speak = useCallback(async (text: string) => {
     if (!text.trim()) return
-    isSpeakingRef.current = true
     setPhase("speaking")
 
     try {
@@ -129,10 +125,8 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
         source.start(0)
       })
     } catch (err) {
-      console.warn("[VoiceChat] TTS failed (non-fatal):", err)
-      // TTS failure is non-fatal — conversation continues
+      console.warn("[VoiceChat] TTS failed:", err)
     } finally {
-      isSpeakingRef.current = false
       currentSourceRef.current = null
     }
   }, [])
@@ -142,10 +136,9 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       currentSourceRef.current?.stop()
     } catch {}
     currentSourceRef.current = null
-    isSpeakingRef.current = false
   }, [])
 
-  // ── AI: get response ───────────────────────────────────────────────────────────────────────
+  // ── AI Response ────────────────────────────────────────────────────────────────
   const getAIResponse = useCallback(async (userText: string): Promise<string> => {
     setPhase("thinking")
     const res = await fetch("/api/xmad/chat", {
@@ -156,16 +149,15 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     if (!res.ok) throw new Error(`AI error: ${res.status}`)
     const data = await res.json()
     if (!data.success) throw new Error(data.error || "AI failed")
-    console.log("[Voice] AI response:", JSON.stringify((data.message as string)?.slice(0, 50)))
+    console.log("[Voice] AI response:", (data.message as string)?.slice(0, 50))
     return data.message as string
   }, [])
 
-  // ── STT: transcribe blob ─────────────────────────────────────────────────────────────────
+  // ── STT ────────────────────────────────────────────────────────────────────────
   const transcribeBlob = useCallback(
     async (blob: Blob): Promise<string> => {
       setPhase("processing")
       const form = new FormData()
-      // Use correct extension and MIME type for iOS Safari
       const ext = mimeTypeRef.current.includes("mp4")
         ? "mp4"
         : mimeTypeRef.current.includes("ogg")
@@ -178,23 +170,70 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
         `recording.${ext}`
       )
       form.append("language", language)
+
+      console.log("[Voice] Sending to STT:", { ext, fileType, blobSize: blob.size })
+
       const res = await fetch("/api/stt", { method: "POST", body: form })
       const data = await res.json()
       if (!data.ok) throw new Error(data.error || "STT failed")
-      console.log("[Voice] Transcript:", JSON.stringify(data.text))
+      console.log("[Voice] Transcript:", data.text)
       return (data.text || "").trim()
     },
     [language]
   )
 
-  // ── Core: single record + process cycle ─────────────────────────────────────────────
-  const doOneRecordCycle = useCallback(async () => {
-    if (!isActiveRef.current) return
+  // ── Process recorded audio ─────────────────────────────────────────────────────
+  const processRecording = useCallback(async () => {
+    const blob = new Blob(audioChunksRef.current, { type: mimeTypeRef.current || "audio/webm" })
+    console.log("[Voice] Processing blob:", blob.size, "bytes")
 
-    // Start recording
-    setPhase("listening")
-    isRecordingRef.current = true
-    audioChunksRef.current = []
+    if (blob.size < 1000) {
+      console.log("[Voice] Blob too small, skipping")
+      return
+    }
+
+    let text: string
+    try {
+      text = await transcribeBlob(blob)
+    } catch (err) {
+      handleError(err instanceof Error ? err.message : "Transcription failed")
+      return
+    }
+
+    if (!text) {
+      console.log("[Voice] No transcript, skipping")
+      return
+    }
+
+    setTranscript(text)
+    onTranscriptRef.current?.(text)
+
+    let aiText: string
+    try {
+      aiText = await getAIResponse(text)
+    } catch (err) {
+      handleError(err instanceof Error ? err.message : "AI failed")
+      return
+    }
+
+    onAIResponseRef.current?.(aiText)
+
+    if (ttsEnabledRef.current) {
+      await speak(aiText)
+    }
+  }, [transcribeBlob, getAIResponse, speak, handleError])
+
+  // ── Start recording ───────────────────────────────────────────────────────────
+  const startRecording = useCallback(async () => {
+    if (!isSupported) {
+      handleError("Voice not supported")
+      return
+    }
+
+    // Cleanup any previous
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop())
+    }
 
     let stream: MediaStream
     try {
@@ -204,11 +243,10 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       streamRef.current = stream
     } catch {
       handleError("Microphone access denied")
-      isActiveRef.current = false
       return
     }
 
-    // iOS Safari MIME type support - try multiple formats
+    // Find supported MIME type
     const mimeType = (() => {
       const types = [
         "audio/webm;codecs=opus",
@@ -221,149 +259,148 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     })()
 
     if (!mimeType) {
-      handleError("No supported audio format on this device")
-      isActiveRef.current = false
+      handleError("No supported audio format")
+      stream.getTracks().forEach((t) => t.stop())
       return
     }
 
-    // Store MIME type for later use in transcribeBlob
     mimeTypeRef.current = mimeType
     console.log("[Voice] Using MIME type:", mimeType)
 
+    audioChunksRef.current = []
     const recorder = new MediaRecorder(stream, { mimeType })
     mediaRecorderRef.current = recorder
+
     recorder.ondataavailable = (e) => {
       if (e.data.size > 0) audioChunksRef.current.push(e.data)
     }
-    recorder.start(100)
 
-    // Wait for stop signal (stopRecording or stopSession sets state)
+    recorder.start(100)
+    setPhase("listening")
+    console.log("[Voice] Recording started")
+
+    // Auto-stop after maxRecordTime
+    recordTimeoutRef.current = setTimeout(() => {
+      if (mediaRecorderRef.current?.state === "recording") {
+        console.log("[Voice] Auto-stop after timeout")
+        mediaRecorderRef.current.stop()
+      }
+    }, maxRecordTime)
+  }, [isSupported, handleError, maxRecordTime])
+
+  // ── Stop recording ────────────────────────────────────────────────────────────
+  const stopRecording = useCallback(() => {
+    if (recordTimeoutRef.current) {
+      clearTimeout(recordTimeoutRef.current)
+      recordTimeoutRef.current = null
+    }
+
+    if (mediaRecorderRef.current?.state === "recording") {
+      mediaRecorderRef.current.stop()
+      console.log("[Voice] Recording stopped")
+    }
+  }, [])
+
+  // ── Continuous session loop ───────────────────────────────────────────────────
+  const runContinuousLoop = useCallback(async () => {
+    if (!isActive) return
+
+    await startRecording()
+
+    // Wait for recording to stop
     await new Promise<void>((resolve) => {
-      recorder.onstop = () => resolve()
+      const checkStopped = () => {
+        if (mediaRecorderRef.current?.state !== "recording") {
+          resolve()
+        } else {
+          setTimeout(checkStopped, 100)
+        }
+      }
+      // Also resolve when recorder.onstop fires
+      const originalOnStop = mediaRecorderRef.current?.onstop
+      if (mediaRecorderRef.current) {
+        mediaRecorderRef.current.onstop = (e) => {
+          originalOnStop?.(e)
+          resolve()
+        }
+      }
+      checkStopped()
     })
 
-    isRecordingRef.current = false
-    stream.getTracks().forEach((t) => t.stop())
-
-    if (!isActiveRef.current) return
-
-    const blob = new Blob(audioChunksRef.current, { type: mimeType })
-    console.log("[Voice] Blob size:", blob.size, "bytes")
-
-    if (blob.size < 1000) {
-      // Too short — no speech detected, restart loop
-      if (continuousRef.current && isActiveRef.current) {
-        setTimeout(() => doOneRecordCycle(), 300)
-      }
-      return
+    // Stop mic stream
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop())
     }
 
-    // Transcribe
-    let text: string
-    try {
-      text = await transcribeBlob(blob)
-    } catch (err) {
-      handleError(err instanceof Error ? err.message : "Transcription failed")
-      if (continuousRef.current && isActiveRef.current) setTimeout(() => doOneRecordCycle(), 1000)
-      return
-    }
+    if (!isActive) return
 
-    if (!text || !isActiveRef.current) {
-      if (continuousRef.current && isActiveRef.current) setTimeout(() => doOneRecordCycle(), 300)
-      return
-    }
+    // Process the recording
+    await processRecording()
 
-    setTranscript(text)
-    onTranscript?.(text)
+    if (!isActive) return
 
-    // Get AI response
-    let aiText: string
-    try {
-      aiText = await getAIResponse(text)
-    } catch (err) {
-      handleError(err instanceof Error ? err.message : "AI failed")
-      if (continuousRef.current && isActiveRef.current) setTimeout(() => doOneRecordCycle(), 1000)
-      return
-    }
-
-    if (!isActiveRef.current) return
-    onAIResponse?.(aiText)
-
-    // Speak response if TTS enabled
-    if (ttsEnabledRef.current) {
-      await speak(aiText)
-    }
-
-    // Loop — start listening again
-    if (continuousRef.current && isActiveRef.current) {
-      setTimeout(() => doOneRecordCycle(), 300)
+    // Continue loop after delay
+    if (continuousRef.current) {
+      loopTimeoutRef.current = setTimeout(() => {
+        if (isActive) runContinuousLoop()
+      }, 500)
     } else {
       setPhase("idle")
     }
-  }, [transcribeBlob, getAIResponse, speak, handleError, onTranscript, onAIResponse])
+  }, [isActive, startRecording, processRecording])
 
-  // ── Public API ─────────────────────────────────────────────────────────────────────────
-
-  /** Start a continuous voice session - loops automatically */
+  // ── Session controls ──────────────────────────────────────────────────────────
   const startSession = useCallback(async () => {
     if (!isSupported) {
-      handleError("Voice not supported in this browser")
+      handleError("Voice not supported")
       return
     }
-    if (isActiveRef.current) return // Already running
+    if (isActive) return
 
-    isActiveRef.current = true
+    setIsActive(true)
     setError(null)
-    await doOneRecordCycle()
-  }, [isSupported, doOneRecordCycle, handleError])
+    setTranscript("")
+    console.log("[Voice] Session started")
 
-  /** Stop everything */
+    // Start the loop
+    runContinuousLoop()
+  }, [isSupported, isActive, handleError, runContinuousLoop])
+
   const stopSession = useCallback(() => {
-    isActiveRef.current = false
-    isRecordingRef.current = false
-    isSpeakingRef.current = false
+    console.log("[Voice] Session stopping...")
+    setIsActive(false)
+
+    // Clear timeouts
+    if (recordTimeoutRef.current) {
+      clearTimeout(recordTimeoutRef.current)
+      recordTimeoutRef.current = null
+    }
+    if (loopTimeoutRef.current) {
+      clearTimeout(loopTimeoutRef.current)
+      loopTimeoutRef.current = null
+    }
 
     // Stop recorder
-    try {
-      if (mediaRecorderRef.current?.state === "recording") {
-        mediaRecorderRef.current.stop()
-      }
-    } catch {}
+    if (mediaRecorderRef.current?.state === "recording") {
+      mediaRecorderRef.current.stop()
+    }
 
-    // Stop audio
+    // Stop mic
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop())
+      streamRef.current = null
+    }
+
+    // Stop TTS
     stopSpeaking()
-
-    // Stop mic stream
-    streamRef.current?.getTracks().forEach((t) => t.stop())
-    streamRef.current = null
 
     setPhase("idle")
     setTranscript("")
   }, [stopSpeaking])
 
-  /** Start a single recording (manual control — used by mic button for single-shot) */
-  const startRecording = useCallback(async () => {
-    if (!isSupported) {
-      handleError("Voice not supported")
-      return
-    }
-    isActiveRef.current = true
-    setError(null)
-    await doOneRecordCycle()
-  }, [isSupported, doOneRecordCycle, handleError])
-
-  /** Stop the current recording cycle only */
-  const stopRecording = useCallback(() => {
-    try {
-      if (mediaRecorderRef.current?.state === "recording") {
-        mediaRecorderRef.current.stop()
-      }
-    } catch {}
-  }, [])
-
   return {
     phase,
-    isActive: isActiveRef.current,
+    isActive,
     isRecording: phase === "listening",
     isSpeaking: phase === "speaking",
     isSupported,
