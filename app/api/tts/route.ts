@@ -3,7 +3,28 @@ import { NextResponse } from "next/server"
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
-const DEFAULT_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"
+// Deepgram voice options (Aura models)
+const DEEPGRAM_VOICES = {
+  "aura-asteria-en": "aura-asteria-en", // Female, natural
+  "aura-luna-en": "aura-luna-en", // Female, warm
+  "aura-stella-en": "aura-stella-en", // Female, bright
+  "aura-athena-en": "aura-athena-en", // Female, calm
+  "aura-hera-en": "aura-hera-en", // Female, authoritative
+  "aura-orion-en": "aura-orion-en", // Male, natural
+  "aura-arcas-en": "aura-arcas-en", // Male, deep
+  "aura-perseus-en": "aura-perseus-en", // Male, warm
+  "aura-helios-en": "aura-helios-en", // Male, bright
+  "aura-zeus-en": "aura-zeus-en", // Male, authoritative
+} as const
+
+const DEFAULT_DEEPGRAM_VOICE = "aura-asteria-en"
+const DEFAULT_ELEVENLABS_VOICE = "21m00Tcm4TlvDq8ikWAM"
+
+function getDeepgramKey(): string {
+  return (
+    process.env.SSOT_VOICE_DEEPGRAM || process.env.DEEPGRAM_API_KEY || process.env.DG_API_KEY || ""
+  )
+}
 
 function getElevenLabsKey(): string {
   return (
@@ -15,31 +36,24 @@ function getElevenLabsKey(): string {
 }
 
 export async function GET() {
-  const key = getElevenLabsKey()
-  return NextResponse.json({ ok: true, available: !!key, defaultVoiceId: DEFAULT_VOICE_ID })
+  const deepgramKey = getDeepgramKey()
+  const elevenLabsKey = getElevenLabsKey()
+  return NextResponse.json({
+    ok: true,
+    available: !!(deepgramKey || elevenLabsKey),
+    primaryProvider: deepgramKey ? "deepgram" : elevenLabsKey ? "elevenlabs" : "none",
+    defaultVoice: deepgramKey ? DEFAULT_DEEPGRAM_VOICE : DEFAULT_ELEVENLABS_VOICE,
+  })
 }
 
 export async function POST(req: Request) {
-  const apiKey = getElevenLabsKey()
-  if (!apiKey) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: "ElevenLabs API key not configured. Add ELEVENLABS_API_KEY to Vercel env.",
-      },
-      { status: 500 }
-    )
-  }
-
   try {
     const body = (await req.json()) as {
       text: string
       voiceId?: string
-      modelId?: string
-      stability?: number
-      similarityBoost?: number
+      provider?: "deepgram" | "elevenlabs"
     }
-    const { text, voiceId = DEFAULT_VOICE_ID, modelId, stability, similarityBoost } = body
+    const { text, voiceId, provider } = body
 
     if (!text || typeof text !== "string") {
       return NextResponse.json({ ok: false, error: "Text is required" }, { status: 400 })
@@ -52,30 +66,97 @@ export async function POST(req: Request) {
       )
     }
 
-    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "xi-api-key": apiKey },
-      body: JSON.stringify({
-        text,
-        model_id: modelId || "eleven_turbo_v2_5",
-        voice_settings: { stability: stability ?? 0.5, similarity_boost: similarityBoost ?? 0.75 },
-      }),
-      signal: AbortSignal.timeout(30000),
-    })
+    // Try Deepgram first (has $200 free credit), fallback to ElevenLabs
+    const deepgramKey = getDeepgramKey()
+    const elevenLabsKey = getElevenLabsKey()
 
-    if (!response.ok) {
-      return NextResponse.json(
-        { ok: false, error: `ElevenLabs API error: ${response.status}` },
-        { status: 500 }
-      )
+    // If provider explicitly specified, use that
+    if (provider === "elevenlabs" && elevenLabsKey) {
+      return await callElevenLabs(text, voiceId || DEFAULT_ELEVENLABS_VOICE, elevenLabsKey)
     }
 
-    const audioBuffer = await response.arrayBuffer()
-    return new Response(audioBuffer, {
-      status: 200,
-      headers: { "Content-Type": "audio/mpeg", "Cache-Control": "no-cache" },
-    })
+    if (provider === "deepgram" && deepgramKey) {
+      return await callDeepgram(text, voiceId || DEFAULT_DEEPGRAM_VOICE, deepgramKey)
+    }
+
+    // Auto: Try Deepgram first, then ElevenLabs
+    if (deepgramKey) {
+      const result = await callDeepgram(text, voiceId || DEFAULT_DEEPGRAM_VOICE, deepgramKey)
+      return result
+    }
+
+    if (elevenLabsKey) {
+      return await callElevenLabs(text, voiceId || DEFAULT_ELEVENLABS_VOICE, elevenLabsKey)
+    }
+
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "No TTS API key configured. Add SSOT_VOICE_DEEPGRAM or ELEVENLABS_API_KEY.",
+      },
+      { status: 500 }
+    )
   } catch (err) {
     return NextResponse.json({ ok: false, error: (err as Error).message }, { status: 500 })
   }
+}
+
+async function callDeepgram(text: string, voice: string, apiKey: string): Promise<Response> {
+  const model = voice in DEEPGRAM_VOICES ? voice : DEFAULT_DEEPGRAM_VOICE
+  const response = await fetch(`https://api.deepgram.com/v1/speak?model=${model}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Token ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ text }),
+    signal: AbortSignal.timeout(30000),
+  })
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => "Unknown error")
+    console.error(`Deepgram TTS error ${response.status}:`, errorText)
+    return new Response(
+      JSON.stringify({ ok: false, error: `Deepgram API error: ${response.status}` }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    )
+  }
+
+  const audioBuffer = await response.arrayBuffer()
+  return new Response(audioBuffer, {
+    status: 200,
+    headers: { "Content-Type": "audio/mpeg", "Cache-Control": "no-cache" },
+  })
+}
+
+async function callElevenLabs(text: string, voiceId: string, apiKey: string): Promise<Response> {
+  const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "xi-api-key": apiKey },
+    body: JSON.stringify({
+      text,
+      model_id: "eleven_turbo_v2_5",
+      voice_settings: { stability: 0.5, similarity_boost: 0.75 },
+    }),
+    signal: AbortSignal.timeout(30000),
+  })
+
+  if (!response.ok) {
+    return new Response(
+      JSON.stringify({ ok: false, error: `ElevenLabs API error: ${response.status}` }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    )
+  }
+
+  const audioBuffer = await response.arrayBuffer()
+  return new Response(audioBuffer, {
+    status: 200,
+    headers: { "Content-Type": "audio/mpeg", "Cache-Control": "no-cache" },
+  })
 }
