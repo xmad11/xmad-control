@@ -42,7 +42,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     onError,
     onAIResponse,
     language = "en",
-    ttsEnabled = false,
+    ttsEnabled = true,
     continuous = true,
     maxRecordTime = 15000,
   } = options
@@ -304,6 +304,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
 
     onAIResponseRef.current?.(aiText)
 
+    console.log("[TTS] ttsEnabled:", ttsEnabledRef.current)
     if (ttsEnabledRef.current) {
       await speak(aiText)
     }
