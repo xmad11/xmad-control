@@ -63,6 +63,11 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
   const loopRunningRef = useRef(false) // Guard against parallel loop execution
   const audioContextRef = useRef<AudioContext | null>(null) // Pre-unlocked for iOS
 
+  // Streaming TTS queue refs
+  const ttsQueueRef = useRef<string[]>([]) // Sentences queued for TTS
+  const isProcessingQueueRef = useRef(false) // Guard against parallel queue processing
+  const currentSourceRef = useRef<AudioBufferSourceNode | null>(null) // Current audio source for cancellation
+
   // Option refs
   const ttsEnabledRef = useRef(ttsEnabled)
   const continuousRef = useRef(continuous)
@@ -97,6 +102,181 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       setError(null)
     }, 3000)
   }, [])
+
+  // ── Streaming TTS Queue (ultra-low latency) ─────────────────────────────────────
+  // Split text into sentences for streaming TTS
+  const splitIntoSentences = useCallback((text: string): string[] => {
+    // Split on sentence boundaries, keeping the delimiter
+    const sentences = text
+      .replace(/\*\*/g, "") // Remove markdown bold
+      .split(/(?<=[.!?])\s+/)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0)
+    return sentences
+  }, [])
+
+  // Play a single sentence via TTS
+  const speakSentence = useCallback(async (text: string): Promise<void> => {
+    if (!text.trim()) return
+
+    const ctx = audioContextRef.current
+    if (!ctx || ctx.state === "closed") {
+      console.warn("[TTS-Queue] No AudioContext for sentence")
+      return
+    }
+
+    try {
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: text.slice(0, 500) }), // Shorter chunks for speed
+      })
+
+      if (!res.ok) {
+        console.warn("[TTS-Queue] TTS API error:", res.status)
+        return
+      }
+
+      const arrayBuffer = await res.arrayBuffer()
+      if (arrayBuffer.byteLength < 100) {
+        console.warn("[TTS-Queue] Audio buffer too small")
+        return
+      }
+
+      // Ensure context is running
+      if (ctx.state === "suspended") {
+        await ctx.resume()
+      }
+
+      // Decode and play
+      const buffer = await ctx.decodeAudioData(arrayBuffer)
+      const source = ctx.createBufferSource()
+      source.buffer = buffer
+      source.connect(ctx.destination)
+      currentSourceRef.current = source
+
+      await new Promise<void>((resolve) => {
+        source.onended = () => {
+          currentSourceRef.current = null
+          resolve()
+        }
+        source.start(0)
+        console.log("[TTS-Queue] Playing:", text.slice(0, 30))
+      })
+    } catch (err) {
+      console.error("[TTS-Queue] Playback error:", err)
+    }
+  }, [])
+
+  // Process the TTS queue one sentence at a time
+  const processTTSQueue = useCallback(async () => {
+    if (isProcessingQueueRef.current) return
+    isProcessingQueueRef.current = true
+
+    while (ttsQueueRef.current.length > 0 && isActiveRef.current) {
+      const sentence = ttsQueueRef.current.shift()
+      if (sentence) {
+        await speakSentence(sentence)
+      }
+    }
+
+    isProcessingQueueRef.current = false
+    console.log("[TTS-Queue] Queue empty, done")
+  }, [speakSentence])
+
+  // Enqueue text for streaming TTS (splits into sentences)
+  const enqueueTTS = useCallback(
+    (text: string) => {
+      if (!ttsEnabledRef.current || !text.trim()) return
+
+      const sentences = splitIntoSentences(text)
+      ttsQueueRef.current.push(...sentences)
+      console.log("[TTS-Queue] Enqueued", sentences.length, "sentences")
+
+      // Start processing if not already
+      if (!isProcessingQueueRef.current) {
+        processTTSQueue()
+      }
+    },
+    [splitIntoSentences, processTTSQueue]
+  )
+
+  // Stream AI response and enqueue TTS chunks
+  const getStreamingAIResponse = useCallback(
+    async (userText: string): Promise<string> => {
+      setPhase("thinking")
+
+      const res = await fetch("/api/xmad/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userText, stream: true }),
+      })
+
+      if (!res.ok) throw new Error(`AI error: ${res.status}`)
+
+      const reader = res.body?.getReader()
+      if (!reader) throw new Error("No response body")
+
+      const decoder = new TextDecoder()
+      let fullText = ""
+      let sentenceBuffer = ""
+
+      setPhase("speaking") // Start speaking phase as soon as we get first chunk
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value, { stream: true })
+
+        // Parse SSE format: "data: {...}\n\n"
+        const lines = chunk.split("\n")
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            const data = line.slice(6)
+            if (data === "[DONE]") continue
+
+            try {
+              const parsed = JSON.parse(data)
+              // Handle Anthropic-style streaming
+              const token = parsed?.delta?.text || parsed?.content?.[0]?.text || parsed?.text || ""
+
+              if (token) {
+                const cleanToken = token.replace(/\*\*/g, "") // Remove markdown bold
+                fullText += cleanToken
+                sentenceBuffer += cleanToken
+
+                // Check if we have a complete sentence
+                if (/[.!?]\s*$/.test(sentenceBuffer) && sentenceBuffer.trim().length > 10) {
+                  enqueueTTS(sentenceBuffer.trim())
+                  sentenceBuffer = ""
+                }
+              }
+            } catch {
+              // Not JSON, might be raw text
+              if (data && data !== "[DONE]") {
+                fullText += data
+              }
+            }
+          }
+        }
+      }
+
+      // Enqueue any remaining text
+      if (sentenceBuffer.trim()) {
+        enqueueTTS(sentenceBuffer.trim())
+      }
+
+      // Wait for TTS queue to finish
+      while (isProcessingQueueRef.current || ttsQueueRef.current.length > 0) {
+        await new Promise((r) => setTimeout(r, 100))
+      }
+
+      console.log("[Voice] Streaming AI response complete:", fullText.slice(0, 50))
+      return fullText
+    },
+    [enqueueTTS]
+  )
 
   // ── TTS (ElevenLabs via AudioContext, with browser SpeechSynthesis fallback) ─────
   const speak = useCallback(async (text: string) => {
@@ -232,11 +412,23 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
   }, [])
 
   const stopSpeaking = useCallback(() => {
+    // Clear TTS queue
+    ttsQueueRef.current = []
+    isProcessingQueueRef.current = false
+
+    // Stop current audio source
+    if (currentSourceRef.current) {
+      try {
+        currentSourceRef.current.stop()
+      } catch {}
+      currentSourceRef.current = null
+    }
+
     // Cancel browser SpeechSynthesis
     if (typeof window !== "undefined" && window.speechSynthesis) {
       window.speechSynthesis.cancel()
     }
-    console.log("[TTS] Stopped speaking")
+    console.log("[TTS] Stopped speaking and cleared queue")
   }, [])
 
   // ── AI Response ────────────────────────────────────────────────────────────────
@@ -309,16 +501,6 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     setTranscript(text)
     onTranscriptRef.current?.(text)
 
-    let aiText: string
-    try {
-      aiText = await getAIResponse(text)
-    } catch (err) {
-      handleError(err instanceof Error ? err.message : "AI failed")
-      return
-    }
-
-    onAIResponseRef.current?.(aiText)
-
     // Stop mic before TTS to prevent echo
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       mediaRecorderRef.current.stop()
@@ -328,14 +510,24 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     }
     console.log("[Voice] Mic stopped for TTS")
 
-    console.log("[TTS] ttsEnabled:", ttsEnabledRef.current)
-    if (ttsEnabledRef.current) {
-      await speak(aiText)
+    let aiText: string
+    try {
+      // Use streaming AI response for ultra-low latency TTS
+      if (ttsEnabledRef.current) {
+        aiText = await getStreamingAIResponse(text)
+      } else {
+        aiText = await getAIResponse(text)
+      }
+    } catch (err) {
+      handleError(err instanceof Error ? err.message : "AI failed")
+      return
     }
+
+    onAIResponseRef.current?.(aiText)
 
     // Small delay to ensure audio finishes cleanly
     await new Promise((r) => setTimeout(r, 200))
-  }, [transcribeBlob, getAIResponse, speak, handleError])
+  }, [transcribeBlob, getAIResponse, getStreamingAIResponse, handleError])
 
   // ── Start recording ───────────────────────────────────────────────────────────
   const startRecording = useCallback(async () => {
