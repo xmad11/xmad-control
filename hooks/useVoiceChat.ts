@@ -13,9 +13,11 @@ export interface UseVoiceChatOptions {
   onError?: (error: string) => void
   language?: string
   onAIResponse?: (text: string) => void
+  onToken?: (token: string) => void // Live transcript callback
   ttsEnabled?: boolean
   continuous?: boolean
   maxRecordTime?: number
+  voice?: string // TTS voice selection
 }
 
 export type VoicePhase = "idle" | "listening" | "processing" | "thinking" | "speaking" | "error"
@@ -41,10 +43,12 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     onTranscript,
     onError,
     onAIResponse,
+    onToken,
     language = "en",
     ttsEnabled = true,
     continuous = true,
     maxRecordTime = 15000,
+    voice = "aura-asteria-en", // Default Deepgram voice
   } = options
 
   const [phase, setPhase] = useState<VoicePhase>("idle")
@@ -74,12 +78,16 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
   const onTranscriptRef = useRef(onTranscript)
   const onAIResponseRef = useRef(onAIResponse)
   const onErrorRef = useRef(onError)
+  const onTokenRef = useRef(onToken)
+  const voiceRef = useRef(voice)
 
   ttsEnabledRef.current = ttsEnabled
   continuousRef.current = continuous
   onTranscriptRef.current = onTranscript
   onAIResponseRef.current = onAIResponse
   onErrorRef.current = onError
+  onTokenRef.current = onToken
+  voiceRef.current = voice
 
   const isSupported =
     typeof window !== "undefined" &&
@@ -129,7 +137,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       const res = await fetch("/api/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: text.slice(0, 500) }), // Shorter chunks for speed
+        body: JSON.stringify({ text: text.slice(0, 500), voice: voiceRef.current }), // Include voice
       })
 
       if (!res.ok) {
@@ -267,6 +275,10 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
                 const cleanToken = token.replace(/\*\*/g, "") // Remove markdown bold
                 fullText += cleanToken
                 sentenceBuffer += cleanToken
+
+                // Live transcript callback
+                onTokenRef.current?.(cleanToken)
+
                 console.log(
                   "[Stream] Token:",
                   token.slice(0, 20),

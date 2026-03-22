@@ -43,6 +43,10 @@ export async function GET() {
     available: !!(deepgramKey || elevenLabsKey),
     primaryProvider: deepgramKey ? "deepgram" : elevenLabsKey ? "elevenlabs" : "none",
     defaultVoice: deepgramKey ? DEFAULT_DEEPGRAM_VOICE : DEFAULT_ELEVENLABS_VOICE,
+    voices: {
+      deepgram: Object.keys(DEEPGRAM_VOICES),
+      elevenlabs: ["21m00Tcm4TlvDq8ikWAM", "AZnzlk1XWNv7e4KIX5tO", "EXAVITQu4vrWxnsgxmL1"],
+    },
   })
 }
 
