@@ -64,6 +64,14 @@ async function handleDeepgram(req: NextRequest, apiKey: string): Promise<Respons
       return NextResponse.json({ ok: false, error: "No audio file provided" }, { status: 400 })
     }
 
+    // File size validation (Deepgram limit is ~25MB)
+    if (audioFile.size > 25 * 1024 * 1024) {
+      return NextResponse.json(
+        { ok: false, error: "Audio file too large (max 25MB)" },
+        { status: 400 }
+      )
+    }
+
     // Deepgram STT endpoint with ultra-low latency settings
     const sttUrl = new URL("https://api.deepgram.com/v1/listen")
     sttUrl.searchParams.set("model", "nova-3") // Fastest model

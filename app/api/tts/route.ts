@@ -133,8 +133,8 @@ async function callDeepgram(text: string, voice: string, apiKey: string): Promis
     )
   }
 
-  const audioBuffer = await response.arrayBuffer()
-  return new Response(audioBuffer, {
+  // Stream response body directly instead of buffering into memory
+  return new Response(response.body, {
     status: 200,
     headers: { "Content-Type": "audio/mpeg", "Cache-Control": "no-cache" },
   })
@@ -162,8 +162,8 @@ async function callElevenLabs(text: string, voiceId: string, apiKey: string): Pr
     )
   }
 
-  const audioBuffer = await response.arrayBuffer()
-  return new Response(audioBuffer, {
+  // Stream response body directly instead of buffering into memory
+  return new Response(response.body, {
     status: 200,
     headers: { "Content-Type": "audio/mpeg", "Cache-Control": "no-cache" },
   })

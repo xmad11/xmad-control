@@ -296,7 +296,11 @@ export function BottomSheetContent() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 overscroll-contain chat-messages-container">
+      <div
+        className="flex-1 overflow-y-auto p-4 space-y-4 overscroll-contain chat-messages-container"
+        aria-live="polite"
+        aria-label="Chat messages"
+      >
         {messages.map((message) => (
           <div
             key={message.id}

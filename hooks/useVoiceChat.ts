@@ -8,6 +8,13 @@
 
 import { useCallback, useRef, useState } from "react"
 
+// ═══════════════════════════════════════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════════════════════════════════════
+
+/** Default silence threshold in milliseconds for auto-stop */
+const DEFAULT_SILENCE_THRESHOLD_MS = 1500
+
 export interface UseVoiceChatOptions {
   onTranscript?: (text: string) => void
   onError?: (error: string) => void
@@ -47,7 +54,7 @@ export interface UseVoiceChatReturn {
 function createSilenceDetector(
   stream: MediaStream,
   onSilence: () => void,
-  threshold = 1500 // ms of silence
+  threshold = DEFAULT_SILENCE_THRESHOLD_MS
 ): { stop: () => void } {
   const audioContext = new AudioContext()
   const analyser = audioContext.createAnalyser()
@@ -113,7 +120,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     maxRecordTime = 30000, // MAX 30s, but auto-stop on silence
     voice = "aura-asteria-en",
     silenceDetection = true, // Enable by default for ultra-low latency
-    silenceThreshold = 1500, // 1.5s of silence
+    silenceThreshold = DEFAULT_SILENCE_THRESHOLD_MS,
   } = options
 
   const [phase, setPhase] = useState<VoicePhase>("idle")
@@ -133,6 +140,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
   const audioContextRef = useRef<AudioContext | null>(null)
   const silenceDetectorRef = useRef<{ stop: () => void } | null>(null)
   const isRecordingRef = useRef(false)
+  const streamAbortRef = useRef<AbortController | null>(null)
 
   // Streaming TTS queue refs
   const ttsQueueRef = useRef<string[]>([])
@@ -281,10 +289,15 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       setPhase("thinking")
       console.log("[Stream] Starting streaming request for:", userText.slice(0, 30))
 
+      // Create AbortController for this stream
+      const abortController = new AbortController()
+      streamAbortRef.current = abortController
+
       const res = await fetch("/api/xmad/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userText, stream: true }),
+        signal: abortController.signal,
       })
 
       if (!res.ok) throw new Error(`AI error: ${res.status}`)
@@ -296,79 +309,89 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       const decoder = new TextDecoder()
       let fullText = ""
       let sentenceBuffer = ""
+      let lineBuffer = "" // Buffer for incomplete SSE lines
       let chunkCount = 0
 
       setPhase("speaking") // Start speaking phase as soon as we get first chunk
 
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) {
-          console.log("[Stream] Done, received", chunkCount, "chunks")
-          break
-        }
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) {
+            console.log("[Stream] Done, received", chunkCount, "chunks")
+            break
+          }
 
-        const chunk = decoder.decode(value, { stream: true })
-        chunkCount++
-        console.log("[Stream] Chunk", chunkCount, "raw:", chunk.slice(0, 150))
+          const chunk = decoder.decode(value, { stream: true })
+          chunkCount++
+          console.log("[Stream] Chunk", chunkCount, "raw:", chunk.slice(0, 150))
 
-        // Parse SSE format: "data: {...}\n\n" or "event: ...\ndata: {...}\n\n"
-        const lines = chunk.split("\n")
-        for (const line of lines) {
-          if (line.startsWith("data:")) {
-            const data = line.startsWith("data: ") ? line.slice(6).trim() : line.slice(5).trim()
-            if (data === "[DONE]" || !data) continue
+          // Handle SSE lines that may split mid-chunk
+          lineBuffer += chunk
+          const lines = lineBuffer.split("\n")
+          // Keep the last incomplete line in the buffer
+          lineBuffer = lines.pop() || ""
 
-            try {
-              const parsed = JSON.parse(data)
-              console.log(
-                "[Stream] Parsed type:",
-                parsed?.type,
-                "delta:",
-                JSON.stringify(parsed?.delta || {}).slice(0, 50)
-              )
+          for (const line of lines) {
+            if (line.startsWith("data:")) {
+              const data = line.startsWith("data: ") ? line.slice(6).trim() : line.slice(5).trim()
+              if (data === "[DONE]" || !data) continue
 
-              // Handle Anthropic-style streaming
-              const token =
-                (parsed?.delta?.type === "text_delta"
-                  ? (parsed.delta as { text?: string }).text
-                  : "") ||
-                parsed?.delta?.text ||
-                parsed?.content?.[0]?.text ||
-                parsed?.text ||
-                ""
-
-              if (token) {
-                const cleanToken = token.replace(/\*\*/g, "") // Remove markdown bold
-                fullText += cleanToken
-                sentenceBuffer += cleanToken
-
-                // Live transcript callback
-                onTokenRef.current?.(cleanToken)
-
+              try {
+                const parsed = JSON.parse(data)
                 console.log(
-                  "[Stream] Token:",
-                  token.slice(0, 20),
-                  "| Buffer:",
-                  sentenceBuffer.length,
-                  "chars"
+                  "[Stream] Parsed type:",
+                  parsed?.type,
+                  "delta:",
+                  JSON.stringify(parsed?.delta || {}).slice(0, 50)
                 )
 
-                // Check if we have a complete sentence
-                if (/[.!?]\s*$/.test(sentenceBuffer) && sentenceBuffer.trim().length > 10) {
-                  console.log("[Stream] Sentence complete:", sentenceBuffer.trim().slice(0, 40))
-                  enqueueTTS(sentenceBuffer.trim())
-                  sentenceBuffer = ""
+                // Handle Anthropic-style streaming
+                const token =
+                  (parsed?.delta?.type === "text_delta"
+                    ? (parsed.delta as { text?: string }).text
+                    : "") ||
+                  parsed?.delta?.text ||
+                  parsed?.content?.[0]?.text ||
+                  parsed?.text ||
+                  ""
+
+                if (token) {
+                  const cleanToken = token.replace(/\*\*/g, "") // Remove markdown bold
+                  fullText += cleanToken
+                  sentenceBuffer += cleanToken
+
+                  // Live transcript callback
+                  onTokenRef.current?.(cleanToken)
+
+                  console.log(
+                    "[Stream] Token:",
+                    token.slice(0, 20),
+                    "| Buffer:",
+                    sentenceBuffer.length,
+                    "chars"
+                  )
+
+                  // Check if we have a complete sentence
+                  if (/[.!?]\s*$/.test(sentenceBuffer) && sentenceBuffer.trim().length > 10) {
+                    console.log("[Stream] Sentence complete:", sentenceBuffer.trim().slice(0, 40))
+                    enqueueTTS(sentenceBuffer.trim())
+                    sentenceBuffer = ""
+                  }
                 }
-              }
-            } catch (e) {
-              console.log("[Stream] Parse error:", e, "for:", data.slice(0, 50))
-              // Not JSON, might be raw text
-              if (data && data !== "[DONE]") {
-                fullText += data
+              } catch (e) {
+                console.log("[Stream] Parse error:", e, "for:", data.slice(0, 50))
+                // Not JSON, might be raw text
+                if (data && data !== "[DONE]") {
+                  fullText += data
+                }
               }
             }
           }
         }
+      } finally {
+        reader.releaseLock()
+        streamAbortRef.current = null
       }
 
       // Enqueue any remaining text
@@ -468,7 +491,13 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       }
       window.speechSynthesis.cancel()
 
+      // Flag to prevent double-call from both onvoiceschanged and setTimeout
+      let spoken = false
+
       const doSpeak = () => {
+        if (spoken) return
+        spoken = true
+
         const utterance = new SpeechSynthesisUtterance(text.slice(0, 4000))
         utterance.rate = 1.0
         utterance.pitch = 1.0
@@ -844,6 +873,11 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     // CRITICAL: Create and unlock AudioContext in user gesture call stack (iOS requirement)
     // This MUST happen synchronously during the tap/click handler
     try {
+      // Close existing AudioContext if present (prevent leak on rapid session start)
+      if (audioContextRef.current && audioContextRef.current.state !== "closed") {
+        audioContextRef.current.close()
+      }
+
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
       const ctx = new AudioCtx()
       audioContextRef.current = ctx
@@ -907,6 +941,12 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
 
     // Stop TTS
     stopSpeaking()
+
+    // Abort any pending stream request
+    if (streamAbortRef.current) {
+      streamAbortRef.current.abort()
+      streamAbortRef.current = null
+    }
 
     // Close AudioContext
     if (audioContextRef.current && audioContextRef.current.state !== "closed") {

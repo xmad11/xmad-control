@@ -236,6 +236,8 @@ export function SheetProvider({ children }: { children: ReactNode }) {
   }, [isRecording, isSpeaking, voicePhase])
 
   // Sync hook states to context state via useEffect (not in render body!)
+  // Note: liveTokens and userTranscript are managed separately via their own useState
+  // to avoid duplicate updates - they're only synced here for the voiceState object
   useEffect(() => {
     setVoiceState((prev) => ({
       ...prev,
@@ -243,6 +245,7 @@ export function SheetProvider({ children }: { children: ReactNode }) {
       isSpeaking,
       phase: voicePhase,
       isListening: voicePhase === "processing" || voicePhase === "thinking",
+      // liveTokens and userTranscript come from their own useState, not from hook
       liveTokens,
       userTranscript,
     }))

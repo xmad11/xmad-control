@@ -195,6 +195,7 @@ export function HomeClient() {
                 <button
                   onContextMenu={(e) => e.preventDefault()}
                   {...holdHandlers}
+                  style={{ touchAction: "manipulation" }}
                   className="transition-all ease-out select-none touch-none flex relative p-3 rounded-xl backdrop-blur-xl border scale-110 glass-voice-button-active"
                   aria-label="Voice active - hold to stop, tap to expand tabs"
                   onClick={expandTabs}
@@ -219,6 +220,7 @@ export function HomeClient() {
                   transition={{ duration: ANIMATION.intentFast }}
                   onContextMenu={(e) => e.preventDefault()}
                   {...holdHandlers}
+                  style={{ touchAction: "manipulation" }}
                   className="relative p-2 rounded-lg backdrop-blur-xl border transition-colors select-none touch-none glass-voice-button-active"
                   aria-label="Voice active - hold to stop, tap to open chat"
                   onClick={() => openSheet("bottom")}
@@ -252,6 +254,7 @@ export function HomeClient() {
                 {...holdHandlers}
                 {...keyboardHandlers}
                 {...ariaProps}
+                style={{ touchAction: "manipulation" }}
                 className={`transition-all ease-out select-none touch-none ${
                   tabsExpanded || voiceMode ? "hidden" : "flex"
                 } relative p-3 rounded-xl backdrop-blur-xl border glass-tab-button`}
