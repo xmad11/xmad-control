@@ -98,6 +98,10 @@ export function SheetProvider({ children }: { children: ReactNode }) {
   const transcriptHandlerRef = useRef<((text: string) => void) | null>(null)
   const aiResponseHandlerRef = useRef<((text: string) => void) | null>(null)
 
+  // Track activeSheet with ref to avoid stale closure in toggleSheet
+  const activeSheetRef = useRef(activeSheet)
+  activeSheetRef.current = activeSheet
+
   // Voice chat hook - integrated at context level for global access
   const {
     phase: voicePhase,
@@ -148,13 +152,11 @@ export function SheetProvider({ children }: { children: ReactNode }) {
     setActiveSheet(null)
   }, [])
 
-  const toggleSheet = useCallback(
-    (direction: SheetDirection) => {
-      setActiveSheet((current) => (current === direction ? null : direction))
-      return activeSheet !== direction
-    },
-    [activeSheet]
-  )
+  const toggleSheet = useCallback((direction: SheetDirection) => {
+    const wasOpen = activeSheetRef.current === direction
+    setActiveSheet((current) => (current === direction ? null : direction))
+    return !wasOpen
+  }, [])
 
   const isSheetOpen = useCallback(
     (direction: SheetDirection) => {

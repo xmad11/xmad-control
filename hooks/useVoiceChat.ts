@@ -58,6 +58,7 @@ function createSilenceDetector(
   const dataArray = new Uint8Array(analyser.frequencyBinCount)
   let silenceStart: number | null = null
   let running = true
+  let rafId: number | null = null // Track RAF ID for cleanup
 
   const check = () => {
     if (!running) return
@@ -71,20 +72,31 @@ function createSilenceDetector(
       } else if (Date.now() - silenceStart > threshold) {
         onSilence()
         running = false
-        audioContext.close()
+        // Check state before closing to avoid double-close error
+        if (audioContext.state !== "closed") {
+          audioContext.close()
+        }
         return
       }
     } else {
       silenceStart = null
     }
-    requestAnimationFrame(check)
+    rafId = requestAnimationFrame(check)
   }
-  requestAnimationFrame(check)
+  rafId = requestAnimationFrame(check)
 
   return {
     stop: () => {
       running = false
-      audioContext.close()
+      // Cancel pending RAF
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId)
+        rafId = null
+      }
+      // Check state before closing to avoid double-close error
+      if (audioContext.state !== "closed") {
+        audioContext.close()
+      }
     },
   }
 }
