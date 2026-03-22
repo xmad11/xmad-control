@@ -205,6 +205,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
   const getStreamingAIResponse = useCallback(
     async (userText: string): Promise<string> => {
       setPhase("thinking")
+      console.log("[Stream] Starting streaming request for:", userText.slice(0, 30))
 
       const res = await fetch("/api/xmad/chat", {
         method: "POST",
@@ -213,6 +214,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       })
 
       if (!res.ok) throw new Error(`AI error: ${res.status}`)
+      console.log("[Stream] Response OK, reading body...")
 
       const reader = res.body?.getReader()
       if (!reader) throw new Error("No response body")
@@ -220,39 +222,68 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       const decoder = new TextDecoder()
       let fullText = ""
       let sentenceBuffer = ""
+      let chunkCount = 0
 
       setPhase("speaking") // Start speaking phase as soon as we get first chunk
 
       while (true) {
         const { done, value } = await reader.read()
-        if (done) break
+        if (done) {
+          console.log("[Stream] Done, received", chunkCount, "chunks")
+          break
+        }
 
         const chunk = decoder.decode(value, { stream: true })
+        chunkCount++
+        console.log("[Stream] Chunk", chunkCount, "raw:", chunk.slice(0, 150))
 
-        // Parse SSE format: "data: {...}\n\n"
+        // Parse SSE format: "data: {...}\n\n" or "event: ...\ndata: {...}\n\n"
         const lines = chunk.split("\n")
         for (const line of lines) {
           if (line.startsWith("data: ")) {
-            const data = line.slice(6)
-            if (data === "[DONE]") continue
+            const data = line.slice(6).trim()
+            if (data === "[DONE]" || !data) continue
 
             try {
               const parsed = JSON.parse(data)
+              console.log(
+                "[Stream] Parsed type:",
+                parsed?.type,
+                "delta:",
+                JSON.stringify(parsed?.delta || {}).slice(0, 50)
+              )
+
               // Handle Anthropic-style streaming
-              const token = parsed?.delta?.text || parsed?.content?.[0]?.text || parsed?.text || ""
+              const token =
+                (parsed?.delta?.type === "text_delta"
+                  ? (parsed.delta as { text?: string }).text
+                  : "") ||
+                parsed?.delta?.text ||
+                parsed?.content?.[0]?.text ||
+                parsed?.text ||
+                ""
 
               if (token) {
                 const cleanToken = token.replace(/\*\*/g, "") // Remove markdown bold
                 fullText += cleanToken
                 sentenceBuffer += cleanToken
+                console.log(
+                  "[Stream] Token:",
+                  token.slice(0, 20),
+                  "| Buffer:",
+                  sentenceBuffer.length,
+                  "chars"
+                )
 
                 // Check if we have a complete sentence
                 if (/[.!?]\s*$/.test(sentenceBuffer) && sentenceBuffer.trim().length > 10) {
+                  console.log("[Stream] Sentence complete:", sentenceBuffer.trim().slice(0, 40))
                   enqueueTTS(sentenceBuffer.trim())
                   sentenceBuffer = ""
                 }
               }
-            } catch {
+            } catch (e) {
+              console.log("[Stream] Parse error:", e, "for:", data.slice(0, 50))
               // Not JSON, might be raw text
               if (data && data !== "[DONE]") {
                 fullText += data
@@ -264,15 +295,17 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
 
       // Enqueue any remaining text
       if (sentenceBuffer.trim()) {
+        console.log("[Stream] Final buffer:", sentenceBuffer.trim().slice(0, 40))
         enqueueTTS(sentenceBuffer.trim())
       }
 
       // Wait for TTS queue to finish
+      console.log("[Stream] Waiting for TTS queue to drain...")
       while (isProcessingQueueRef.current || ttsQueueRef.current.length > 0) {
         await new Promise((r) => setTimeout(r, 100))
       }
 
-      console.log("[Voice] Streaming AI response complete:", fullText.slice(0, 50))
+      console.log("[Stream] Complete:", fullText.slice(0, 60))
       return fullText
     },
     [enqueueTTS]
