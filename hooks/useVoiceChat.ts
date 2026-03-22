@@ -61,6 +61,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
   const loopTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const isActiveRef = useRef(false) // Ref for async callback checks
   const loopRunningRef = useRef(false) // Guard against parallel loop execution
+  const audioContextRef = useRef<AudioContext | null>(null) // Pre-unlocked for iOS
 
   // Option refs
   const ttsEnabledRef = useRef(ttsEnabled)
@@ -103,7 +104,15 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     setPhase("speaking")
     console.log("[TTS] Starting for text:", text.slice(0, 50))
 
-    // Try ElevenLabs first via AudioContext (best iOS compatibility)
+    // Use pre-unlocked AudioContext from user gesture (iOS-compatible)
+    const ctx = audioContextRef.current
+    if (!ctx) {
+      console.warn(
+        "[TTS] No AudioContext available - session may not have been started with user gesture"
+      )
+    }
+
+    // Try ElevenLabs/Deepgram first via AudioContext
     try {
       const res = await fetch("/api/tts", {
         method: "POST",
@@ -115,46 +124,47 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
         const arrayBuffer = await res.arrayBuffer()
         console.log("[TTS] Received audio buffer:", arrayBuffer.byteLength, "bytes")
 
-        await new Promise<void>((resolve) => {
-          // Create or resume AudioContext (iOS-compatible)
-          const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
-          const ctx = new AudioCtx()
+        if (ctx && ctx.state !== "closed") {
+          await new Promise<void>((resolve) => {
+            const playAudio = async () => {
+              try {
+                // Ensure context is running (should already be unlocked from user gesture)
+                if (ctx.state === "suspended") {
+                  await ctx.resume()
+                  console.log("[TTS] AudioContext resumed (was suspended)")
+                }
 
-          const playAudio = async () => {
-            try {
-              if (ctx.state === "suspended") {
-                await ctx.resume()
-                console.log("[TTS] AudioContext resumed")
+                console.log("[TTS] AudioContext state:", ctx.state)
+
+                // Decode and play
+                const buffer = await ctx.decodeAudioData(arrayBuffer)
+                const source = ctx.createBufferSource()
+                source.buffer = buffer
+                source.connect(ctx.destination)
+
+                source.onended = () => {
+                  console.log("[TTS] Audio finished playing")
+                  setTimeout(resolve, 500)
+                }
+
+                source.start(0)
+                console.log("[TTS] Audio started playing")
+              } catch (err) {
+                console.error("[TTS] AudioContext playback error:", err)
+                resolve() // Don't reject - fall through to browser TTS
               }
-
-              // Decode and play
-              const buffer = await ctx.decodeAudioData(arrayBuffer)
-              const source = ctx.createBufferSource()
-              source.buffer = buffer
-              source.connect(ctx.destination)
-
-              source.onended = () => {
-                console.log("[TTS] Audio finished playing")
-                ctx.close()
-                setTimeout(resolve, 500)
-              }
-
-              source.start(0)
-              console.log("[TTS] Audio started playing")
-            } catch (err) {
-              console.error("[TTS] AudioContext playback error:", err)
-              ctx.close()
-              resolve() // Don't reject - fall through to browser TTS
             }
-          }
 
-          playAudio()
-        })
-        return
+            playAudio()
+          })
+          return
+        }
+        console.warn("[TTS] AudioContext closed or unavailable, trying browser TTS")
+      } else {
+        console.warn("[TTS] TTS API returned status:", res.status)
       }
-      console.warn("[TTS] ElevenLabs returned status:", res.status)
     } catch (err) {
-      console.warn("[TTS] ElevenLabs fetch failed:", err)
+      console.warn("[TTS] TTS fetch failed:", err)
     }
 
     // Fall back to browser SpeechSynthesis
@@ -502,6 +512,31 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     setTranscript("")
     console.log("[Voice] Session started")
 
+    // CRITICAL: Create and unlock AudioContext in user gesture call stack (iOS requirement)
+    // This MUST happen synchronously during the tap/click handler
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
+      const ctx = new AudioCtx()
+      audioContextRef.current = ctx
+
+      // Resume immediately in user gesture context
+      if (ctx.state === "suspended") {
+        await ctx.resume()
+        console.log("[Voice] AudioContext unlocked for iOS")
+      }
+
+      // Play a silent buffer to fully unlock audio on iOS
+      const silentBuffer = ctx.createBuffer(1, 1, 22050)
+      const silentSource = ctx.createBufferSource()
+      silentSource.buffer = silentBuffer
+      silentSource.connect(ctx.destination)
+      silentSource.start(0)
+      console.log("[Voice] AudioContext ready, state:", ctx.state)
+    } catch (err) {
+      console.warn("[Voice] AudioContext setup failed:", err)
+      // Continue anyway - browser TTS fallback will work
+    }
+
     // Start the loop
     runContinuousLoop()
   }, [isSupported, handleError, runContinuousLoop])
@@ -537,6 +572,13 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
 
     // Stop TTS
     stopSpeaking()
+
+    // Close AudioContext
+    if (audioContextRef.current && audioContextRef.current.state !== "closed") {
+      audioContextRef.current.close()
+      audioContextRef.current = null
+      console.log("[Voice] AudioContext closed")
+    }
 
     setPhase("idle")
     setTranscript("")
