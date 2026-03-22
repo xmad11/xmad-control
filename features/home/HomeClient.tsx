@@ -2,6 +2,7 @@
    HOME CLIENT - XMAD Control Dashboard
    AI Dock State Machine + Glass Liquid Tabs + Unified Sheets
    Header is now in layout (AppHeader) - this only renders content + sheets
+   Voice overlay with live transcript for hold mode
    ══════════════════════════════════════════════════════════════════════════════════ */
 
 "use client"
@@ -23,6 +24,7 @@ import { MessageSquare, Mic, MicOff } from "lucide-react"
 import { useEffect, useMemo } from "react"
 
 import { MiniWaveIndicator } from "@/components/ai-dock/MiniWaveIndicator"
+import { VoiceOverlay } from "@/components/ai-dock/VoiceOverlay"
 import { SurfaceErrorBoundary } from "@/components/error-boundary"
 import { useSheetContext } from "@/context/SheetContext"
 import { BackgroundBlobs } from "@/features/dashboard-ui/BackgroundBlobs"
@@ -107,7 +109,7 @@ export function HomeClient() {
   } = useSurfaceController()
 
   // Sheet Context - global sheet state + voice state (shared with BottomSheetContent)
-  const { activeSheet, openSheet, closeSheet, isSheetOpen, startVoice, stopVoice } =
+  const { activeSheet, openSheet, closeSheet, isSheetOpen, startVoice, stopVoice, voiceState } =
     useSheetContext()
 
   // AI Dock Controller - owns tabsExpanded state and all dock interactions
@@ -297,6 +299,18 @@ export function HomeClient() {
           VOICE TOAST
           ════════════════════════════════════════════════════════════════════════ */}
       <VoiceToast show={voiceToast.show} message={voiceToast.message} type={voiceToast.type} />
+
+      {/* ══════════════════════════════════════════════════════════════════════════
+          VOICE OVERLAY - Live transcript during hold mode
+          ════════════════════════════════════════════════════════════════════════ */}
+      <VoiceOverlay
+        visible={voiceMode && !isSheetOpen("bottom")}
+        phase={voiceState.phase}
+        tokens={voiceState.liveTokens}
+        userTranscript={voiceState.userTranscript ?? undefined}
+        maxLines={2}
+        bottomOffset="140px"
+      />
 
       {/* ════════════════════════════════════════════════════════════════════════
           UNIFIED SHEETS - All 4 directions using GlassSheet

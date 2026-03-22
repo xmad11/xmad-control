@@ -2,6 +2,7 @@
    SHEET CONTEXT - Global sheet state + voice state for AppHeader + HomeClient
    Now includes useVoiceChat hook for global voice control
    Continuous conversation mode - auto-listen after each AI response
+   Live transcript support for hold mode overlay
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 "use client"
@@ -26,6 +27,10 @@ interface VoiceState {
   ttsEnabled: boolean
   /** Current phase of voice interaction */
   phase: VoicePhase
+  /** Live AI tokens (for overlay display) */
+  liveTokens: string[]
+  /** User's last transcript */
+  userTranscript: string | null
 }
 
 interface SheetContextValue {
@@ -67,6 +72,8 @@ interface SheetContextValue {
   lastTranscript: string | null
   /** Clear the last transcript */
   clearTranscript: () => void
+  /** Clear live tokens */
+  clearLiveTokens: () => void
 }
 
 const SheetContext = createContext<SheetContextValue | null>(null)
@@ -78,12 +85,16 @@ const initialVoiceState: VoiceState = {
   isSpeaking: false,
   ttsEnabled: true,
   phase: "idle",
+  liveTokens: [],
+  userTranscript: null,
 }
 
 export function SheetProvider({ children }: { children: ReactNode }) {
   const [activeSheet, setActiveSheet] = useState<SheetDirection | null>(null)
   const [voiceState, setVoiceState] = useState<VoiceState>(initialVoiceState)
   const [lastTranscript, setLastTranscript] = useState<string | null>(null)
+  const [liveTokens, setLiveTokens] = useState<string[]>([])
+  const [userTranscript, setUserTranscript] = useState<string | null>(null)
   const transcriptHandlerRef = useRef<((text: string) => void) | null>(null)
   const aiResponseHandlerRef = useRef<((text: string) => void) | null>(null)
 
@@ -100,6 +111,7 @@ export function SheetProvider({ children }: { children: ReactNode }) {
     onTranscript: (text) => {
       // Store the transcript
       setLastTranscript(text)
+      setUserTranscript(text)
       // Call registered handler if exists
       if (transcriptHandlerRef.current) {
         transcriptHandlerRef.current(text)
@@ -110,6 +122,10 @@ export function SheetProvider({ children }: { children: ReactNode }) {
       if (aiResponseHandlerRef.current) {
         aiResponseHandlerRef.current(text)
       }
+    },
+    onToken: (token) => {
+      // Live token callback - for overlay display
+      setLiveTokens((prev) => [...prev, token])
     },
     onError: (error) => {
       console.error("[VoiceChat Error]", error)
@@ -201,6 +217,22 @@ export function SheetProvider({ children }: { children: ReactNode }) {
     setLastTranscript(null)
   }, [])
 
+  const clearLiveTokens = useCallback(() => {
+    setLiveTokens([])
+    setUserTranscript(null)
+  }, [])
+
+  // Clear live tokens when voice stops
+  useEffect(() => {
+    if (!isRecording && !isSpeaking && voicePhase === "idle") {
+      // Small delay before clearing to let user see final text
+      const timer = setTimeout(() => {
+        setLiveTokens([])
+      }, 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [isRecording, isSpeaking, voicePhase])
+
   // Sync hook states to context state via useEffect (not in render body!)
   useEffect(() => {
     setVoiceState((prev) => ({
@@ -209,8 +241,10 @@ export function SheetProvider({ children }: { children: ReactNode }) {
       isSpeaking,
       phase: voicePhase,
       isListening: voicePhase === "processing" || voicePhase === "thinking",
+      liveTokens,
+      userTranscript,
     }))
-  }, [isRecording, isSpeaking, voicePhase])
+  }, [isRecording, isSpeaking, voicePhase, liveTokens, userTranscript])
 
   return (
     <SheetContext.Provider
@@ -233,6 +267,7 @@ export function SheetProvider({ children }: { children: ReactNode }) {
         registerAIResponseHandler,
         lastTranscript,
         clearTranscript,
+        clearLiveTokens,
       }}
     >
       {children}
