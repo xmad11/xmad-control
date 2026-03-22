@@ -3,6 +3,7 @@ import { ConditionalHeader } from "@/components/layout/ConditionalHeader"
 import Providers from "@/components/layout/Providers"
 import { SkipLink } from "@/components/layout/SkipLink"
 import { NavigationProvider } from "@/components/navigation/NavigationProvider"
+import { VoiceDebug } from "@/components/voice-debug"
 import { SheetProvider } from "@/context/SheetContext"
 import type { Metadata, Viewport } from "next"
 import { Toaster } from "sonner"
@@ -179,6 +180,7 @@ export default function RootLayout({
                 {children}
               </main>
             </NavigationProvider>
+            <VoiceDebug />
           </SheetProvider>
         </Providers>
 
