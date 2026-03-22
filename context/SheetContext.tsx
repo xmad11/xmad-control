@@ -6,7 +6,7 @@
 
 "use client"
 
-import { createContext, useCallback, useContext, useRef, useState } from "react"
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react"
 import type { ReactNode } from "react"
 
 import { type VoicePhase, useVoiceChat } from "@/hooks/useVoiceChat"
@@ -201,33 +201,16 @@ export function SheetProvider({ children }: { children: ReactNode }) {
     setLastTranscript(null)
   }, [])
 
-  // Sync hook states to context state
-  // Note: isRecording is derived from phase in the hook
-  const syncStateRef = useRef({ isRecording, isSpeaking, voicePhase })
-  syncStateRef.current = { isRecording, isSpeaking, voicePhase }
-
-  // Use a stable callback to sync state
-  const syncVoiceState = useCallback(() => {
-    const { isRecording: rec, isSpeaking: spk, voicePhase: ph } = syncStateRef.current
+  // Sync hook states to context state via useEffect (not in render body!)
+  useEffect(() => {
     setVoiceState((prev) => ({
       ...prev,
-      isRecording: rec,
-      isSpeaking: spk,
-      phase: ph,
-      // Derive isListening from phase
-      isListening: ph === "processing" || ph === "thinking",
+      isRecording,
+      isSpeaking,
+      phase: voicePhase,
+      isListening: voicePhase === "processing" || voicePhase === "thinking",
     }))
-  }, [])
-
-  // Sync when recording/speaking/phase changes
-  if (
-    voiceState.isRecording !== isRecording ||
-    voiceState.isSpeaking !== isSpeaking ||
-    voiceState.phase !== voicePhase
-  ) {
-    // Queue state update
-    setTimeout(syncVoiceState, 0)
-  }
+  }, [isRecording, isSpeaking, voicePhase])
 
   return (
     <SheetContext.Provider

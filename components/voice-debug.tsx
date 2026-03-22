@@ -1,37 +1,53 @@
 "use client"
 import { useSheetContext } from "@/context/SheetContext"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 export function VoiceDebug() {
   const { voiceState } = useSheetContext()
   const [logs, setLogs] = useState<string[]>([])
   const [show, setShow] = useState(false)
+  const patchedRef = useRef(false)
 
-  // Intercept console.log
-  if (typeof window !== "undefined") {
-    const orig = console.log.bind(console)
-    console.log = (...args: unknown[]) => {
-      orig(...args)
-      const msg = args.map((a) => (typeof a === "object" ? JSON.stringify(a) : String(a))).join(" ")
-      if (msg.includes("[Voice]")) {
-        setLogs((prev) => [...prev.slice(-20), `${new Date().toLocaleTimeString()}: ${msg}`])
-      }
-    }
+  useEffect(() => {
+    if (patchedRef.current) return
+    patchedRef.current = true
+
+    const origLog = console.log.bind(console)
     const origErr = console.error.bind(console)
-    console.error = (...args: unknown[]) => {
-      origErr(...args)
-      const msg = args.map((a) => (typeof a === "object" ? JSON.stringify(a) : String(a))).join(" ")
-      setLogs((prev) => [...prev.slice(-20), `ERR ${new Date().toLocaleTimeString()}: ${msg}`])
-    }
     const origWarn = console.warn.bind(console)
-    console.warn = (...args: unknown[]) => {
-      origWarn(...args)
+
+    const addLog = (prefix: string, args: unknown[]) => {
       const msg = args.map((a) => (typeof a === "object" ? JSON.stringify(a) : String(a))).join(" ")
-      if (msg.includes("[Voice]")) {
-        setLogs((prev) => [...prev.slice(-20), `WARN ${new Date().toLocaleTimeString()}: ${msg}`])
+      if (msg.includes("[Voice") || prefix === "ERR") {
+        setLogs((prev) => [
+          ...prev.slice(-30),
+          `${prefix}${new Date().toLocaleTimeString()}: ${msg}`,
+        ])
       }
     }
-  }
+
+    console.log = (...args) => {
+      origLog(...args)
+      addLog("", args)
+    }
+    console.error = (...args) => {
+      origErr(...args)
+      addLog("ERR ", args)
+    }
+    console.warn = (...args) => {
+      origWarn(...args)
+      addLog("WRN ", args)
+    }
+
+    return () => {
+      console.log = origLog
+      console.error = origErr
+      console.warn = origWarn
+    }
+  }, [])
+
+  const phase = voiceState?.phase ?? "idle"
+  const active = voiceState?.isActive ?? false
 
   if (!show) {
     return (
@@ -40,7 +56,7 @@ export function VoiceDebug() {
         onClick={() => setShow(true)}
         style={{
           position: "fixed",
-          bottom: 120,
+          top: 8,
           right: 8,
           zIndex: 9999,
           background: "rgba(0,0,0,0.8)",
@@ -50,9 +66,10 @@ export function VoiceDebug() {
           padding: "4px 8px",
           fontSize: 10,
           fontFamily: "monospace",
+          touchAction: "manipulation",
         }}
       >
-        DEBUG
+        DBG
       </button>
     )
   }
@@ -61,7 +78,7 @@ export function VoiceDebug() {
     <div
       style={{
         position: "fixed",
-        bottom: 0,
+        top: 0,
         left: 0,
         right: 0,
         zIndex: 9999,
@@ -70,14 +87,23 @@ export function VoiceDebug() {
         fontFamily: "monospace",
         fontSize: 10,
         padding: 8,
-        maxHeight: "40vh",
+        maxHeight: "50vh",
         overflow: "auto",
-        borderTop: "1px solid #0f0",
+        borderBottom: "1px solid #0f0",
       }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: 4,
+          position: "sticky",
+          top: 0,
+          background: "rgba(0,0,0,0.95)",
+        }}
+      >
         <span style={{ color: "#ff0" }}>
-          phase:{voiceState.phase} active:{String(voiceState.isActive)}
+          phase:{phase} active:{String(active)}
         </span>
         <div style={{ display: "flex", gap: 8 }}>
           <button
@@ -89,6 +115,7 @@ export function VoiceDebug() {
               border: "none",
               cursor: "pointer",
               fontSize: 10,
+              padding: "2px 6px",
             }}
           >
             CLR
@@ -102,20 +129,19 @@ export function VoiceDebug() {
               border: "none",
               cursor: "pointer",
               fontSize: 10,
+              padding: "2px 6px",
             }}
           >
             HIDE
           </button>
         </div>
       </div>
-      {logs.length === 0 && (
-        <div style={{ color: "#666" }}>No voice logs yet. Tap mic to start.</div>
-      )}
+      {logs.length === 0 && <div style={{ color: "#666" }}>Tap mic to see voice logs</div>}
       {logs.map((log, i) => (
         <div
           key={i}
           style={{
-            color: log.startsWith("ERR") ? "#f44" : log.startsWith("WARN") ? "#fa0" : "#0f0",
+            color: log.startsWith("ERR") ? "#f44" : log.startsWith("WRN") ? "#fa0" : "#0f0",
             marginBottom: 2,
             wordBreak: "break-all",
           }}
