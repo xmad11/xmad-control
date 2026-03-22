@@ -55,7 +55,6 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
   // Refs - all refs for stable access in async callbacks
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
-  const currentAudioRef = useRef<HTMLAudioElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const mimeTypeRef = useRef<string>("")
   const recordTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -98,12 +97,13 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     }, 3000)
   }, [])
 
-  // ── TTS (ElevenLabs with browser SpeechSynthesis fallback) ──────────────────────
+  // ── TTS (ElevenLabs via AudioContext, with browser SpeechSynthesis fallback) ─────
   const speak = useCallback(async (text: string) => {
     if (!text.trim()) return
     setPhase("speaking")
+    console.log("[TTS] Starting for text:", text.slice(0, 50))
 
-    // Try ElevenLabs first, fall back to browser SpeechSynthesis
+    // Try ElevenLabs first via AudioContext (best iOS compatibility)
     try {
       const res = await fetch("/api/tts", {
         method: "POST",
@@ -112,53 +112,61 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       })
 
       if (res.ok) {
-        const blob = await res.blob()
-        const url = URL.createObjectURL(blob)
+        const arrayBuffer = await res.arrayBuffer()
+        console.log("[TTS] Received audio buffer:", arrayBuffer.byteLength, "bytes")
+
         await new Promise<void>((resolve) => {
-          const audio = new Audio(url)
-          currentAudioRef.current = audio
-          audio.onended = () => {
-            URL.revokeObjectURL(url)
-            currentAudioRef.current = null
-            setTimeout(resolve, 800)
+          // Create or resume AudioContext (iOS-compatible)
+          const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
+          const ctx = new AudioCtx()
+
+          const playAudio = async () => {
+            try {
+              if (ctx.state === "suspended") {
+                await ctx.resume()
+                console.log("[TTS] AudioContext resumed")
+              }
+
+              // Decode and play
+              const buffer = await ctx.decodeAudioData(arrayBuffer)
+              const source = ctx.createBufferSource()
+              source.buffer = buffer
+              source.connect(ctx.destination)
+
+              source.onended = () => {
+                console.log("[TTS] Audio finished playing")
+                ctx.close()
+                setTimeout(resolve, 500)
+              }
+
+              source.start(0)
+              console.log("[TTS] Audio started playing")
+            } catch (err) {
+              console.error("[TTS] AudioContext playback error:", err)
+              ctx.close()
+              resolve() // Don't reject - fall through to browser TTS
+            }
           }
-          audio.onerror = () => {
-            URL.revokeObjectURL(url)
-            currentAudioRef.current = null
-            resolve()
-          }
-          audio.play().catch(() => resolve())
+
+          playAudio()
         })
         return
       }
-      // Fall through to browser TTS if ElevenLabs fails
-      console.warn("[Voice] ElevenLabs unavailable, using browser TTS")
-    } catch {
-      console.warn("[Voice] ElevenLabs failed, using browser TTS")
+      console.warn("[TTS] ElevenLabs returned status:", res.status)
+    } catch (err) {
+      console.warn("[TTS] ElevenLabs fetch failed:", err)
     }
 
-    // Unlock iOS audio output by playing a silent sound first
-    try {
-      const silentCtx = new AudioContext()
-      const buf = silentCtx.createBuffer(1, 1, 22050)
-      const src = silentCtx.createBufferSource()
-      src.buffer = buf
-      src.connect(silentCtx.destination)
-      src.start(0)
-      await new Promise((r) => setTimeout(r, 100))
-      silentCtx.close()
-    } catch {}
-
-    // Browser SpeechSynthesis fallback
+    // Fall back to browser SpeechSynthesis
+    console.log("[TTS] Using browser SpeechSynthesis fallback")
     await new Promise<void>((resolve) => {
       if (!window.speechSynthesis) {
-        console.warn("[Voice] speechSynthesis not available")
+        console.warn("[TTS] speechSynthesis not available")
         resolve()
         return
       }
       window.speechSynthesis.cancel()
 
-      // Wait for voices to load (required on some browsers)
       const doSpeak = () => {
         const utterance = new SpeechSynthesisUtterance(text.slice(0, 4000))
         utterance.rate = 1.0
@@ -178,28 +186,28 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
           ) || voices.find((v) => v.lang.startsWith("en"))
         if (preferred) utterance.voice = preferred
 
-        console.log(
-          "[Voice] Browser TTS voices available:",
-          voices.length,
-          "using:",
-          preferred?.name ?? "default"
-        )
+        console.log("[TTS] Browser TTS using voice:", preferred?.name ?? "default")
 
-        utterance.onend = () => setTimeout(resolve, 800)
+        utterance.onend = () => {
+          console.log("[TTS] Browser TTS finished")
+          setTimeout(resolve, 500)
+        }
         utterance.onerror = (e) => {
-          console.warn("[Voice] SpeechSynthesis error:", e.error)
+          console.warn("[TTS] SpeechSynthesis error:", e.error)
           resolve()
         }
-        // Unlock media audio channel on iOS
+
+        // Unlock media audio channel on iOS before speaking
         const unlock = new Audio(
           "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="
         )
         unlock.volume = 0.01
         unlock.play().catch(() => {})
-        window.speechSynthesis.speak(utterance)
-        console.log("[Voice] Browser TTS speaking:", text.slice(0, 30))
 
-        // Failsafe
+        window.speechSynthesis.speak(utterance)
+        console.log("[TTS] Browser TTS speaking:", text.slice(0, 30))
+
+        // Failsafe timeout
         setTimeout(resolve, 35000)
       }
 
@@ -208,20 +216,17 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
         doSpeak()
       } else {
         window.speechSynthesis.onvoiceschanged = () => doSpeak()
-        // If voices never load, speak anyway after 500ms
         setTimeout(doSpeak, 500)
       }
     })
   }, [])
 
   const stopSpeaking = useCallback(() => {
-    if (currentAudioRef.current) {
-      currentAudioRef.current.pause()
-      currentAudioRef.current = null
-    }
+    // Cancel browser SpeechSynthesis
     if (typeof window !== "undefined" && window.speechSynthesis) {
       window.speechSynthesis.cancel()
     }
+    console.log("[TTS] Stopped speaking")
   }, [])
 
   // ── AI Response ────────────────────────────────────────────────────────────────
