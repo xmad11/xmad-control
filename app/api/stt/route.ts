@@ -98,7 +98,7 @@ async function handleDeepgram(req: NextRequest, apiKey: string): Promise<Respons
 
     // Deepgram STT endpoint with ultra-low latency settings
     const sttUrl = new URL("https://api.deepgram.com/v1/listen")
-    sttUrl.searchParams.set("model", "nova-3") // Fastest model
+    sttUrl.searchParams.set("model", "nova-2") // Latest stable model
     sttUrl.searchParams.set("language", language)
     sttUrl.searchParams.set("punctuate", "true")
     sttUrl.searchParams.set("smart_format", "true")
@@ -106,13 +106,21 @@ async function handleDeepgram(req: NextRequest, apiKey: string): Promise<Respons
     sttUrl.searchParams.set("vad_events", "true") // Voice activity detection events
     sttUrl.searchParams.set("endpointing", "300") // 300ms endpoint for faster detection
 
+    // Strip codecs from MIME type (Deepgram doesn't like "audio/webm;codecs=opus")
+    const cleanMimeType = (audioFile.type || "audio/webm").split(";")[0]
+    console.log("[STT API] Cleaned MIME type:", cleanMimeType, "(original:", audioFile.type, ")")
+
+    // CRITICAL: Convert File to ArrayBuffer - Deepgram REST expects raw bytes, not File object
+    const audioBuffer = await audioFile.arrayBuffer()
+    console.log("[STT API] Converted to ArrayBuffer:", audioBuffer.byteLength, "bytes")
+
     const response = await fetch(sttUrl.toString(), {
       method: "POST",
       headers: {
         Authorization: `Token ${apiKey}`,
-        "Content-Type": audioFile.type || "audio/webm",
+        "Content-Type": cleanMimeType,
       },
-      body: audioFile,
+      body: audioBuffer,
       signal: AbortSignal.timeout(15000), // 15s timeout for edge runtime
     })
 
@@ -127,9 +135,27 @@ async function handleDeepgram(req: NextRequest, apiKey: string): Promise<Respons
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error("[STT API] Deepgram ERROR response:", errorText)
+      console.error("[STT API] ========== DEEPGRAM ERROR ==========")
+      console.error("[STT API] HTTP Status:", response.status)
+      console.error("[STT API] Error body:", errorText)
+      console.error("[STT API] Request URL was:", sttUrl.toString())
+      console.error("[STT API] Content-Type sent:", audioFile.type || "audio/webm")
+      console.error("[STT API] File size:", audioFile.size, "bytes")
+
+      // Try to parse the error for more details
+      let errorDetails = errorText
+      try {
+        const parsed = JSON.parse(errorText)
+        errorDetails = JSON.stringify(parsed, null, 2)
+        console.error("[STT API] Parsed error:", errorDetails)
+      } catch {}
+
       return NextResponse.json(
-        { ok: false, error: `Deepgram error: ${response.status}` },
+        {
+          ok: false,
+          error: `Deepgram error: ${response.status}`,
+          details: errorText.slice(0, 500), // Include actual error for debugging
+        },
         { status: 500 }
       )
     }
