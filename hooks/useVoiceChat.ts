@@ -21,6 +21,9 @@ const MIN_RECORDING_DURATION_MS = 2000
 /** Audio level threshold for silence detection (0-255 scale, higher = less sensitive) */
 const SILENCE_AUDIO_THRESHOLD = 20
 
+/** DEBUG: Set to true to disable silence auto-stop (for debugging empty transcripts) */
+const DEBUG_DISABLE_SILENCE_STOP = true
+
 export interface UseVoiceChatOptions {
   onTranscript?: (text: string) => void
   onError?: (error: string) => void
@@ -72,17 +75,37 @@ function createSilenceDetector(
   let silenceStart: number | null = null
   let running = true
   let rafId: number | null = null // Track RAF ID for cleanup
+  let logCounter = 0 // Log every 10 frames to avoid spam
 
   const check = () => {
     if (!running) return
     analyser.getByteFrequencyData(dataArray)
     const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length
 
+    // Log audio level periodically (every 10 frames ~ every 160ms)
+    logCounter++
+    if (logCounter % 10 === 0) {
+      console.log(
+        "[SilenceDetector] Audio RMS:",
+        avg.toFixed(2),
+        "| Threshold:",
+        SILENCE_AUDIO_THRESHOLD,
+        "| Silent:",
+        avg < SILENCE_AUDIO_THRESHOLD
+      )
+    }
+
     // Threshold: below SILENCE_AUDIO_THRESHOLD is considered silence
     if (avg < SILENCE_AUDIO_THRESHOLD) {
       if (!silenceStart) {
         silenceStart = Date.now()
+        console.log("[SilenceDetector] Silence STARTED at RMS:", avg.toFixed(2))
       } else if (Date.now() - silenceStart > threshold) {
+        console.log(
+          "[SilenceDetector] TRIGGERING silence callback after",
+          Date.now() - silenceStart,
+          "ms of silence"
+        )
         onSilence()
         running = false
         // Check state before closing to avoid double-close error
@@ -92,6 +115,13 @@ function createSilenceDetector(
         return
       }
     } else {
+      if (silenceStart) {
+        console.log(
+          "[SilenceDetector] Silence ENDED (was silent for",
+          Date.now() - silenceStart,
+          "ms)"
+        )
+      }
       silenceStart = null
     }
     rafId = requestAnimationFrame(check)
@@ -195,36 +225,38 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
 
   // ── Comprehensive Markdown Stripping for TTS ─────────────────────────────────────
   const stripMarkdown = useCallback((text: string): string => {
-    return text
-      // Remove code blocks first (to avoid partial matches)
-      .replace(/```[\s\S]*?```/g, "")
-      .replace(/`{3}[\s\S]*?`{3}/g, "")
-      // Remove inline code
-      .replace(/`([^`]+)`/g, "$1")
-      // Remove headers (# ## ### etc.)
-      .replace(/^#{1,6}\s+/gm, "")
-      // Remove bold/italic (**bold** *italic* ***both***)
-      .replace(/\*\*\*(.+?)\*\*\*/g, "$1")
-      .replace(/\*\*(.+?)\*\*/g, "$1")
-      .replace(/\*(.+?)\*/g, "$1")
-      // Remove strikethrough
-      .replace(/~~(.+?)~~/g, "$1")
-      // Remove links [text](url) -> text
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-      // Remove images ![alt](url)
-      .replace(/!\[([^\]]*)\]\([^)]+\)/g, "")
-      // Remove blockquotes
-      .replace(/^>\s+/gm, "")
-      // Remove horizontal rules
-      .replace(/^[-*_]{3,}\s*$/gm, "")
-      // Remove list markers (- * + 1.)
-      .replace(/^[-*+]\s+/gm, "")
-      .replace(/^\d+\.\s+/gm, "")
-      // Remove HTML tags
-      .replace(/<[^>]+>/g, "")
-      // Collapse multiple spaces/newlines
-      .replace(/\s+/g, " ")
-      .trim()
+    return (
+      text
+        // Remove code blocks first (to avoid partial matches)
+        .replace(/```[\s\S]*?```/g, "")
+        .replace(/`{3}[\s\S]*?`{3}/g, "")
+        // Remove inline code
+        .replace(/`([^`]+)`/g, "$1")
+        // Remove headers (# ## ### etc.)
+        .replace(/^#{1,6}\s+/gm, "")
+        // Remove bold/italic (**bold** *italic* ***both***)
+        .replace(/\*\*\*(.+?)\*\*\*/g, "$1")
+        .replace(/\*\*(.+?)\*\*/g, "$1")
+        .replace(/\*(.+?)\*/g, "$1")
+        // Remove strikethrough
+        .replace(/~~(.+?)~~/g, "$1")
+        // Remove links [text](url) -> text
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+        // Remove images ![alt](url)
+        .replace(/!\[([^\]]*)\]\([^)]+\)/g, "")
+        // Remove blockquotes
+        .replace(/^>\s+/gm, "")
+        // Remove horizontal rules
+        .replace(/^[-*_]{3,}\s*$/gm, "")
+        // Remove list markers (- * + 1.)
+        .replace(/^[-*+]\s+/gm, "")
+        .replace(/^\d+\.\s+/gm, "")
+        // Remove HTML tags
+        .replace(/<[^>]+>/g, "")
+        // Collapse multiple spaces/newlines
+        .replace(/\s+/g, " ")
+        .trim()
+    )
   }, [])
 
   // ── Streaming TTS Queue (ultra-low latency) ─────────────────────────────────────
@@ -247,7 +279,8 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
         // Check if this looks like an abbreviation (not end of sentence)
         const abbreviations = ["Mr", "Mrs", "Ms", "Dr", "Jr", "Sr", "vs", "etc", "i.e", "e.g"]
         const endsWithAbbrev = abbreviations.some(
-          (abbr) => currentSentence.trim().endsWith(abbr) || currentSentence.trim().endsWith(abbr + ".")
+          (abbr) =>
+            currentSentence.trim().endsWith(abbr) || currentSentence.trim().endsWith(`${abbr}.`)
         )
 
         // If not an abbreviation and has enough content, consider it complete
@@ -446,9 +479,20 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
                   const trimmedBuffer = sentenceBuffer.trim()
                   if (/[.!?]\s*$/.test(trimmedBuffer) && trimmedBuffer.length > 5) {
                     // Check it doesn't end with abbreviation
-                    const abbreviations = ["Mr", "Mrs", "Ms", "Dr", "Jr", "Sr", "vs", "etc", "i.e", "e.g"]
+                    const abbreviations = [
+                      "Mr",
+                      "Mrs",
+                      "Ms",
+                      "Dr",
+                      "Jr",
+                      "Sr",
+                      "vs",
+                      "etc",
+                      "i.e",
+                      "e.g",
+                    ]
                     const endsWithAbbrev = abbreviations.some(
-                      (abbr) => trimmedBuffer.endsWith(abbr) || trimmedBuffer.endsWith(abbr + ".")
+                      (abbr) => trimmedBuffer.endsWith(abbr) || trimmedBuffer.endsWith(`${abbr}.`)
                     )
                     if (!endsWithAbbrev) {
                       enqueueTTS(trimmedBuffer)
@@ -484,7 +528,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       console.log("[Stream] Request", reqId, "complete:", fullText.slice(0, 60))
       return fullText
     },
-    [enqueueTTS]
+    [enqueueTTS, stripMarkdown]
   )
 
   // ── TTS (ElevenLabs via AudioContext, with browser SpeechSynthesis fallback) ─────
@@ -670,14 +714,33 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
   // ── STT ────────────────────────────────────────────────────────────────────────────────
   const transcribeBlob = useCallback(
     async (blob: Blob): Promise<string> => {
+      console.log("[Voice] ========== STT REQUEST START ==========")
+      const sttStartTime = Date.now()
+
       setPhase("processing")
-      const form = new FormData()
       const ext = mimeTypeRef.current.includes("mp4")
         ? "mp4"
         : mimeTypeRef.current.includes("ogg")
           ? "ogg"
           : "webm"
       const fileType = mimeTypeRef.current || "audio/webm"
+
+      console.log("[Voice] STT blob info:", {
+        size: blob.size,
+        sizeKB: (blob.size / 1024).toFixed(2),
+        type: blob.type,
+        ext,
+        fileType,
+        language,
+      })
+
+      // Guard: Don't send tiny blobs
+      if (blob.size < 10000) {
+        console.warn("[Voice] ⚠️ Blob too small for reliable STT:", blob.size, "bytes (< 10KB)")
+        console.warn("[Voice] This may result in empty transcript!")
+      }
+
+      const form = new FormData()
       form.append(
         "audio",
         new File([blob], `recording.${ext}`, { type: fileType }),
@@ -685,40 +748,73 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       )
       form.append("language", language)
 
-      console.log("[Voice] Sending to STT:", { ext, fileType, blobSize: blob.size })
-
+      console.log("[Voice] Sending to STT API...")
       const res = await fetch("/api/stt", { method: "POST", body: form })
+
+      const responseTime = Date.now()
+      console.log("[Voice] STT response received in", responseTime - sttStartTime, "ms")
+      console.log("[Voice] STT HTTP status:", res.status)
+
       const data = await res.json()
-      if (!data.ok) throw new Error(data.error || "STT failed")
-      console.log("[Voice] Transcript:", data.text)
-      return (data.text || "").trim()
+      const parseTime = Date.now()
+      console.log("[Voice] STT JSON parsed in", parseTime - responseTime, "ms")
+      console.log("[Voice] STT response data:", JSON.stringify(data, null, 2))
+
+      if (!data.ok) {
+        console.error("[Voice] STT FAILED:", data.error)
+        throw new Error(data.error || "STT failed")
+      }
+
+      const transcriptText = (data.text || "").trim()
+      console.log("[Voice] ========== STT RESULT ==========")
+      console.log("[Voice] Transcript length:", transcriptText.length, "chars")
+      console.log("[Voice] Transcript text:", transcriptText.slice(0, 200) || "(empty)")
+      console.log("[Voice] Total STT time:", Date.now() - sttStartTime, "ms")
+
+      if (!transcriptText) {
+        console.warn("[Voice] ⚠️ EMPTY TRANSCRIPT returned from STT!")
+        console.warn("[Voice] Blob size was:", blob.size, "bytes")
+        console.warn("[Voice] Check server logs for Deepgram response details")
+      }
+
+      return transcriptText
     },
     [language]
   )
 
   // ── Process recorded audio ─────────────────────────────────────────────────────
   const processRecording = useCallback(async () => {
+    console.log("[Voice] ========== PROCESSING RECORDING ==========")
+    const processStartTime = Date.now()
+
     const blob = new Blob(audioChunksRef.current, { type: mimeTypeRef.current || "audio/webm" })
-    console.log("[Voice] Processing blob:", blob.size, "bytes")
+    console.log("[Voice] Created blob from", audioChunksRef.current.length, "chunks")
+    console.log("[Voice] Blob size:", blob.size, "bytes (", (blob.size / 1024).toFixed(2), "KB)")
+    console.log("[Voice] Blob type:", blob.type)
 
     if (blob.size < 1000) {
-      console.log("[Voice] Blob too small, skipping")
+      console.warn("[Voice] ⚠️ Blob too small (< 1KB), skipping transcription")
+      console.warn("[Voice] This usually means no audio was captured or mic issue")
       return
     }
 
     let text: string
     try {
       text = await transcribeBlob(blob)
+      console.log("[Voice] Transcription complete in", Date.now() - processStartTime, "ms")
     } catch (err) {
+      console.error("[Voice] Transcription FAILED:", err)
       handleError(err instanceof Error ? err.message : "Transcription failed")
       return
     }
 
     if (!text) {
-      console.log("[Voice] No transcript, skipping")
+      console.warn("[Voice] ⚠️ Empty transcript - skipping AI response")
+      console.warn("[Voice] This is the EMPTY TRANSCRIPT bug we're investigating!")
       return
     }
 
+    console.log("[Voice] ✓ Got transcript:", text.slice(0, 100))
     setTranscript(text)
     onTranscriptRef.current?.(text)
 
@@ -731,20 +827,29 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     }
     console.log("[Voice] Mic stopped for TTS")
 
+    const aiStartTime = Date.now()
     let aiText: string
     try {
       // Use streaming AI response for ultra-low latency TTS
       if (ttsEnabledRef.current) {
+        console.log("[Voice] Getting streaming AI response...")
         aiText = await getStreamingAIResponse(text)
       } else {
+        console.log("[Voice] Getting non-streaming AI response...")
         aiText = await getAIResponse(text)
       }
+      console.log("[Voice] AI response complete in", Date.now() - aiStartTime, "ms")
     } catch (err) {
+      console.error("[Voice] AI response FAILED:", err)
       handleError(err instanceof Error ? err.message : "AI failed")
       return
     }
 
+    console.log("[Voice] ✓ AI response:", aiText?.slice(0, 100))
     onAIResponseRef.current?.(aiText)
+
+    console.log("[Voice] ========== PROCESSING COMPLETE ==========")
+    console.log("[Voice] Total processing time:", Date.now() - processStartTime, "ms")
 
     // Small delay to ensure audio finishes cleanly
     await new Promise((r) => setTimeout(r, 200))
@@ -752,6 +857,9 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
 
   // ── Start recording ───────────────────────────────────────────────────────────
   const startRecording = useCallback(async () => {
+    console.log("[Voice] ========== RECORDING START INITIATED ==========")
+    console.log("[Voice] isSupported:", isSupported)
+
     if (!isSupported) {
       handleError("Voice not supported")
       return
@@ -767,6 +875,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
 
     let stream: MediaStream
     try {
+      console.log("[Voice] Requesting microphone access...")
       stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -776,7 +885,18 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
         },
       })
       streamRef.current = stream
-    } catch {
+      console.log("[Voice] Microphone access granted")
+      console.log("[Voice] Audio tracks:", stream.getAudioTracks().length)
+      const track = stream.getAudioTracks()[0]
+      if (track) {
+        console.log("[Voice] Track settings:", JSON.stringify(track.getSettings(), null, 2))
+        console.log(
+          "[Voice] Track capabilities:",
+          JSON.stringify(track.getCapabilities?.() || {}, null, 2)
+        )
+      }
+    } catch (micErr) {
+      console.error("[Voice] Microphone access DENIED:", micErr)
       handleError("Microphone access denied")
       return
     }
@@ -790,29 +910,71 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
         "audio/ogg;codecs=opus",
         "audio/ogg",
       ]
-      return types.find((t) => MediaRecorder.isTypeSupported(t)) || ""
+      const supported = types.find((t) => MediaRecorder.isTypeSupported(t)) || ""
+      console.log(
+        "[Voice] MIME type support check:",
+        types.map((t) => ({ type: t, supported: MediaRecorder.isTypeSupported(t) }))
+      )
+      return supported
     })()
 
     if (!mimeType) {
+      console.error("[Voice] No supported audio MIME type found")
       handleError("No supported audio format")
       stream.getTracks().forEach((t) => t.stop())
       return
     }
 
     mimeTypeRef.current = mimeType
-    console.log("[Voice] Using MIME type:", mimeType)
+    console.log("[Voice] Selected MIME type:", mimeType)
 
     audioChunksRef.current = []
     const recorder = new MediaRecorder(stream, { mimeType })
     mediaRecorderRef.current = recorder
+    console.log("[Voice] MediaRecorder created with mimeType:", mimeType)
+
+    // Track chunk sizes for debugging
+    let chunkCount = 0
+    let totalChunkSize = 0
 
     recorder.ondataavailable = (e) => {
-      if (e.data.size > 0) audioChunksRef.current.push(e.data)
+      if (e.data.size > 0) {
+        audioChunksRef.current.push(e.data)
+        chunkCount++
+        totalChunkSize += e.data.size
+        // Log every 5 chunks or large chunks
+        if (chunkCount % 5 === 0 || e.data.size > 5000) {
+          console.log(
+            "[Voice] Chunk #",
+            chunkCount,
+            ":",
+            e.data.size,
+            "bytes | Total so far:",
+            totalChunkSize,
+            "bytes"
+          )
+        }
+      }
     }
 
     // Set onstop handler BEFORE recorder.start() to avoid race condition
     recorder.onstop = () => {
-      console.log("[Voice] Recorder onstop fired")
+      const duration = Date.now() - recordingStartTimeRef.current
+      const finalBlob = new Blob(audioChunksRef.current, {
+        type: mimeTypeRef.current || "audio/webm",
+      })
+      console.log("[Voice] ========== RECORDER STOPPED ==========")
+      console.log("[Voice] Stop reason: onstop event fired")
+      console.log("[Voice] Recording duration:", duration, "ms")
+      console.log("[Voice] Total chunks:", audioChunksRef.current.length)
+      console.log(
+        "[Voice] Final blob size:",
+        finalBlob.size,
+        "bytes (",
+        (finalBlob.size / 1024).toFixed(2),
+        "KB)"
+      )
+      console.log("[Voice] Blob type:", finalBlob.type)
       isRecordingRef.current = false
     }
 
@@ -820,10 +982,13 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     isRecordingRef.current = true
     recordingStartTimeRef.current = Date.now() // Track when recording started
     setPhase("listening")
-    console.log("[Voice] Recording started")
+    console.log("[Voice] ========== RECORDING STARTED ==========")
+    console.log("[Voice] Timeslice: 100ms")
+    console.log("[Voice] Silence detection enabled:", silenceDetection)
+    console.log("[Voice] DEBUG: Silence auto-stop DISABLED:", DEBUG_DISABLE_SILENCE_STOP)
 
     // Start silence detection for ultra-low latency (auto-stop when user stops talking)
-    if (silenceDetection) {
+    if (silenceDetection && !DEBUG_DISABLE_SILENCE_STOP) {
       silenceDetectorRef.current = createSilenceDetector(
         stream,
         () => {
@@ -834,62 +999,80 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
             return
           }
           if (mediaRecorderRef.current?.state === "recording") {
-            console.log("[Voice] Silence detected, auto-stopping after", elapsed, "ms")
+            console.log("[Voice] ========== AUTO-STOP: SILENCE DETECTED ==========")
+            console.log("[Voice] Duration:", elapsed, "ms")
             mediaRecorderRef.current.stop()
           }
         },
         silenceThreshold
+      )
+    } else if (DEBUG_DISABLE_SILENCE_STOP) {
+      console.log(
+        "[Voice] ⚠️ DEBUG MODE: Silence auto-stop is DISABLED - recording will continue until max time or manual stop"
       )
     }
 
     // Fallback: Auto-stop after maxRecordTime (safety net, not forced wait)
     recordTimeoutRef.current = setTimeout(() => {
       if (mediaRecorderRef.current?.state === "recording") {
-        console.log("[Voice] Max time reached, auto-stopping")
+        console.log("[Voice] ========== AUTO-STOP: MAX TIME REACHED ==========")
+        console.log("[Voice] Max time:", maxRecordTime, "ms")
         mediaRecorderRef.current.stop()
       }
     }, maxRecordTime)
   }, [isSupported, handleError, maxRecordTime, silenceDetection, silenceThreshold])
 
   // ── Stop recording ────────────────────────────────────────────────────────────
-  const stopRecording = useCallback(() => {
+  const stopRecording = useCallback((reason = "manual") => {
+    console.log("[Voice] ========== STOP RECORDING ==========")
+    console.log("[Voice] Stop reason:", reason)
+    console.log("[Voice] Recorder state:", mediaRecorderRef.current?.state)
+
     if (recordTimeoutRef.current) {
       clearTimeout(recordTimeoutRef.current)
       recordTimeoutRef.current = null
+      console.log("[Voice] Cleared record timeout")
     }
 
     isRecordingRef.current = false
 
     if (mediaRecorderRef.current?.state === "recording") {
+      console.log("[Voice] Calling recorder.stop()")
       mediaRecorderRef.current.stop()
-      console.log("[Voice] Recording stopped")
+    } else {
+      console.log("[Voice] Recorder not in recording state, skip stop()")
     }
   }, [])
 
   // ── Continuous session loop (uses ref for isActive check) ────────────────────────────────
   const runContinuousLoop = useCallback(async () => {
+    const loopId = Math.random().toString(36).slice(2, 6)
+    console.log("[Voice] ========== LOOP START [", loopId, "] ==========")
+
     // Guard against parallel execution
     if (loopRunningRef.current) {
-      console.log("[Voice] Loop: already running, skipping")
+      console.log("[Voice] Loop [", loopId, "]: already running, skipping")
       return
     }
     loopRunningRef.current = true
+    console.log("[Voice] Loop [", loopId, "]: loopRunningRef set to true")
 
     // Use ref, not state - avoids stale closure
     if (!isActiveRef.current) {
-      console.log("[Voice] Loop: not active, returning")
+      console.log("[Voice] Loop [", loopId, "]: isActiveRef is FALSE, returning")
       loopRunningRef.current = false
       return
     }
 
-    console.log("[Voice] Loop: starting recording...")
+    console.log("[Voice] Loop [", loopId, "]: starting recording...")
     await startRecording()
 
     // Wait for recording to stop (either timeout or manual)
+    console.log("[Voice] Loop [", loopId, "]: waiting for recording to stop...")
     await new Promise<void>((resolve) => {
       const checkStopped = () => {
         if (mediaRecorderRef.current?.state !== "recording") {
-          console.log("[Voice] Loop: recording stopped detected")
+          console.log("[Voice] Loop [", loopId, "]: recording stopped detected via polling")
           resolve()
         } else {
           setTimeout(checkStopped, 100)
@@ -900,7 +1083,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       // Use addEventListener instead of mutating onstop (prevents race conditions)
       const recorder = mediaRecorderRef.current
       const onRecorderStop = () => {
-        console.log("[Voice] Loop: recorder stop event fired")
+        console.log("[Voice] Loop [", loopId, "]: recorder stop event fired")
         resolve()
       }
       if (recorder) {
@@ -914,35 +1097,53 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       }
     })
 
+    console.log("[Voice] Loop [", loopId, "]: recording stopped, checking state...")
+    console.log("[Voice] Loop [", loopId, "]: isActiveRef:", isActiveRef.current)
+
     // Stop mic stream
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((t) => t.stop())
     }
 
     if (!isActiveRef.current) {
+      console.log("[Voice] Loop [", loopId, "]: session deactivated, exiting loop")
       loopRunningRef.current = false
       return
     }
 
     // Process the recording
-    console.log("[Voice] Loop: processing recording...")
+    console.log("[Voice] Loop [", loopId, "]: processing recording...")
     await processRecording()
 
     if (!isActiveRef.current) {
+      console.log("[Voice] Loop [", loopId, "]: session deactivated after processing, exiting loop")
       loopRunningRef.current = false
       return
     }
 
     // Continue loop after delay if continuous mode
     if (continuousRef.current && isActiveRef.current) {
-      console.log("[Voice] Loop: scheduling next cycle in 100ms...")
+      console.log("[Voice] Loop [", loopId, "]: scheduling next cycle in 100ms...")
+      console.log("[Voice] Loop [", loopId, "]: continuous:", continuousRef.current)
       loopTimeoutRef.current = setTimeout(() => {
+        console.log("[Voice] Loop [", loopId, "]: timeout fired, checking if should continue...")
         loopRunningRef.current = false
         if (isActiveRef.current) {
+          console.log("[Voice] Loop [", loopId, "]: starting next iteration")
           runContinuousLoop()
+        } else {
+          console.log("[Voice] Loop [", loopId, "]: session no longer active, not continuing")
         }
       }, 100) // Reduced from 500ms for faster response
     } else {
+      console.log(
+        "[Voice] Loop [",
+        loopId,
+        "]: NOT continuing - continuous:",
+        continuousRef.current,
+        "active:",
+        isActiveRef.current
+      )
       loopRunningRef.current = false
       setPhase("idle")
     }
@@ -950,7 +1151,13 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
 
   // ── Session controls ──────────────────────────────────────────────────────────
   const startSession = useCallback(async () => {
+    console.log("[Voice] ========== SESSION START REQUESTED ==========")
+    console.log("[Voice] isSupported:", isSupported)
+    console.log("[Voice] Current isActiveRef:", isActiveRef.current)
+    console.log("[Voice] Current loopRunningRef:", loopRunningRef.current)
+
     if (!isSupported) {
+      console.error("[Voice] Session NOT started - voice not supported")
       handleError("Voice not supported")
       return
     }
@@ -965,7 +1172,13 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     setIsActive(true)
     setError(null)
     setTranscript("")
-    console.log("[Voice] Session started")
+
+    // TODO: Should call clearLiveTokens() here if using live transcript display
+    console.log(
+      "[Voice] ⚠️ NOTE: clearLiveTokens() should be called here if using live transcript context"
+    )
+
+    console.log("[Voice] Session started, isActiveRef:", isActiveRef.current)
 
     // CRITICAL: Create and unlock AudioContext in user gesture call stack (iOS requirement)
     // This MUST happen synchronously during the tap/click handler
@@ -1002,7 +1215,15 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
   }, [isSupported, handleError, runContinuousLoop])
 
   const stopSession = useCallback(() => {
-    console.log("[Voice] Session stopping...")
+    console.log("[Voice] ========== SESSION STOPPING ==========")
+    console.log("[Voice] Stop called from:", new Error().stack?.split("\n")[2] || "unknown")
+    console.log(
+      "[Voice] Current state - isActive:",
+      isActiveRef.current,
+      "loopRunning:",
+      loopRunningRef.current
+    )
+
     // Set ref first
     isActiveRef.current = false
     loopRunningRef.current = false
@@ -1013,36 +1234,46 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     if (recordTimeoutRef.current) {
       clearTimeout(recordTimeoutRef.current)
       recordTimeoutRef.current = null
+      console.log("[Voice] Cleared recordTimeout")
     }
     if (loopTimeoutRef.current) {
       clearTimeout(loopTimeoutRef.current)
       loopTimeoutRef.current = null
+      console.log("[Voice] Cleared loopTimeout")
     }
 
     // Stop silence detector
     if (silenceDetectorRef.current) {
       silenceDetectorRef.current.stop()
       silenceDetectorRef.current = null
+      console.log("[Voice] Stopped silence detector")
     }
 
     // Stop recorder
     if (mediaRecorderRef.current?.state === "recording") {
+      console.log("[Voice] Stopping recorder (was recording)")
       mediaRecorderRef.current.stop()
+    } else {
+      console.log("[Voice] Recorder state:", mediaRecorderRef.current?.state || "null")
     }
 
     // Stop mic
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach((t) => t.stop())
+      const tracks = streamRef.current.getTracks()
+      console.log("[Voice] Stopping", tracks.length, "media tracks")
+      tracks.forEach((t) => t.stop())
       streamRef.current = null
     }
 
     // Stop TTS
     stopSpeaking()
+    console.log("[Voice] Stopped speaking")
 
     // Abort any pending stream request
     if (streamAbortRef.current) {
       streamAbortRef.current.abort()
       streamAbortRef.current = null
+      console.log("[Voice] Aborted stream request")
     }
 
     // Close AudioContext
@@ -1054,6 +1285,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
 
     setPhase("idle")
     setTranscript("")
+    console.log("[Voice] ========== SESSION STOPPED ==========")
   }, [stopSpeaking])
 
   // ── Cleanup on unmount ──────────────────────────────────────────────────────────

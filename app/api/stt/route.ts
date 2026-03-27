@@ -53,15 +53,39 @@ async function handleDeepgram(req: NextRequest, apiKey: string): Promise<Respons
     const audioFile = formData.get("audio") as File | null
     const language = (formData.get("language") as string) || "en-US"
 
-    console.log("[STT API] Deepgram request:", {
-      name: audioFile?.name,
-      size: audioFile?.size,
-      type: audioFile?.type,
-      language,
-    })
+    const requestStartTime = Date.now()
+    console.log("[STT API] ========== DEEPGRAM REQUEST START ==========")
+    console.log(
+      "[STT API] Blob size:",
+      audioFile?.size,
+      "bytes (",
+      (audioFile?.size || 0) / 1024,
+      "KB)"
+    )
+    console.log("[STT API] File type:", audioFile?.type)
+    console.log("[STT API] File name:", audioFile?.name)
+    console.log("[STT API] Language:", language)
 
     if (!audioFile || audioFile.size === 0) {
+      console.error("[STT API] ERROR: No audio file provided")
       return NextResponse.json({ ok: false, error: "No audio file provided" }, { status: 400 })
+    }
+
+    // MINIMUM SIZE GUARD - Reject blobs < 20KB (likely too short to transcribe)
+    if (audioFile.size < 20 * 1024) {
+      console.warn(
+        "[STT API] WARNING: Blob too small (",
+        audioFile.size,
+        "bytes < 20KB) - likely silence or too short"
+      )
+      return NextResponse.json(
+        {
+          ok: false,
+          error: `Audio too short (${audioFile.size} bytes). Please speak longer.`,
+          tooShort: true,
+        },
+        { status: 400 }
+      )
     }
 
     // File size validation (Deepgram limit is ~25MB)
@@ -92,11 +116,18 @@ async function handleDeepgram(req: NextRequest, apiKey: string): Promise<Respons
       signal: AbortSignal.timeout(15000), // 15s timeout for edge runtime
     })
 
-    console.log("[STT API] Deepgram response:", response.status)
+    const deepgramResponseTime = Date.now()
+    console.log(
+      "[STT API] Deepgram HTTP status:",
+      response.status,
+      "| Time:",
+      deepgramResponseTime - requestStartTime,
+      "ms"
+    )
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error("[STT API] Deepgram error:", errorText)
+      console.error("[STT API] Deepgram ERROR response:", errorText)
       return NextResponse.json(
         { ok: false, error: `Deepgram error: ${response.status}` },
         { status: 500 }
@@ -104,12 +135,37 @@ async function handleDeepgram(req: NextRequest, apiKey: string): Promise<Respons
     }
 
     const result = await response.json()
-    const transcript =
-      result?.results?.channels?.[0]?.alternatives?.[0]?.transcript ||
-      result?.results?.utterances?.map((u: any) => u.transcript).join(" ") ||
-      ""
+    const parseTime = Date.now()
+    console.log("[STT API] ========== DEEPGRAM RAW RESPONSE ==========")
+    console.log("[STT API] Full response:", JSON.stringify(result, null, 2))
+    console.log("[STT API] Parse time:", parseTime - deepgramResponseTime, "ms")
 
-    console.log("[STT API] Deepgram transcript:", transcript?.slice(0, 100))
+    // Extract transcript from multiple possible paths
+    const channelTranscript = result?.results?.channels?.[0]?.alternatives?.[0]?.transcript
+    const utteranceTranscript = result?.results?.utterances?.map((u: any) => u.transcript).join(" ")
+    const transcript = channelTranscript || utteranceTranscript || ""
+
+    console.log("[STT API] Channel transcript:", channelTranscript?.slice(0, 100) || "(empty)")
+    console.log("[STT API] Utterance transcript:", utteranceTranscript?.slice(0, 100) || "(empty)")
+    console.log("[STT API] Final transcript:", transcript?.slice(0, 100) || "(empty)")
+
+    if (!transcript || transcript.trim() === "") {
+      console.warn("[STT API] ========== EMPTY TRANSCRIPT WARNING ==========")
+      console.warn("[STT API] Blob size was:", audioFile.size, "bytes")
+      console.warn("[STT API] File type was:", audioFile.type)
+      console.warn(
+        "[STT API] Full Deepgram response for debugging:",
+        JSON.stringify(result, null, 2)
+      )
+      console.warn("[STT API] Check: channels exist?", !!result?.results?.channels)
+      console.warn(
+        "[STT API] Check: alternatives exist?",
+        !!result?.results?.channels?.[0]?.alternatives
+      )
+      console.warn("[STT API] Check: utterances exist?", !!result?.results?.utterances)
+    }
+
+    console.log("[STT API] Total request time:", Date.now() - requestStartTime, "ms")
 
     // Return tokens for live transcript support
     const tokens = transcript.split(" ").filter(Boolean)
