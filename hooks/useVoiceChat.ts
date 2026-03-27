@@ -6,14 +6,20 @@
 
 "use client"
 
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 // ═══════════════════════════════════════════════════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════════════════════════════════
 
 /** Default silence threshold in milliseconds for auto-stop */
-const DEFAULT_SILENCE_THRESHOLD_MS = 1500
+const DEFAULT_SILENCE_THRESHOLD_MS = 2000
+
+/** Minimum recording duration before silence detection can trigger (ms) */
+const MIN_RECORDING_DURATION_MS = 2000
+
+/** Audio level threshold for silence detection (0-255 scale, higher = less sensitive) */
+const SILENCE_AUDIO_THRESHOLD = 20
 
 export interface UseVoiceChatOptions {
   onTranscript?: (text: string) => void
@@ -60,7 +66,7 @@ function createSilenceDetector(
   const analyser = audioContext.createAnalyser()
   const source = audioContext.createMediaStreamSource(stream)
   source.connect(analyser)
-  analyser.fftSize = 512
+  analyser.fftSize = 2048 // Increased for better frequency resolution (was 512)
 
   const dataArray = new Uint8Array(analyser.frequencyBinCount)
   let silenceStart: number | null = null
@@ -72,8 +78,8 @@ function createSilenceDetector(
     analyser.getByteFrequencyData(dataArray)
     const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length
 
-    // Threshold: below 10 is considered silence
-    if (avg < 10) {
+    // Threshold: below SILENCE_AUDIO_THRESHOLD is considered silence
+    if (avg < SILENCE_AUDIO_THRESHOLD) {
       if (!silenceStart) {
         silenceStart = Date.now()
       } else if (Date.now() - silenceStart > threshold) {
@@ -141,11 +147,13 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
   const silenceDetectorRef = useRef<{ stop: () => void } | null>(null)
   const isRecordingRef = useRef(false)
   const streamAbortRef = useRef<AbortController | null>(null)
+  const recordingStartTimeRef = useRef<number>(0)
 
   // Streaming TTS queue refs
   const ttsQueueRef = useRef<string[]>([])
   const isProcessingQueueRef = useRef(false)
   const currentSourceRef = useRef<AudioBufferSourceNode | null>(null)
+  const ttsAbortRef = useRef<AbortController | null>(null)
 
   // Option refs
   const ttsEnabledRef = useRef(ttsEnabled)
@@ -185,17 +193,79 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     }, 3000)
   }, [])
 
-  // ── Streaming TTS Queue (ultra-low latency) ─────────────────────────────────────
-  // Split text into sentences for streaming TTS (avoids splitting on abbreviations)
-  const splitIntoSentences = useCallback((text: string): string[] => {
-    // Split on sentence boundaries, avoiding common abbreviations
-    const sentences = text
-      .replace(/\*\*/g, "") // Remove markdown bold
-      .split(/(?<=[.!?])(?<!Mr\.|Mrs\.|Ms\.|Dr\.|Jr\.|Sr\.|vs\.|etc\.|i\.e\.|e\.g\.)\s+/i)
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0)
-    return sentences
+  // ── Comprehensive Markdown Stripping for TTS ─────────────────────────────────────
+  const stripMarkdown = useCallback((text: string): string => {
+    return text
+      // Remove code blocks first (to avoid partial matches)
+      .replace(/```[\s\S]*?```/g, "")
+      .replace(/`{3}[\s\S]*?`{3}/g, "")
+      // Remove inline code
+      .replace(/`([^`]+)`/g, "$1")
+      // Remove headers (# ## ### etc.)
+      .replace(/^#{1,6}\s+/gm, "")
+      // Remove bold/italic (**bold** *italic* ***both***)
+      .replace(/\*\*\*(.+?)\*\*\*/g, "$1")
+      .replace(/\*\*(.+?)\*\*/g, "$1")
+      .replace(/\*(.+?)\*/g, "$1")
+      // Remove strikethrough
+      .replace(/~~(.+?)~~/g, "$1")
+      // Remove links [text](url) -> text
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+      // Remove images ![alt](url)
+      .replace(/!\[([^\]]*)\]\([^)]+\)/g, "")
+      // Remove blockquotes
+      .replace(/^>\s+/gm, "")
+      // Remove horizontal rules
+      .replace(/^[-*_]{3,}\s*$/gm, "")
+      // Remove list markers (- * + 1.)
+      .replace(/^[-*+]\s+/gm, "")
+      .replace(/^\d+\.\s+/gm, "")
+      // Remove HTML tags
+      .replace(/<[^>]+>/g, "")
+      // Collapse multiple spaces/newlines
+      .replace(/\s+/g, " ")
+      .trim()
   }, [])
+
+  // ── Streaming TTS Queue (ultra-low latency) ─────────────────────────────────────
+  // Split text into sentences for streaming TTS (Safari-compatible, no lookbehind)
+  const splitIntoSentences = useCallback(
+    (text: string): string[] => {
+      // First strip all markdown
+      const cleanText = stripMarkdown(text)
+
+      // Split on sentence boundaries (Safari-compatible without lookbehind)
+      // We check for abbreviations after splitting and rejoin if needed
+      const rawSentences = cleanText.split(/[.!?]+\s+/)
+
+      const sentences: string[] = []
+      let currentSentence = ""
+
+      for (const part of rawSentences) {
+        currentSentence += (currentSentence ? " " : "") + part
+
+        // Check if this looks like an abbreviation (not end of sentence)
+        const abbreviations = ["Mr", "Mrs", "Ms", "Dr", "Jr", "Sr", "vs", "etc", "i.e", "e.g"]
+        const endsWithAbbrev = abbreviations.some(
+          (abbr) => currentSentence.trim().endsWith(abbr) || currentSentence.trim().endsWith(abbr + ".")
+        )
+
+        // If not an abbreviation and has enough content, consider it complete
+        if (!endsWithAbbrev && currentSentence.trim().length > 5) {
+          sentences.push(currentSentence.trim())
+          currentSentence = ""
+        }
+      }
+
+      // Add any remaining text
+      if (currentSentence.trim()) {
+        sentences.push(currentSentence.trim())
+      }
+
+      return sentences.filter((s) => s.length > 0)
+    },
+    [stripMarkdown]
+  )
 
   // Play a single sentence via TTS
   const speakSentence = useCallback(async (text: string): Promise<void> => {
@@ -213,11 +283,15 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       return
     }
 
+    // Create AbortController for this TTS request
+    ttsAbortRef.current = new AbortController()
+
     try {
       const res = await fetch("/api/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: text.slice(0, 500), voice: voiceRef.current }), // Include voice
+        body: JSON.stringify({ text: text.slice(0, 500), voice: voiceRef.current }),
+        signal: ttsAbortRef.current.signal, // Enable abort
       })
 
       if (!res.ok) {
@@ -361,20 +435,25 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
                   ""
 
                 if (token) {
-                  const cleanToken = token.replace(/\*\*/g, "") // Remove markdown bold
+                  const cleanToken = stripMarkdown(token) // Use comprehensive markdown stripping
                   fullText += cleanToken
                   sentenceBuffer += cleanToken
 
                   // Live transcript callback
                   onTokenRef.current?.(cleanToken)
 
-                  // Check if we have a complete sentence (avoid abbreviations)
-                  if (
-                    /(?<!Mr|Mrs|Ms|Dr|Jr|Sr|vs|etc)[.!?]\s*$/i.test(sentenceBuffer) &&
-                    sentenceBuffer.trim().length > 10
-                  ) {
-                    enqueueTTS(sentenceBuffer.trim())
-                    sentenceBuffer = ""
+                  // Safari-compatible sentence detection (no lookbehind)
+                  const trimmedBuffer = sentenceBuffer.trim()
+                  if (/[.!?]\s*$/.test(trimmedBuffer) && trimmedBuffer.length > 5) {
+                    // Check it doesn't end with abbreviation
+                    const abbreviations = ["Mr", "Mrs", "Ms", "Dr", "Jr", "Sr", "vs", "etc", "i.e", "e.g"]
+                    const endsWithAbbrev = abbreviations.some(
+                      (abbr) => trimmedBuffer.endsWith(abbr) || trimmedBuffer.endsWith(abbr + ".")
+                    )
+                    if (!endsWithAbbrev) {
+                      enqueueTTS(trimmedBuffer)
+                      sentenceBuffer = ""
+                    }
                   }
                 }
               } catch {
@@ -548,6 +627,12 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
   }, [])
 
   const stopSpeaking = useCallback(() => {
+    // Abort any in-flight TTS fetch
+    if (ttsAbortRef.current) {
+      ttsAbortRef.current.abort()
+      ttsAbortRef.current = null
+    }
+
     // Clear TTS queue
     ttsQueueRef.current = []
     isProcessingQueueRef.current = false
@@ -733,6 +818,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
 
     recorder.start(100) // Collect chunks every 100ms
     isRecordingRef.current = true
+    recordingStartTimeRef.current = Date.now() // Track when recording started
     setPhase("listening")
     console.log("[Voice] Recording started")
 
@@ -741,8 +827,14 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       silenceDetectorRef.current = createSilenceDetector(
         stream,
         () => {
+          // MINIMUM DURATION GUARD: Don't stop if recording hasn't met minimum duration
+          const elapsed = Date.now() - recordingStartTimeRef.current
+          if (elapsed < MIN_RECORDING_DURATION_MS) {
+            console.log("[Voice] Silence ignored - minimum duration not met:", elapsed, "ms")
+            return
+          }
           if (mediaRecorderRef.current?.state === "recording") {
-            console.log("[Voice] Silence detected, auto-stopping")
+            console.log("[Voice] Silence detected, auto-stopping after", elapsed, "ms")
             mediaRecorderRef.current.stop()
           }
         },
@@ -804,16 +896,22 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
         }
       }
 
-      // Also resolve when recorder.onstop fires
+      // Also resolve when recorder fires 'stop' event
+      // Use addEventListener instead of mutating onstop (prevents race conditions)
       const recorder = mediaRecorderRef.current
+      const onRecorderStop = () => {
+        console.log("[Voice] Loop: recorder stop event fired")
+        resolve()
+      }
       if (recorder) {
-        const originalOnStop = recorder.onstop
-        recorder.onstop = (e: Event) => {
-          if (originalOnStop) originalOnStop.call(recorder, e)
-          resolve()
-        }
+        recorder.addEventListener("stop", onRecorderStop, { once: true })
       }
       checkStopped()
+
+      // Cleanup listener if promise resolves via checkStopped
+      return () => {
+        recorder?.removeEventListener("stop", onRecorderStop)
+      }
     })
 
     // Stop mic stream
@@ -837,13 +935,13 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
 
     // Continue loop after delay if continuous mode
     if (continuousRef.current && isActiveRef.current) {
-      console.log("[Voice] Loop: scheduling next cycle in 500ms...")
+      console.log("[Voice] Loop: scheduling next cycle in 100ms...")
       loopTimeoutRef.current = setTimeout(() => {
         loopRunningRef.current = false
         if (isActiveRef.current) {
           runContinuousLoop()
         }
-      }, 500)
+      }, 100) // Reduced from 500ms for faster response
     } else {
       loopRunningRef.current = false
       setPhase("idle")
@@ -856,7 +954,10 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       handleError("Voice not supported")
       return
     }
-    if (isActiveRef.current) return // Already running
+    if (isActiveRef.current || loopRunningRef.current) {
+      console.log("[Voice] Session already active or loop running, skipping startSession")
+      return // Already running
+    }
 
     // Set ref FIRST (for immediate use in loop)
     isActiveRef.current = true
@@ -954,6 +1055,34 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     setPhase("idle")
     setTranscript("")
   }, [stopSpeaking])
+
+  // ── Cleanup on unmount ──────────────────────────────────────────────────────────
+  useEffect(() => {
+    return () => {
+      console.log("[Voice] Cleanup: unmounting, stopping all resources")
+
+      // Clear all timeouts
+      if (recordTimeoutRef.current) clearTimeout(recordTimeoutRef.current)
+      if (loopTimeoutRef.current) clearTimeout(loopTimeoutRef.current)
+
+      // Abort all controllers
+      streamAbortRef.current?.abort()
+      ttsAbortRef.current?.abort()
+
+      // Close AudioContext
+      if (audioContextRef.current?.state !== "closed") {
+        audioContextRef.current?.close()
+      }
+
+      // Stop media stream
+      streamRef.current?.getTracks().forEach((t) => t.stop())
+
+      // Cancel browser SpeechSynthesis
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.cancel()
+      }
+    }
+  }, [])
 
   return {
     phase,

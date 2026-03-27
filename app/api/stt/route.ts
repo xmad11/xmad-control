@@ -78,6 +78,9 @@ async function handleDeepgram(req: NextRequest, apiKey: string): Promise<Respons
     sttUrl.searchParams.set("language", language)
     sttUrl.searchParams.set("punctuate", "true")
     sttUrl.searchParams.set("smart_format", "true")
+    sttUrl.searchParams.set("utterances", "true") // Better speech segmentation
+    sttUrl.searchParams.set("vad_events", "true") // Voice activity detection events
+    sttUrl.searchParams.set("endpointing", "300") // 300ms endpoint for faster detection
 
     const response = await fetch(sttUrl.toString(), {
       method: "POST",

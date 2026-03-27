@@ -166,19 +166,13 @@ export function SheetProvider({ children }: { children: ReactNode }) {
   )
 
   // Voice actions - use continuous session
+  // NOTE: Don't manually set voiceState here - let the sync effect (line 241-252) be SSOT
+  // This prevents race conditions between manual state and hook state sync
   const startVoice = useCallback(() => {
-    setVoiceState((prev) => ({ ...prev, isActive: true }))
     startSession()
   }, [startSession])
 
   const stopVoice = useCallback(() => {
-    setVoiceState((prev) => ({
-      ...prev,
-      isActive: false,
-      isRecording: false,
-      isListening: false,
-      phase: "idle",
-    }))
     stopSession()
     stopSpeaking()
   }, [stopSession, stopSpeaking])
