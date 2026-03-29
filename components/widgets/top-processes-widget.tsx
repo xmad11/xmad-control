@@ -90,14 +90,14 @@ function ConfirmPopup({
             />
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="text-white text-lg font-medium">
+            <h3 className="text-fg text-lg font-medium">
               Confirm {action === "kill" ? "Kill" : "Restart"}
             </h3>
-            <p className="text-white/50 text-sm truncate">{processName}</p>
+            <p className="text-fg-50 text-sm truncate">{processName}</p>
           </div>
         </div>
 
-        <p className="text-white/60 text-sm mb-6">
+        <p className="text-fg-60 text-sm mb-6">
           {action === "kill"
             ? "This will forcefully terminate the process. Unsaved data may be lost."
             : "This will restart the process. It may be temporarily unavailable."}
@@ -107,7 +107,7 @@ function ConfirmPopup({
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 px-4 py-3 rounded-xl bg-white/10 text-white/70 hover:bg-white/15 transition-colors text-sm font-medium"
+            className="flex-1 px-4 py-3 rounded-xl bg-fg-10 text-fg-70 hover:bg-fg-15 transition-colors text-sm font-medium"
           >
             Cancel
           </button>
@@ -152,12 +152,12 @@ function ProcessItem({
   const progressColor = "bg-gradient-to-r from-emerald-400 to-green-400"
 
   return (
-    <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
+    <div className="flex items-center justify-between p-2.5 rounded-xl bg-fg-5 hover:bg-fg-10 transition-colors">
       <div className="flex items-center gap-3 flex-1 min-w-0">
-        <span className="text-white/50 text-sm font-medium w-6 tabular-nums">{index + 1}</span>
+        <span className="text-fg-50 text-sm font-medium w-6 tabular-nums">{index + 1}</span>
         <div className="flex-1 min-w-0">
-          <div className="text-white/90 text-sm font-medium truncate">{process.name}</div>
-          <div className="flex items-center gap-3 text-white/40 text-xs mt-0.5">
+          <div className="text-fg-90 text-sm font-medium truncate">{process.name}</div>
+          <div className="flex items-center gap-3 text-fg-40 text-xs mt-0.5">
             <span>PID: {process.pid}</span>
             {type === "memory" && process.cpu !== undefined && (
               <span className="text-cyan-400/70">CPU: {process.cpu.toFixed(1)}%</span>
@@ -171,10 +171,10 @@ function ProcessItem({
 
       <div className="flex items-center gap-3 shrink-0">
         <div className="flex flex-col items-end gap-1.5">
-          <span className="text-white tabular-nums text-sm font-medium">
+          <span className="text-fg tabular-nums text-sm font-medium">
             {type === "memory" ? `${Math.round(process.usage)} MB` : `${process.usage.toFixed(1)}%`}
           </span>
-          <div className="w-24 h-2 bg-white/10 rounded-full overflow-hidden">
+          <div className="w-24 h-2 bg-fg-10 rounded-full overflow-hidden">
             <div
               className={cn("h-full rounded-full transition-all", progressColor)}
               style={{ width: `${usagePercent}%` }}
@@ -273,7 +273,7 @@ function TopProcessesWidget({
               "flex items-center gap-2 px-5 py-2 rounded-full text-sm font-medium transition-all",
               activeTab === "memory"
                 ? "bg-green-500/20 text-green-400 ring-1 ring-green-500/30"
-                : "bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/70"
+                : "bg-fg-5 text-fg-50 hover:bg-fg-10 hover:text-fg-70"
             )}
           >
             <MemoryStick className="w-4 h-4" />
@@ -286,7 +286,7 @@ function TopProcessesWidget({
               "flex items-center gap-2 px-5 py-2 rounded-full text-sm font-medium transition-all",
               activeTab === "cpu"
                 ? "bg-cyan-500/20 text-cyan-400 ring-1 ring-cyan-500/30"
-                : "bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/70"
+                : "bg-fg-5 text-fg-50 hover:bg-fg-10 hover:text-fg-70"
             )}
           >
             <Cpu className="w-4 h-4" />
@@ -295,7 +295,7 @@ function TopProcessesWidget({
         </div>
 
         {/* Rank indicator */}
-        <div className="text-center text-white/30 text-xs mb-3">
+        <div className="text-center text-fg-30 text-xs mb-3">
           Processes #{rankStart} - #{rankEnd}
         </div>
 
@@ -313,7 +313,7 @@ function TopProcessesWidget({
               />
             ))
           ) : (
-            <div className="text-center py-8 text-white/40 text-sm">No processes available</div>
+            <div className="text-center py-8 text-fg-40 text-sm">No processes available</div>
           )}
         </div>
       </GlassWidgetBase>

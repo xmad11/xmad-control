@@ -367,6 +367,35 @@ input[type="search"]:focus-visible {
   );
 }
 
+/* ═════════════════════════════════════════════════════════════════════════════════
+   THEME-AWARE TEXT & BACKGROUND UTILITIES
+   Use these instead of text-white/bg-white for theme support
+   ═════════════════════════════════════════════════════════════════════════════════ */
+
+/* Text color - uses --fg from current theme */
+.text-fg { color: var(--fg); }
+.text-fg-40 { color: oklch(from var(--fg) l c h / 0.4); }
+.text-fg-50 { color: oklch(from var(--fg) l c h / 0.5); }
+.text-fg-60 { color: oklch(from var(--fg) l c h / 0.6); }
+.text-fg-70 { color: oklch(from var(--fg) l c h / 0.7); }
+.text-fg-80 { color: oklch(from var(--fg) l c h / 0.8); }
+.text-fg-90 { color: oklch(from var(--fg) l c h / 0.9); }
+
+/* Background color - uses --fg for subtle backgrounds */
+.bg-fg { background-color: var(--fg); }
+.bg-fg-5 { background-color: oklch(from var(--fg) l c h / 0.05); }
+.bg-fg-10 { background-color: oklch(from var(--fg) l c h / 0.1); }
+.bg-fg-15 { background-color: oklch(from var(--fg) l c h / 0.15); }
+.bg-fg-20 { background-color: oklch(from var(--fg) l c h / 0.2); }
+
+/* Background - uses --bg from current theme */
+.bg-theme { background-color: var(--bg); }
+.bg-theme-secondary { background-color: var(--bg-secondary); }
+
+/* Border - subtle borders using foreground */
+.border-fg-10 { border-color: oklch(from var(--fg) l c h / 0.1); }
+.border-fg-20 { border-color: oklch(from var(--fg) l c h / 0.2); }
+
 /* Text selection */
 ::selection {
   background-color: oklch(from var(--color-brand-primary) l c h / 0.3);
