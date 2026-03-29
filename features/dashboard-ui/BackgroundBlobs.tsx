@@ -6,8 +6,8 @@
 export function BackgroundBlobs() {
   return (
     <>
-      {/* Base gradient */}
-      <div className="fixed inset-0 z-0 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900" />
+      {/* Base gradient - uses theme-aware --bg-dashboard variable */}
+      <div className="fixed inset-0 z-0 dashboard-bg" />
       {/* Blue blob - top left */}
       <div className="fixed top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl z-0 animate-blob-pulse" />
       {/* Purple blob - bottom right */}
