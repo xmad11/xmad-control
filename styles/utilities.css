@@ -1,4 +1,56 @@
 /* ═══════════════════════════════════════════════════════════════════════════════
+   ANIMATION UTILITIES - For ThemeModal and other animated components
+   Tailwind CSS v4 compatible (replaces tailwindcss-animate plugin)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* Base animation-in class */
+.animate-in {
+  animation-duration: var(--duration-normal, 240ms);
+  animation-fill-mode: both;
+}
+
+/* Fade in animation */
+.fade-in {
+  animation-name: fade-in;
+  animation-timing-function: ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Slide in from right - with CSS variable support */
+.slide-in-from-right-\[var\(--theme-modal-slide-distance\)\] {
+  animation-name: slide-in-from-right;
+  animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes slide-in-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(var(--theme-modal-slide-distance, 2rem));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Duration utilities */
+.duration-\[var\(--duration-normal\)\] {
+  animation-duration: var(--duration-normal, 240ms);
+}
+
+.duration-\[var\(--duration-slow\)\] {
+  animation-duration: var(--duration-slow, 500ms);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
    BADGE COLOR UTILITIES - Cuisine badges use brand primary color
    ═══════════════════════════════════════════════════════════════════════════════ */
 
