@@ -19,6 +19,7 @@ export type SurfaceId =
   | "chat"
   | "terminal"
   | "showcase"
+  | "tenants"
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SURFACE DIRECTIONS (for positioning)

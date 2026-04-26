@@ -4,7 +4,7 @@
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 import { SurfaceErrorBoundary } from "@/components/error-boundary"
-import { lazy, Suspense } from "react"
+import { Suspense, lazy } from "react"
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // LAZY LOADED SURFACES
@@ -19,6 +19,7 @@ const SettingsSurfaceLazy = lazy(() => import("./settings.surface"))
 const TerminalSurfaceLazy = lazy(() => import("./terminal.surface"))
 const ChatSurfaceLazy = lazy(() => import("./chat.surface"))
 const ShowcaseSurfaceLazy = lazy(() => import("./showcase.surface"))
+const TenantsSurfaceLazy = lazy(() => import("./tenants.surface"))
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // LOADING FALLBACK
@@ -124,6 +125,16 @@ export function ShowcaseSurface() {
     <SurfaceErrorBoundary surfaceId="showcase">
       <Suspense fallback={<SurfaceLoadingFallback />}>
         <ShowcaseSurfaceLazy />
+      </Suspense>
+    </SurfaceErrorBoundary>
+  )
+}
+
+export function TenantsSurface() {
+  return (
+    <SurfaceErrorBoundary surfaceId="tenants">
+      <Suspense fallback={<SurfaceLoadingFallback />}>
+        <TenantsSurfaceLazy />
       </Suspense>
     </SurfaceErrorBoundary>
   )

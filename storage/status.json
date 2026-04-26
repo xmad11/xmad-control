@@ -1,12 +1,12 @@
 {
-  "cpu": 6.38,
+  "cpu": 11.50,
   "memory": {
-    "used": 4810,
+    "used": 3714,
     "total": 8192,
-    "percentage": 58
+    "percentage": 45
   },
   "disk": { "percentage": 3 },
   "openclaw": { "running": false },
   "mode": "eco",
-  "timestamp": 1774207900
+  "timestamp": 1776179663
 }

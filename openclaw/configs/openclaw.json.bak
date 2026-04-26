@@ -1,7 +1,7 @@
 {
   "meta": {
-    "lastTouchedVersion": "2026.3.13",
-    "lastTouchedAt": "2026-04-04T23:23:40.965Z"
+    "lastTouchedVersion": "2026.3.11",
+    "lastTouchedAt": "2026-03-17T12:30:00.000Z"
   },
   "env": {
     "shellEnv": {
@@ -32,9 +32,7 @@
     "defaults": {
       "model": {
         "primary": "zai/glm-4.7",
-        "fallbacks": [
-          "zai/glm-5"
-        ]
+        "fallbacks": ["zai/glm-5"]
       },
       "workspace": "/Users/ahmadabdullah/xmad-control/openclaw/workspace",
       "contextPruning": {
@@ -72,29 +70,12 @@
   },
   "tools": {
     "profile": "full",
-    "allow": [
-      "bash",
-      "process",
-      "read",
-      "write",
-      "edit"
-    ],
-    "deny": [
-      "browser",
-      "canvas",
-      "nodes",
-      "cron",
-      "discord",
-      "gateway"
-    ],
+    "allow": ["bash", "process", "read", "write", "edit"],
+    "deny": ["browser", "canvas", "nodes", "cron", "discord", "gateway"],
     "elevated": {
       "enabled": true,
       "allowFrom": {
-        "whatsapp": [
-          "+971504042000",
-          "+971502059116",
-          "+971562713967"
-        ]
+        "whatsapp": ["+971504042000", "+971502059116", "+971562713967"]
       }
     },
     "exec": {
@@ -123,16 +104,8 @@
     "whatsapp": {
       "enabled": true,
       "dmPolicy": "pairing",
-      "allowFrom": [
-        "+971504042000",
-        "+971502059116",
-        "+971562713967"
-      ],
-      "groupAllowFrom": [
-        "+971504042000",
-        "+971502059116",
-        "+971562713967"
-      ],
+      "allowFrom": ["+971504042000", "+971502059116", "+971562713967"],
+      "groupAllowFrom": ["+971504042000", "+971502059116", "+971562713967"],
       "groupPolicy": "allowlist",
       "textChunkLimit": 4000,
       "chunkMode": "length",
@@ -157,18 +130,9 @@
     }
   },
   "skills": {
-    "allowBundled": [
-      "apple-notes",
-      "apple-reminders",
-      "github",
-      "gog",
-      "coding-agent",
-      "weather"
-    ],
+    "allowBundled": ["apple-notes", "apple-reminders", "github", "gog", "coding-agent", "weather"],
     "load": {
-      "extraDirs": [
-        "/Users/ahmadabdullah/xmad-control/openclaw/skills"
-      ]
+      "extraDirs": ["/Users/ahmadabdullah/xmad-control/openclaw/skills"]
     }
   },
   "plugins": {

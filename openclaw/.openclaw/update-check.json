@@ -1,3 +1,11 @@
 {
-  "lastCheckedAt": "2026-03-17T01:28:40.328Z"
+  "lastCheckedAt": "2026-04-04T23:23:36.249Z",
+  "lastAvailableVersion": "2026.4.2",
+  "lastAvailableTag": "latest",
+  "autoInstallId": "15648592-17c1-4c06-9224-ea6ce2690eb7",
+  "autoFirstSeenVersion": "2026.4.2",
+  "autoFirstSeenTag": "latest",
+  "autoFirstSeenAt": "2026-04-04T06:37:36.887Z",
+  "autoLastAttemptVersion": "2026.4.2",
+  "autoLastAttemptAt": "2026-04-04T23:23:36.249Z"
 }

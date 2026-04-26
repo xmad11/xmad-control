@@ -2,105 +2,117 @@
 
 ## Current Status
 
-**Commit:** `0364961` — Pushed to main, deployed to Vercel
+**Commit:** `dbffc86` — Pushed to main, deploying to Vercel
 **Memory:** 88% used — Cannot run local builds
-**Last Test:** Waiting for Vercel deployment
+**Debug Mode:** ACTIVE - Silence auto-stop DISABLED for investigation
 
 ---
 
-## What Was Fixed (Commit 0364961)
+## What Was Fixed (Commit dbffc86 - Debug Patch)
 
-| Fix | File | Change |
-|-----|------|--------|
-| Silence threshold | useVoiceChat.ts:76 | `avg < 10` → `avg < 20` |
-| Min recording duration | useVoiceChat.ts | Added 2000ms guard |
-| Markdown stripping | useVoiceChat.ts | Full stripping (headers, code, links, lists) |
-| State management | SheetContext.tsx | Single source of truth |
-| Memory cleanup | useVoiceChat.ts | Added cleanup useEffect |
-| TTS interrupt | useVoiceChat.ts | AbortController for fetches |
-| Safari regex | useVoiceChat.ts | No lookbehind, use abbreviation check |
-| Deepgram params | api/stt/route.ts | + utterances, vad_events, endpointing |
-| FFT size | useVoiceChat.ts:69 | 512 → 2048 |
-| Loop delay | useVoiceChat.ts | 500ms → 100ms |
+### STT API (`app/api/stt/route.ts`)
+| Change | Description |
+|--------|-------------|
+| Blob size logging | Log blob size in bytes and KB before sending to Deepgram |
+| File type logging | Log MIME type and extension |
+| 20KB minimum guard | Reject blobs < 20KB with `tooShort: true` flag |
+| Raw Deepgram response | Log full JSON response for debugging |
+| Empty transcript warning | Log full response when transcript is empty |
+| Performance timing | Log request time in milliseconds |
+
+### Voice Hook (`hooks/useVoiceChat.ts`)
+| Change | Description |
+|--------|-------------|
+| `DEBUG_DISABLE_SILENCE_STOP = true` | Temporarily disable silence auto-stop |
+| RMS logging | Log audio levels every ~160ms in silence detector |
+| Recording start log | Log MIME type, track settings, capabilities |
+| Chunk logging | Log every 5 chunks with cumulative size |
+| Recording stop log | Log duration, total chunks, final blob size |
+| STT request log | Log blob info before sending, warn if < 10KB |
+| STT response log | Log transcript length and text |
+| Loop iteration IDs | Unique IDs for each loop iteration |
+| Stop reason logging | Log all stop reasons and stack traces |
 
 ---
 
-## What Still Needs Fixing
-
-### P0 — Critical (STT still returning empty)
-
-The debug logs show STT is still returning empty transcripts. Root causes:
-
-1. **Blob size guard missing** — Need to reject blobs < 20KB
-2. **Clear live tokens** — Not called on session start
-3. **Deep debug needed** — Must see raw Deepgram response
-
-### Required Debug Patch
+## Debug Mode Flags
 
 ```typescript
-// app/api/stt/route.ts — Add these logs
+// In hooks/useVoiceChat.ts
+const DEBUG_DISABLE_SILENCE_STOP = true  // Recording won't auto-stop on silence
 
-console.log("[STT] Blob size:", blob.size);
-console.log("[STT] File type:", fileType);
-
-const json = await response.json();
-console.log("[STT] Deepgram raw response:", JSON.stringify(json, null, 2));
-
-const transcript = json?.results?.channels?.[0]?.alternatives?.[0]?.transcript || "";
-console.log("[STT] Final transcript:", transcript);
-
-if (!transcript) {
-  console.warn("[STT] EMPTY TRANSCRIPT — FULL RESPONSE:", json);
-}
-```
-
-### P1 — High Priority
-
-1. **clearLiveTokens()** not called on voice start
-2. **liveTokens stored as array** — should be string for performance
-
-### P2 — Codebase Health
-
-1. Delete `components/ui/pwa-hooks/` (duplicate)
-2. Delete `components/ui/pwa-components/` (duplicate)
-3. Delete `hooks/use-mobile.tsx` (conflicts with useBreakpoint.ts)
-4. Wrap debug logs in `if (DEV)`
-
----
-
-## Files Modified
-
-```
-hooks/useVoiceChat.ts        +126/-38 lines
-context/SheetContext.tsx     +5/-4 lines
-app/api/stt/route.ts         +3/-0 lines
+// To re-enable silence auto-stop:
+// Set DEBUG_DISABLE_SILENCE_STOP = false
 ```
 
 ---
 
-## Key Code Locations
+## How to Collect Logs
 
-| Function | File | Line |
-|----------|------|------|
-| createSilenceDetector | useVoiceChat.ts | 54 |
-| stripMarkdown | useVoiceChat.ts | 196 |
-| splitIntoSentences | useVoiceChat.ts | 229 |
-| speakSentence | useVoiceChat.ts | 270 |
-| processTTSQueue | useVoiceChat.ts | 330 |
-| getStreamingAIResponse | useVoiceChat.ts | 360 |
-| startRecording | useVoiceChat.ts | 800 |
-| startSession | useVoiceChat.ts | 950 |
-| stopSession | useVoiceChat.ts | 990 |
+1. Open browser DevTools (F12)
+2. Go to Console tab
+3. Filter by `[Voice]` or `[STT]` or `[SilenceDetector]`
+4. Start a voice session
+5. Speak for 5-10 seconds
+6. Stop session
+7. Copy all console output
+
+### Key Log Patterns to Look For
+
+```
+[Voice] ========== SESSION START REQUESTED ==========
+[Voice] ========== RECORDING STARTED ==========
+[SilenceDetector] Audio RMS: XX.XX | Threshold: 20 | Silent: false
+[Voice] Chunk # 5 : XXXX bytes | Total so far: XXXXX bytes
+[Voice] ========== RECORDER STOPPED ==========
+[Voice] Recording duration: XXXX ms
+[Voice] Final blob size: XXXXX bytes ( XX.XX KB)
+[STT API] ========== DEEPGRAM REQUEST START ==========
+[STT API] Blob size: XXXXX bytes ( XX.XX KB)
+[STT API] ========== DEEPGRAM RAW RESPONSE ==========
+[STT API] Full response: { ... }
+[Voice] ========== STT RESULT ==========
+[Voice] Transcript text: ...
+```
 
 ---
 
-## Duplication Found (3300+ lines)
+## Known Issues to Investigate
 
-| Directory | Files | Lines |
-|-----------|-------|-------|
-| `components/ui/pwa-hooks/` | 4 | ~1200 |
-| `components/ui/pwa-components/` | 2 | ~800 |
-| `hooks/use-mobile.tsx` | 1 | ~100 |
+### Possible Root Causes for Empty Transcripts
+
+1. **Blob too small** — Check if blob size < 20KB (now logged)
+2. **No audio captured** — Check RMS values in silence detector logs
+3. **Deepgram error** — Check raw response for error fields
+4. **MIME type issue** — Check if Deepgram received correct format
+5. **Early stop** — Check recording duration (should be > 2s)
+6. **Browser codec issue** — Check MIME type support in logs
+
+### What to Report Back
+
+1. Blob size when transcript is empty
+2. RMS values during recording (was there actual audio?)
+3. Recording duration
+4. Deepgram raw response (what did it return?)
+5. Any errors in red text
+
+---
+
+## After Debug Complete
+
+1. Set `DEBUG_DISABLE_SILENCE_STOP = false`
+2. Remove or reduce verbose logging
+3. Remove the 20KB minimum guard if causing issues
+4. Update this handoff with findings
+
+---
+
+## Files Modified in This Session
+
+```
+app/api/stt/route.ts         +56/-10 lines
+hooks/useVoiceChat.ts        +225/-38 lines
+```
 
 ---
 
@@ -122,13 +134,19 @@ Voice system must:
 ```
 Read /Users/ahmadabdullah/xmad-control/.claude/VOICE_SYSTEM_HANDOFF.md
 
-Then apply the debug patch from PART 1-9 in that document.
+Check Vercel deployment logs and browser console for the debug output.
 
-Goal: Identify EXACTLY why STT returns empty transcripts.
+Goal: Analyze the logs to identify why STT returns empty transcripts.
 
-DO NOT refactor anything. ONLY add logging + minimal fixes.
+Look for:
+1. Blob size (should be > 20KB)
+2. RMS audio levels (should be > 20 during speech)
+3. Deepgram raw response (what's in it?)
+4. Recording duration (should be > 2000ms)
+
+DO NOT refactor anything until the root cause is identified.
 ```
 
 ---
 
-*Generated: 2026-03-27 | Memory: 88% | Branch: main*
+*Generated: 2026-03-27 | Memory: 88% | Branch: main | Commit: dbffc86*

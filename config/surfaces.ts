@@ -13,6 +13,7 @@ import {
   Settings,
   Sparkles,
   Terminal,
+  Users,
   Zap,
 } from "lucide-react"
 
@@ -101,6 +102,15 @@ export const SURFACE_REGISTRY: Record<SurfaceId, SurfaceDefinition> = {
     lazy: () => import("@/surfaces/showcase.surface"),
     zIndex: 10,
     path: "/dashboard/showcase",
+  },
+  tenants: {
+    id: "tenants",
+    direction: "center",
+    icon: Users,
+    label: "Tenants",
+    lazy: () => import("@/surfaces/tenants.surface"),
+    zIndex: 10,
+    path: "/dashboard/tenants",
   },
 }
 
